@@ -1,0 +1,6 @@
+nick: "NICK {{nick}}"
+join: "JOIN {{channel}}"
+part: "PART {{channel}}"
+quit: "QUIT :{{quit}}"
+ping: "PING {{target}}"
+user: "USER {{host}} {{nick}} {{nick}} :{{name}}"
