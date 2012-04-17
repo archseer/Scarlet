@@ -12,9 +12,9 @@ class IrcBot::Bot < EM::Connection
     @scheduler = Scheduler.new
     @user_commands = YAML.load_file("#{path}/../commands.yml").symbolize_keys!
     @users = {}
+    @channels = {}
     @banned = []
     @modes = []
-    @chan_flags = []
     @disconnecting = false
     connect
   end
@@ -78,31 +78,39 @@ class IrcBot::Bot < EM::Connection
       when "NOTICE" #Automatic replies must never be sent in response to a NOTICE message.
         if v[:nick] == "NickServ" && ns_params = v[:parameter].match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
           if ns_params[:digit] == "3"
-            @users[ns_params[:nick]][:ns_login] = true
-            notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
+            #@users[ns_params[:nick]][:ns_login] = true
+            @channels.keys.each {|key|
+              @channels[key][:users][ns_params[:nick]][:ns_login] = true
+            }
+            #notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
           end
         else
           print_console "NOTICE from #{v[:nick]}: #{v[:parameter]}", :light_cyan if v[:nick] != "Global" #hack
         end
       when "MODE"
-        @users, @chan_flags = ::IrcBot::Parser.parse_mode(v[:parameter], @users, @chan_flags)
+        chan = v[:target].gsub('#', '').to_sym
+        @channels[chan][:users], @channels[chan][:flags] = ::IrcBot::Parser.parse_mode(v[:parameter], @channels[chan][:users], @channels[chan][:flags])
       when "JOIN"
+        chan = v[:parameter].gsub('#', '').to_sym
         if $config.irc_bot.nick != v[:nick]
           print_console "#{v[:nick]} (#{v[:hostname]}@#{v[:host]}) has joined channel #{v[:parameter]}", :light_yellow
-          @users[v[:nick]] = {}
           check_nick_login v[:nick]
         else
+          @channels[chan] = {:users => {}, :flags => []}
           send_data "MODE #{v[:parameter]}"
           print_console "Joined channel #{v[:parameter]}", :light_yellow
         end
+        @channels[chan][:users][v[:nick]] = {}
       when "PART"
         print_console "#{v[:nick]} has left channel #{v[:target]} (#{v[:parameter]})", :light_magenta
-        @users.delete v[:nick]
+        chan = v[:parameter].gsub('#', '').to_sym
+        @channels.delete chan if v[:nick] == $config.irc_bot.nick # remove chan if bot parted
+        @channels[chan][:users].delete v[:nick]
       when "QUIT"
         print_console "#{v[:nick]} has quit (#{v[:parameter]})", :light_magenta
-        @users.delete v[:nick]
+        @channels.keys.each {|key| key[:users].delete v[:nick]}
       when "NICK"
-        @users.rename_key! v[:nick], v[:parameter]
+        @channels.keys.each {|key| @channels[key][:users].rename_key!(v[:nick], v[:parameter])}
         if v[:nick] == $config.irc_bot.nick && $config.irc_bot.nick != v[:parameter]
           print_console "You are now known as #{v[:parameter]}", :light_yellow
           $config.irc_bot.nick = v[:parameter]
@@ -132,7 +140,8 @@ class IrcBot::Bot < EM::Connection
         print_console v[:parameter], :light_green if $config.irc_bot.display_logon
       when "324" # MODE for #channel
         t = v[:parameter].split(" ")
-        @chan_flags = ::IrcBot::Parser.parse_serv_mode(t[1], @chan_flags)
+        chan = t[0].gsub('#', '').to_sym
+        @channels[chan][:flags] = ::IrcBot::Parser.parse_serv_mode(t[1], @channels[chan][:flags])
       when "329"
         params = v[:parameter].match(/(?<chan>#\S+)\s(?<parameter>.+)$/)
         print_console "#{params[:chan]} created at #{Time.at(params[:parameter].to_i).std_format}", :light_green
@@ -146,10 +155,14 @@ class IrcBot::Bot < EM::Connection
       when "353" # users on channel
         data = v[:parameter].match(/(?<chantype>[\=\@\*])\s(?<target>#?\S+)\s:(?<nicklist>.+)$/) 
         # chantype:  "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
-        data[:nicklist].split(" ").each { |nick| nick, @users[nick] = ::IrcBot::Parser.parse_names_list nick }
+        chan = data[:target].gsub('#', '').to_sym
+        data[:nicklist].split(" ").each { |nick| nick, @channels[chan][:users][nick] = ::IrcBot::Parser.parse_names_list nick }
       when "366" # end of /NAMES list
         #check users already on chan permissions
-        @users.keys.each { |nick| check_nick_login nick if nick != $config.irc_bot.nick}
+        d = v[:parameter].match(/(?<target>#?\S+) :End of \/NAMES list./)
+        p d[:target]
+        chan = d[:target].gsub('#', '').to_sym
+        @channels[chan][:users].keys.each { |nick| check_nick_login nick if nick != $config.irc_bot.nick}
       when "375" # START of MOTD
         # this is immediately after 005 messages usually so
         send_data "PROTOCTL NAMESX" if $config.irc_bot.extensions.namesx # set up extended NAMES command
@@ -173,8 +186,12 @@ class IrcBot::Bot < EM::Connection
         self.instance_exec sequence, v, &cmd[:method] # execute it
       else # it requires permissions
         nick = ::IrcBot::Nick.where(:nick => v[:nick])
-        if !@users[v[:nick]][:ns_login] # user was not logged in
-          msg $config.irc_bot.channel, "#{v[:nick]}, you are not logged in!"
+        ns_login = false
+        @channels.each {|key, val| 
+          ns_login = val[:users][v[:nick]][:ns_login] if val[:users][v[:nick]][:ns_login]
+        } #it will get set to true if at least one chan detects login. hax
+        if !ns_login # user was not logged in
+          notice v[:nick], "#{v[:nick]}, you are not logged in!"
         elsif nick.count > 0 && nick.first.privileges >= cmd[:access_level] # nick exists and privileges grant access
           self.instance_exec sequence, v, &cmd[:method]
         end

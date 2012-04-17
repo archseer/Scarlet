@@ -26,6 +26,7 @@ module IrcBot::Parser
     end
 
     def parse_mode str, users, chan_flags # parses the MODE response (<flags> <user> <user>...)
+      chan_flags = [] if !chan_flags
       mode = true
       if h = str.match(/(?<flags>\S+)\s(?<nicklist>.+)/) #means we have an user list
         flags = {"q" => :owner, "a" => :admin, "o" => :operator, "h" => :halfop, "v" => :voice, "r" => :registered}
@@ -34,7 +35,8 @@ module IrcBot::Parser
 
         h[:flags].split("").each_with_index do |flag, i|
           mode = (flag=="+") ? true : (flag == "-" ? false : mode)
-          operator_count += 1 and next if flag == "+" or flag == "-"
+          operator_count += 1 and next if flag == "+" or flag == "-" 
+          next if flag == " "
           nick = nicks[i-operator_count]
           nick[0] != "#" ? users[nick][flags[flag]] = mode : (mode ? chan_flags << c : chan_flags.subtract_once(c)) #chan processing is TEMP embedded.
         end
@@ -42,7 +44,7 @@ module IrcBot::Parser
       else #means we split and parse the changes to the channel array for now
         str.split("").each do |c|
           mode = (c=="+") ? true : (c == "-" ? false : mode)
-          next if c == "+" or c == "-"
+          next if c == "+" or c == "-" or c == " "
           mode ? chan_flags << c : chan_flags.subtract_once(c)
         end
       end
@@ -50,10 +52,11 @@ module IrcBot::Parser
     end
 
     def parse_serv_mode str, modes #merge with above
+      modes = [] if !modes
       mode = true
       str.split("").each do |c|
         mode = (c=="+") ? true : (c == "-" ? false : mode)
-        next if c == "+" or c == "-"
+        next if c == "+" or c == "-" or c == " "
         mode ? modes << c : modes.subtract_once(c)
       end
       return modes

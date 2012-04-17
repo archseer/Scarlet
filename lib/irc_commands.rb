@@ -42,8 +42,8 @@ module IrcBot::IrcCommands
           case cmd[:scope]
             when :return_to_sender
               target = sender[:target] == $config.irc_bot.nick ? sender[:nick] : sender[:target]
-            when :channel
-              target = $config.irc_bot.channel
+            #when :channel
+            #  target = $config.irc_bot.channel
             when :user
               target = sender[:nick]
           end
@@ -89,7 +89,11 @@ module IrcBot::IrcCommands
     arities :register => 0, :login => 0, :logout => 0
 
     on :register do |data|
-      if @users[data[:sender]][:ns_login]
+        ns_login = false
+        @channels.each {|key, val| 
+          ns_login = val[:users][data[:sender]][:ns_login] if val[:users][data[:sender]][:ns_login]
+        }
+      if @ns_login
         if Nick.where(:nick => data[:sender]).empty?
           nick = Nick.new(:nick => data[:sender]).save!
           "Successfuly registered with the bot."
@@ -103,7 +107,11 @@ module IrcBot::IrcCommands
 
     on :login do |data|
       if !Nick.where(:nick => data[:sender]).empty?
-        if !@users[data[:sender]][:ns_login]
+        ns_login = false
+          @channels.each {|key, val| 
+            ns_login = val[:users][data[:sender]][:ns_login] if val[:users][data[:sender]][:ns_login]
+          }
+        if !@ns_login
           check_nick_login data[:sender]
         else
           notice data[:sender], "#{data[:sender]}, you are already logged in!"
