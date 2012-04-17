@@ -17,7 +17,7 @@ module IrcBot::Parser
 
     def parse_names_list string # parses NAMES list
       settings = {}
-      modes = $config[:irc_bot][:modes]
+      modes = $config.irc_bot.modes
       matdata = string.match(/([\+%@&~]*)(\S+)/)
       umodes, name = matdata[1].split(""), matdata[2]
       modes.values.each{|v|settings[v]=false}

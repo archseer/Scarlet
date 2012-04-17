@@ -41,9 +41,9 @@ module IrcBot::IrcCommands
           # sets the target
           case cmd[:scope]
             when :return_to_sender
-              target = sender[:target] == $config[:irc_bot][:nick] ? sender[:nick] : sender[:target]
+              target = sender[:target] == $config.irc_bot.nick ? sender[:nick] : sender[:target]
             when :channel
-              target = $config[:irc_bot][:channel]
+              target = $config.irc_bot.channel
             when :user
               target = sender[:nick]
           end

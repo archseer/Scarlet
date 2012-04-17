@@ -20,8 +20,8 @@ class IrcBot::Bot < EM::Connection
   end
 
   def connect
-    client_command :nick, :nick => $config[:irc_bot][:nick]
-    client_command :user, :host => $config[:irc_bot][:host], :nick => $config[:irc_bot][:nick], :name => $config[:irc_bot][:name]
+    client_command :nick, :nick => $config.irc_bot.nick
+    client_command :user, :host => $config.irc_bot.host, :nick => $config.irc_bot.nick, :name => $config.irc_bot.name
   end
 
   def unbind
@@ -48,7 +48,7 @@ class IrcBot::Bot < EM::Connection
  #---main message reactor loop-------------------------------
   def reactor message
     if v = message.match(/^PING :(?<str>.+)$/i) # ping
-      puts("[ Server ping ]") if $config[:irc_bot][:display_ping]
+      puts("[ Server ping ]") if $config.irc_bot.display_ping
       send_data "PONG :#{v[:str]}"
     elsif v = message.match(/:(?<nick>.+?)!(?<hostname>.+?)@(?<host>.+?)\s(?<command>\S+)(?:\s(?<target>#?\S+?))?\s:?(?<parameter>.+?)$/)
       #user/bot sent messages
@@ -74,12 +74,12 @@ class IrcBot::Bot < EM::Connection
         end
         print_chat v[:nick], v[:parameter]
         #process privmsg command if control char was detected
-        privmsg_reactor v if v[:parameter][0] == $config[:irc_bot][:control_char]
+        privmsg_reactor v if v[:parameter][0] == $config.irc_bot.control_char
       when "NOTICE" #Automatic replies must never be sent in response to a NOTICE message.
         if v[:nick] == "NickServ" && ns_params = v[:parameter].match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
           if ns_params[:digit] == "3"
             @users[ns_params[:nick]][:ns_login] = true
-            notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config[:irc_bot][:nick]}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
+            notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
           end
         else
           print_console "NOTICE from #{v[:nick]}: #{v[:parameter]}", :light_cyan if v[:nick] != "Global" #hack
@@ -87,7 +87,7 @@ class IrcBot::Bot < EM::Connection
       when "MODE"
         @users, @chan_flags = ::IrcBot::Parser.parse_mode(v[:parameter], @users, @chan_flags)
       when "JOIN"
-        if $config[:irc_bot][:nick] != v[:nick]
+        if $config.irc_bot.nick != v[:nick]
           print_console "#{v[:nick]} (#{v[:hostname]}@#{v[:host]}) has joined channel #{v[:parameter]}", :light_yellow
           @users[v[:nick]] = {}
           check_nick_login v[:nick]
@@ -103,9 +103,9 @@ class IrcBot::Bot < EM::Connection
         @users.delete v[:nick]
       when "NICK"
         @users.rename_key! v[:nick], v[:parameter]
-        if v[:nick] == $config[:irc_bot][:nick] && $config[:irc_bot][:nick] != v[:parameter]
+        if v[:nick] == $config.irc_bot.nick && $config.irc_bot.nick != v[:parameter]
           print_console "You are now known as #{v[:parameter]}", :light_yellow
-          $config[:irc_bot][:nick] = v[:parameter]
+          $config.irc_bot.nick = v[:parameter]
         else
           print_console "#{v[:nick]} is now known as #{v[:parameter]}", :light_yellow
         end
@@ -119,17 +119,17 @@ class IrcBot::Bot < EM::Connection
       when "PONG"
         puts "[ Ping reply from #{v[:server]} ]"
       when "MODE"
-        if v[:type] == $config[:irc_bot][:nick]
+        if v[:type] == $config.irc_bot.nick
           @modes = ::IrcBot::Parser.parse_serv_mode(v[:parameter], @modes)
         else
           puts "ERROR: MODE CANNOT PARSE!".red
         end
       when "001"
-        msg "nickserv", "IDENTIFY #{$config[:irc_bot][:password]}", true
+        msg "nickserv", "IDENTIFY #{$config.irc_bot.password}", true
       when "005"
-        $config[:irc_bot][:extensions].merge! ::IrcBot::Parser.extentions_parse(v[:parameter])
+        $config.irc_bot.extensions.merge! ::IrcBot::Parser.extentions_parse(v[:parameter])
       when /00\d/
-        print_console v[:parameter], :light_green if $config[:irc_bot][:display_logon]
+        print_console v[:parameter], :light_green if $config.irc_bot.display_logon
       when "324" # MODE for #channel
         t = v[:parameter].split(" ")
         @chan_flags = ::IrcBot::Parser.parse_serv_mode(t[1], @chan_flags)
@@ -149,15 +149,15 @@ class IrcBot::Bot < EM::Connection
         data[:nicklist].split(" ").each { |nick| nick, @users[nick] = ::IrcBot::Parser.parse_names_list nick }
       when "366" # end of /NAMES list
         #check users already on chan permissions
-        @users.keys.each { |nick| check_nick_login nick if nick != $config[:irc_bot][:nick]}
+        @users.keys.each { |nick| check_nick_login nick if nick != $config.irc_bot.nick}
       when "375" # START of MOTD
         # this is immediately after 005 messages usually so
-        send_data "PROTOCTL NAMESX" if $config[:irc_bot][:extensions][:namesx] # set up extended NAMES command
+        send_data "PROTOCTL NAMESX" if $config.irc_bot.extensions.namesx # set up extended NAMES command
       when "376" # END of MOTD command. Join channel!
-        client_command :join, :channel => $config[:irc_bot][:channel]
+        client_command :join, :channel => $config.irc_bot.channel
       when /4\d\d/ # Error messages range
         print_console v[:parameter], :light_red
-        msg $config[:irc_bot][:channel], "ERROR: #{v[:parameter]}".irc_color(4,0), true #TODO: Output only certain messages to channel.
+        msg $config.irc_bot.channel, "ERROR: #{v[:parameter]}".irc_color(4,0), true #TODO: Output only certain messages to channel.
       when /(372|26[56]|25[1245])/ #MOTD command (ignore) + some server info
       else # Anything not implemented will show up as this.
         print_console "TODO SERV -- #{v[:command]}: #{v[:parameter]}", :yellow
@@ -174,14 +174,14 @@ class IrcBot::Bot < EM::Connection
       else # it requires permissions
         nick = ::IrcBot::Nick.where(:nick => v[:nick])
         if !@users[v[:nick]][:ns_login] # user was not logged in
-          msg $config[:irc_bot][:channel], "#{v[:nick]}, you are not logged in!"
+          msg $config.irc_bot.channel, "#{v[:nick]}, you are not logged in!"
         elsif nick.count > 0 && nick.first.privileges >= cmd[:access_level] # nick exists and privileges grant access
           self.instance_exec sequence, v, &cmd[:method]
         end
       end
     end
   rescue(Exception) => result
-    msg $config[:irc_bot][:channel], "ERROR: #{result.message}".irc_color(4,0)
+    msg $config.irc_bot.channel, "ERROR: #{result.message}".irc_color(4,0)
   end
   #----------------------------------------------------------
 
@@ -191,7 +191,7 @@ class IrcBot::Bot < EM::Connection
 
   def msg target, message, silent=false
     send_data "PRIVMSG #{target} :#{message}"
-    print_chat $config[:irc_bot][:nick], message, silent
+    print_chat $config.irc_bot.nick, message, silent
   end
 
   def notice target, message, silent=false
@@ -205,7 +205,7 @@ class IrcBot::Bot < EM::Connection
 
   def sched_msg(time,str)
     @scheduler.in time do
-      msg $config[:irc_bot][:channel], str if !str.blank?
+      msg $config.irc_bot.channel, str if !str.blank?
     end
   end
 
