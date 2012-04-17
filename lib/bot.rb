@@ -105,13 +105,16 @@ class IrcBot::Bot < EM::Connection
         end
         @channels[chan][:users][v[:nick]] = {}
       when "PART"
-        print_console "#{v[:nick]} has left channel #{v[:target]} (#{v[:parameter]})", :light_magenta
-        chan = v[:parameter].gsub('#', '').to_sym
-        @channels.delete chan if v[:nick] == $config.irc_bot.nick # remove chan if bot parted
-        @channels[chan][:users].delete v[:nick]
+        if v[:nick] != $config.irc_bot.nick
+          print_console "#{v[:nick]} has left channel #{v[:target]} (#{v[:parameter]})", :light_magenta
+          chan = v[:parameter].gsub('#', '').to_sym
+          @channels[chan][:users].delete v[:nick]
+        else
+          @channels.delete chan # remove chan if bot parted
+        end
       when "QUIT"
         print_console "#{v[:nick]} has quit (#{v[:parameter]})", :light_magenta
-        @channels.keys.each {|key| key[:users].delete v[:nick]}
+        @channels.keys.each {|key| @channels[key][:users].delete v[:nick]}
       when "NICK"
         @channels.keys.each {|key| @channels[key][:users].rename_key!(v[:nick], v[:parameter])}
         if v[:nick] == $config.irc_bot.nick && $config.irc_bot.nick != v[:parameter]
