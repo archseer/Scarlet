@@ -68,18 +68,17 @@ class IrcBot::Bot < EM::Connection
           return
         elsif v[:parameter] =~ /\001VERSION\001/
           puts "[ CTCP VERSION from #{v[:nick]} ]"
-          send_data "NOTICE #{v[:nick]} :\001VERSION Rubyista v0.8\001"
+          send_data "NOTICE #{v[:nick]} :\001VERSION RubyxCube v0.8\001"
           return
         end
         print_chat v[:nick], v[:parameter]
 
-
         #process privmsg command if control char was detected
         privmsg_reactor v if v[:parameter][0] == $config.irc_bot.control_char
 
-        if v[:target][0] == "#" && v[:nick] != $config.irc_bot.nick && $config.irc_bot.relay? # simple channel symlink
-          @channels.keys.reject{|key| key == v[:target][1..-1].to_sym}.each {|ch| 
-            msg "##{ch}", "[#{v[:target]}] <#{v[:nick]}> #{v[:parameter]}", true
+        if v[:target][0] == "#" && v[:nick] != $config.irc_bot.nick && $config.irc_bot.relay # simple channel symlink
+          @channels.keys.reject{|key| key == v[:target][1..-1].to_sym}.each {|chan| 
+            msg "##{chan}", "[#{v[:target]}] <#{v[:nick]}> #{v[:parameter]}", true
           }
         end
       when "NOTICE" #Automatic replies must never be sent in response to a NOTICE message.
