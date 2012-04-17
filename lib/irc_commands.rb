@@ -1,8 +1,12 @@
 require_relative "monkeypatches.rb"
+
+module ::IrcBot::User ; end
+
 module IrcBot::IrcCommands
   Commands = ::IrcBot.commands
   Todo = ::IrcBot::Todo
   Nick = ::IrcBot::Nick
+  User = ::IrcBot::User
 
   class Command
     class << self
@@ -89,11 +93,7 @@ module IrcBot::IrcCommands
     arities :register => 0, :login => 0, :logout => 0
 
     on :register do |data|
-        ns_login = false
-        @channels.each {|key, val| 
-          ns_login = val[:users][data[:sender]][:ns_login] if val[:users][data[:sender]][:ns_login]
-        }
-      if @ns_login
+      if User.ns_login? @channels, data[:sender]
         if Nick.where(:nick => data[:sender]).empty?
           nick = Nick.new(:nick => data[:sender]).save!
           "Successfuly registered with the bot."
@@ -107,11 +107,7 @@ module IrcBot::IrcCommands
 
     on :login do |data|
       if !Nick.where(:nick => data[:sender]).empty?
-        ns_login = false
-          @channels.each {|key, val| 
-            ns_login = val[:users][data[:sender]][:ns_login] if val[:users][data[:sender]][:ns_login]
-          }
-        if !@ns_login
+        if !User.ns_login? @channels, data[:sender]
           check_nick_login data[:sender]
         else
           notice data[:sender], "#{data[:sender]}, you are already logged in!"
@@ -122,7 +118,8 @@ module IrcBot::IrcCommands
     end
 
     on :logout do |data|
-      if @users[data[:sender]][:ns_login]
+      if User.ns_login? @channels, data[:sender]
+        User.ns_logout @channels, data[:sender]
         @users[data[:sender]][:ns_login] = false
         notice data[:sender], "#{data[:sender]}, you are now logged out."
       end

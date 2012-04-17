@@ -11,7 +11,6 @@ class IrcBot::Bot < EM::Connection
 
     @scheduler = Scheduler.new
     @user_commands = YAML.load_file("#{path}/../commands.yml").symbolize_keys!
-    @users = {}
     @channels = {}
     @banned = []
     @modes = []
@@ -77,12 +76,9 @@ class IrcBot::Bot < EM::Connection
         privmsg_reactor v if v[:parameter][0] == $config.irc_bot.control_char
       when "NOTICE" #Automatic replies must never be sent in response to a NOTICE message.
         if v[:nick] == "NickServ" && ns_params = v[:parameter].match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
-          if ns_params[:digit] == "3"
-            #@users[ns_params[:nick]][:ns_login] = true
-            @channels.keys.each {|key|
-              @channels[key][:users][ns_params[:nick]][:ns_login] = true
-            }
-            #notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
+          if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
+            ::IrcBot::User.ns_login @channels, ns_params[:nick]
+            notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
           end
         else
           print_console "NOTICE from #{v[:nick]}: #{v[:parameter]}", :light_cyan if v[:nick] != "Global" #hack
@@ -113,7 +109,7 @@ class IrcBot::Bot < EM::Connection
         @channels.keys.each {|key| @channels[key][:users].rename_key!(v[:nick], v[:parameter])}
         if v[:nick] == $config.irc_bot.nick && $config.irc_bot.nick != v[:parameter]
           print_console "You are now known as #{v[:parameter]}", :light_yellow
-          $config.irc_bot.nick = v[:parameter]
+          $config.irc_bot[:nick] = v[:parameter]
         else
           print_console "#{v[:nick]} is now known as #{v[:parameter]}", :light_yellow
         end
@@ -160,7 +156,6 @@ class IrcBot::Bot < EM::Connection
       when "366" # end of /NAMES list
         #check users already on chan permissions
         d = v[:parameter].match(/(?<target>#?\S+) :End of \/NAMES list./)
-        p d[:target]
         chan = d[:target].gsub('#', '').to_sym
         @channels[chan][:users].keys.each { |nick| check_nick_login nick if nick != $config.irc_bot.nick}
       when "375" # START of MOTD
@@ -186,11 +181,7 @@ class IrcBot::Bot < EM::Connection
         self.instance_exec sequence, v, &cmd[:method] # execute it
       else # it requires permissions
         nick = ::IrcBot::Nick.where(:nick => v[:nick])
-        ns_login = false
-        @channels.each {|key, val| 
-          ns_login = val[:users][v[:nick]][:ns_login] if val[:users][v[:nick]][:ns_login]
-        } #it will get set to true if at least one chan detects login. hax
-        if !ns_login # user was not logged in
+        if !::IrcBot::User.ns_login? @channels, v[:nick] # user was not logged in
           notice v[:nick], "#{v[:nick]}, you are not logged in!"
         elsif nick.count > 0 && nick.first.privileges >= cmd[:access_level] # nick exists and privileges grant access
           self.instance_exec sequence, v, &cmd[:method]
