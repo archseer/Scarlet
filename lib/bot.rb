@@ -72,8 +72,16 @@ class IrcBot::Bot < EM::Connection
           return
         end
         print_chat v[:nick], v[:parameter]
+
+
         #process privmsg command if control char was detected
         privmsg_reactor v if v[:parameter][0] == $config.irc_bot.control_char
+
+        if v[:target][0] == "#" && v[:nick] != $config.irc_bot.nick && $config.irc_bot.relay? # simple channel symlink
+          @channels.keys.reject{|key| key == v[:target][1..-1].to_sym}.each {|ch| 
+            msg "##{ch}", "[#{v[:target]}] <#{v[:nick]}> #{v[:parameter]}", true
+          }
+        end
       when "NOTICE" #Automatic replies must never be sent in response to a NOTICE message.
         if v[:nick] == "NickServ" && ns_params = v[:parameter].match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
           if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
@@ -81,7 +89,7 @@ class IrcBot::Bot < EM::Connection
             notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
           end
         else
-          print_console "NOTICE from #{v[:nick]}: #{v[:parameter]}", :light_cyan if v[:nick] != "Global" #hack
+          print_console "NOTICE from #{v[:nick]}: #{v[:parameter]}", :light_cyan if v[:nick] != "Global" # hack
         end
       when "MODE"
         chan = v[:target].gsub('#', '').to_sym
