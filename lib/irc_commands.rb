@@ -120,7 +120,6 @@ module IrcBot::IrcCommands
     on :logout do |data|
       if User.ns_login? @channels, data[:sender]
         User.ns_logout @channels, data[:sender]
-        @users[data[:sender]][:ns_login] = false
         notice data[:sender], "#{data[:sender]}, you are now logged out."
       end
     end
