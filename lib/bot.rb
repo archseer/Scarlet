@@ -20,8 +20,8 @@ class IrcBot::Bot < EM::Connection
   end
 
   def connect
-    client_command :nick, :nick => $config.irc_bot.nick
-    client_command :user, :host => $config.irc_bot.host, :nick => $config.irc_bot.nick, :name => $config.irc_bot.name
+    send_cmd :nick, :nick => $config.irc_bot.nick
+    send_cmd :user, :host => $config.irc_bot.host, :nick => $config.irc_bot.nick, :name => $config.irc_bot.name
   end
 
   def unbind
@@ -181,7 +181,7 @@ class IrcBot::Bot < EM::Connection
     # this is immediately after 005 messages usually so set up extended NAMES command
     send_data "PROTOCTL NAMESX" if $config.irc_bot.extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
-    client_command :join, :channel => $config.irc_bot.channel
+    send_cmd :join, :channel => $config.irc_bot.channel
   when /(372|26[56]|25[1245])/ #Ignore MOTD and some statuses
   when /4\d\d/ # Error messages range
     print_console event.params.join(" "), :light_red
@@ -212,7 +212,7 @@ class IrcBot::Bot < EM::Connection
     msg $config.irc_bot.channel, "ERROR: #{result.message}".irc_color(4,0)
   end
   #----------------------------------------------------------
-  def client_command cmd, hash
+  def send_cmd cmd, hash
     send_data Mustache.render(@user_commands[cmd], hash)
   end
 
