@@ -118,12 +118,13 @@ class IrcBot::Bot < EM::Connection
       end
     else # USER modes
       mode = true
-      if h = str.match(/(?<flags>\S+)\s(?<nicklist>.+)/) #means we have an user list
+      event.params.compact!
+      if event.params.count > 1 #means we have an user list
         flags = {"q" => :owner, "a" => :admin, "o" => :operator, "h" => :halfop, "v" => :voice, "r" => :registered}
         operator_count = 0
         nicks = event.params[1..-1]
 
-        h[:flags].split("").each_with_index do |flag, i|
+        event.params.first.split("").each_with_index do |flag, i|
           mode = (flag=="+") ? true : (flag == "-" ? false : mode)
           operator_count += 1 and next if flag == "+" or flag == "-" 
           next if flag == " "
