@@ -29,7 +29,7 @@ class IrcBot::Bot < EM::Connection
     puts "DEBUG: Socket has unbound.".red
     if !@disconnecting
       print_console "Connection to server lost.", :light_red
-      Modules.restart_mod :IrcBot
+      #Modules.restart_mod :IrcBot
     end
   end
 
@@ -75,7 +75,7 @@ class IrcBot::Bot < EM::Connection
     if event.sender.nick == "NickServ" && ns_params = event.params.first.match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
       if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
         ::IrcBot::User.ns_login @channels, ns_params[:nick]
-        #notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
+        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
       end
     else
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack
@@ -269,7 +269,7 @@ class IrcBot::Bot < EM::Connection
   private
   def check_connection
     puts "Sending PING to server to verify connection..."
-    @server.send_cmd :ping, :target => $config.irc_bot.server
+    send_cmd :ping, :target => $config.irc_bot.server
     @check_connection_timer = EM::Timer.new(30, method(:timeout))
   end
 
