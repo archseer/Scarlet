@@ -1,11 +1,12 @@
 #=========================================#
 # // Date Created : 04/07/2012
-# // Date Modified: 04/17/2012
+# // Date Modified: 04/18/2012
 # // Created by IceDragon (IceDragon200)
 #=========================================#
 # // ● Current Commands
 #=========================================#
 # // icver, klik, dice, coin, poke, memo
+# // silence, relay
 #=========================================#
 # // ● Change Log
 #=========================================#
@@ -35,6 +36,10 @@
 # // ■(04/17/2012)
 # //    Little house keeping
 # //      memo, icver
+# // ■(04/18/2012)
+# //    Commands
+# //      silence (added)
+# //      relay   (added)
 #=========================================#
 # // Added functions
 class ::Hash
@@ -44,7 +49,7 @@ class ::Hash
 end
 # // Commands
 class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
-  VERSION = "V0.101C"
+  VERSION = "V0.101D"
   class HelpTable
     attr_accessor :colors, :width
     def initialize(width,lines=[])
@@ -97,6 +102,20 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     ex = ::IrcBot::IrcCommands::IcyCommands
     format("IcyCommands %s by %s", ex::VERSION, ex.mauthor)
   end
+  # // Silence 1.000
+  hlp = hlpF "!silence"
+  new_command(:silence,:return_to_sender,:dev,hlp,0) do |data|
+    $config.irc_bot[:relay] = false
+    notice data[:sender], "Silenced"
+    nil
+  end  
+  # // Relay 1.000
+  hlp = hlpF "!relay"
+  new_command(:relay,:return_to_sender,:dev,hlp,0) do |data|
+    $config.irc_bot[:relay] = true
+    notice data[:sender], "relay"
+    nil
+  end  
   # // Dice 1.004
   DICE_LIMIT = 12
   hlp = hlpF "!dice <int sides> [<int dies>]"
@@ -224,6 +243,8 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
       @@help_table.add_line(format("Time: %s", param.created_at),1,:center,0)
       @@help_table.add_line(format("%s: %s", param.sender, param.message),0,:left,0)
       @@help_table.to_a
+    when "CLEAR"
+      (param ?  : ).irc_color(0,1)
     else # // Empty
       MEMO_MSG[type]
     end
