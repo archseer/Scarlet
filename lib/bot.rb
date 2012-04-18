@@ -17,6 +17,9 @@ class IrcBot::Bot < EM::Connection
     @modes = []
     @disconnecting = false
     connect
+    reset_check_connection_timer
+  rescue => e
+    p e
   end
 
   def connect
@@ -25,6 +28,7 @@ class IrcBot::Bot < EM::Connection
   end
 
   def unbind
+    @check_connection_timer.cancel if @check_connection_timer
     puts "DEBUG: Socket has unbound.".red
     if !@disconnecting
       print_console "Connection to server lost.", :light_red
@@ -37,6 +41,7 @@ class IrcBot::Bot < EM::Connection
   end
 
   def receive_line line
+    reset_check_connection_timer
     return if @disconnecting
     @data_log.info line
 
@@ -264,5 +269,23 @@ class IrcBot::Bot < EM::Connection
     msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
     puts color ? msg.colorize(color) : msg
     @log.info ::IrcBot::Parser.parse_esc_codes message, true
+  end
+
+  private
+  def check_connection
+    puts "Sending PING to server to verify connection..."
+    @server.send_cmd :ping, :target => $config.irc_bot.server
+    @check_connection_timer = EM::Timer.new(30, method(:timeout))
+  end
+
+  def timeout
+    puts "Timed out waiting for server, reconnecting..."
+    send_cmd :quit, :quit => "Ping timeout"
+    close_connection_after_writing
+  end
+
+  def reset_check_connection_timer
+    @check_connection_timer.cancel if @check_connection_timer
+    @check_connection_timer = EM::Timer.new(100, method(:check_connection))
   end
 end
