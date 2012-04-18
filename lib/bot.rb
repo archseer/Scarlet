@@ -1,14 +1,11 @@
 class IrcBot::Bot < EM::Connection
   include EventMachine::Protocols::LineText2
-  attr_accessor :scheduler, :log, :data_log, :disconnecting
+  attr_accessor :scheduler, :log, :disconnecting
 
   def post_init
     path = File.dirname(__FILE__)
     @log = Logger.new("#{path}/../logs/irc.log", 'daily')
-    @chan_log = []
-    @data_log = Logger.new("#{path}/../logs/server_data.log", 'daily')
     @log.info "\n**** NEW SESSION at #{Time.now}"
-    @data_log.info "\n**** NEW SESSION at #{Time.now}"
 
     @scheduler = Scheduler.new
     @user_commands = YAML.load_file("#{path}/../commands.yml").symbolize_keys!
@@ -43,8 +40,6 @@ class IrcBot::Bot < EM::Connection
   def receive_line line
     reset_check_connection_timer
     return if @disconnecting
-    @data_log.info line
-
     parsed_line = IRC::Parser.parse line
     event = IRC::Event.new(:localhost, parsed_line[:prefix],
                       parsed_line[:command].downcase.to_sym,
@@ -80,7 +75,7 @@ class IrcBot::Bot < EM::Connection
     if event.sender.nick == "NickServ" && ns_params = event.params.first.match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
       if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
         ::IrcBot::User.ns_login @channels, ns_params[:nick]
-        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
+        #notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
       end
     else
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack

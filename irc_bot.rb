@@ -25,8 +25,8 @@ module IrcBot
     end
 
     def unload
-      @@bot.disconnecting = true
       @@bot.send_cmd :quit, :quit => $config.irc_bot.quit
+      @@bot.disconnecting = true
       @@bot.close_connection_after_writing
       @@bot.scheduler.remove_all
     end
