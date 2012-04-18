@@ -224,8 +224,6 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
       @@help_table.add_line(format("Time: %s", param.created_at),1,:center,0)
       @@help_table.add_line(format("%s: %s", param.sender, param.message),0,:left,0)
       @@help_table.to_a
-    when "CLEAR"
-      (param ?  : ).irc_color(0,1)
     else # // Empty
       MEMO_MSG[type]
     end
