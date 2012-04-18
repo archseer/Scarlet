@@ -113,7 +113,7 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
   hlp = hlpF "!relay"
   new_command(:relay,:return_to_sender,:dev,hlp,0) do |data|
     $config.irc_bot[:relay] = true
-    notice data[:sender], "relay"
+    notice data[:sender], "Relay On"
     nil
   end  
   # // Dice 1.004
@@ -243,8 +243,6 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
       @@help_table.add_line(format("Time: %s", param.created_at),1,:center,0)
       @@help_table.add_line(format("%s: %s", param.sender, param.message),0,:left,0)
       @@help_table.to_a
-    when "CLEAR"
-      (param ?  : ).irc_color(0,1)
     else # // Empty
       MEMO_MSG[type]
     end
