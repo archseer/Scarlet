@@ -82,34 +82,35 @@ class IrcBot::Bot < EM::Connection
     end
   when :join
     if $config.irc_bot.nick != event.sender.nick
-      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}", :light_yellow
+      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow
       check_nick_login event.sender.nick
     else
       @channels[event.channel] = {:users => {}, :flags => []}
       send_data "MODE #{event.channel}"
-      print_console "Joined channel #{event.channel}", :light_yellow
+      print_console "Joined channel #{event.channel}.", :light_yellow
     end
     @channels[event.channel][:users][event.sender.nick] = {}
   when :part
     if event.sender.nick == $config.irc_bot.nick
+      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
       @channels.delete event.channel # remove chan if bot parted
     else
-      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first})", :light_magenta
+      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
       @channels[event.channel][:users].delete event.sender.nick
     end
   when :quit
-    print_console "#{event.sender.nick} has quit (#{event.target})", :light_magenta
+    print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
     @channels.keys.each {|key| @channels[key][:users].delete event.sender.nick}
   when :nick
     @channels.keys.each {|key| @channels[key][:users].rename_key!(event.sender.nick, event.target)}
     if event.sender.nick == $config.irc_bot.nick
       $config.irc_bot[:nick] = event.target
-      print_console "You are now known as #{event.target}", :light_yellow
+      print_console "You are now known as #{event.target}.", :light_yellow
     else
-      print_console "#{event.sender.nick} is now known as #{event.target}", :light_yellow
+      print_console "#{event.sender.nick} is now known as #{event.target}.", :light_yellow
     end
   when :mode
-    if event.sender.server? # Parse bot's private modes (ix,..)
+    if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
       mode = true
       event.params.first.split("").each do |c|
         mode = (c=="+") ? true : (c == "-" ? false : mode)
@@ -119,7 +120,7 @@ class IrcBot::Bot < EM::Connection
     else # USER modes
       mode = true
       event.params.compact!
-      if event.params.count > 1 #means we have an user list
+      if event.params.count > 1 # means we have an user list
         flags = {"q" => :owner, "a" => :admin, "o" => :operator, "h" => :halfop, "v" => :voice, "r" => :registered}
         operator_count = 0
         nicks = event.params[1..-1]
@@ -135,11 +136,11 @@ class IrcBot::Bot < EM::Connection
             mode ? @channels[event.channel][:flags] << c : @channels[event.channel][:flags].subtract_once(c)
           end
         end
-      else #means we split and parse the changes to the channel array for now
-        str.split("").each do |c|
+      else # means we apply the flags to the channel.
+        event.params.first.split("").each do |c|
           mode = (c=="+") ? true : (c == "-" ? false : mode)
           next if c == "+" or c == "-" or c == " "
-          mode ? chan_flags << c : chan_flags.subtract_once(c)
+          mode ? @channels[event.channel][:flags] << c : @channels[event.channel][:flags].subtract_once(c)
         end
       end
     end
