@@ -41,15 +41,15 @@ module IrcBot::IrcCommands
                               :table => @@table, :access_level => @@access_level[@@permissions[keyword]]  }
         cmd = Commands[keyword]
 
-        cmd[:method] = Proc.new { |params, sender|
+        cmd[:method] = Proc.new { |params, event|
           # sets the target
           case cmd[:scope]
             when :return_to_sender
-              target = sender[:target] == $config.irc_bot.nick ? sender[:nick] : sender[:target]
+              target = event.target == $config.irc_bot.nick ? event.sender.nick : event.target
             #when :channel
             #  target = $config.irc_bot.channel
             when :user
-              target = sender[:nick]
+              target = event.sender.nick
           end
           # arity check
           if cmd[:arity] && !(cmd[:arity].is_a?(Range) ? cmd[:arity].member?(params.split(" ").length) : params.split(" ").length == cmd[:arity])
@@ -59,7 +59,7 @@ module IrcBot::IrcCommands
               msg target, cmd[:help]
             end
           else
-            data = {:params => params, :sender => sender[:nick], :target => sender[:target]} #here we set the data we pass
+            data = {:params => params, :sender => event.sender.nick, :target => event.target} #here we set the data we pass
             result = (self.instance_exec data, &block) #here we exec the function
 
             if result.is_a?(Array) #result processing
@@ -150,7 +150,7 @@ module IrcBot::IrcCommands
 
   class BotCommands < Command
     commands_scope :return_to_sender
-    access_levels :botban => :dev, :botunban => :dev, :botnick => :dev, :eval => :dev, :party => :registered, :toggle => :dev
+    access_levels :botban => :dev, :botunban => :dev, :botnick => :dev, :eval => :any, :party => :registered, :toggle => :dev #eval :dev
     help :botban => "Usage: botban <user> [<user>...]", 
       :botunban => "Usage: botunban <user> [<user>...]", 
       :botnick => "Usage: botnick <nick>",

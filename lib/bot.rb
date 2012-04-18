@@ -1,4 +1,5 @@
 class IrcBot::Bot < EM::Connection
+  include EventMachine::Protocols::LineText2
   attr_accessor :scheduler, :log, :data_log, :disconnecting
 
   def post_init
@@ -35,166 +36,173 @@ class IrcBot::Bot < EM::Connection
     super "#{data}\r"
   end
 
-  def receive_data data
+  def receive_line line
     return if @disconnecting
-    data.split(/\n(?=\:)/).each {|message|
-      message.chomp!
-      return if message.blank?
-      @data_log.info message
-      reactor message
-    }
+    @data_log.info line
+
+    parsed_line = IRC::Parser.parse line
+    event = IRC::Event.new(:localhost, parsed_line[:prefix],
+                      parsed_line[:command].downcase.to_sym,
+                      parsed_line[:target], parsed_line[:params])
+    handle_event event
   end
- #---main message reactor loop-------------------------------
-  def reactor message
-    if v = message.match(/^PING :(?<str>.+)$/i) # ping
-      puts("[ Server ping ]") if $config.irc_bot.display_ping
-      send_data "PONG :#{v[:str]}"
-    elsif v = message.match(/:(?<nick>.+?)!(?<hostname>.+?)@(?<host>.+?)\s(?<command>\S+)(?:\s(?<target>#?\S+?))?\s:?(?<parameter>.+?)$/)
-      #user/bot sent messages
-      user_message_loop v
-    elsif v = message.match(/:(?<server>\S+)\s(?<command>\S+)\s(?<type>#?\S+?)\s(?:\:)?(?<parameter>.+?)$/)
-      # server messages (incl. numeric)
-      server_message_loop v
+ #---handle_event--------------------------------------------
+ def handle_event(event)
+  case event.command
+  when :ping
+    puts("[ Server ping ]") if $config.irc_bot.display_ping
+    send_data "PONG :#{event.target}"
+  when :pong
+    puts "[ Ping reply from #{event.sender.host} ]"
+  when :privmsg
+    if event.params.first =~ /\001PING (.+)\001/
+      puts "[ CTCP PING from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
+      return
+    elsif event.params.first =~ /\001VERSION\001/
+      puts "[ CTCP VERSION from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v0.8\001"
+      return
     end
-  end
- #----user message reactor loop------------------------------
-  def user_message_loop v
-    case v[:command]
-      when "PRIVMSG"
-        #roughly match CTCP: PING and VERSION
-        if v[:parameter] =~ /\001PING (.+)\001/
-          puts "[ CTCP PING from #{v[:nick]} ]"
-          send_data "NOTICE #{v[:nick]} :\001PING #{$1}\001"
-          return
-        elsif v[:parameter] =~ /\001VERSION\001/
-          puts "[ CTCP VERSION from #{v[:nick]} ]"
-          send_data "NOTICE #{v[:nick]} :\001VERSION RubyxCube v0.8\001"
-          return
-        end
-        print_chat v[:nick], v[:parameter]
 
-        #process privmsg command if control char was detected
-        privmsg_reactor v if v[:parameter][0] == $config.irc_bot.control_char
+    print_chat event.sender.nick, event.params.first
+    privmsg_reactor event if event.params.first[0] == $config.irc_bot.control_char
 
-        if v[:target][0] == "#" && v[:nick] != $config.irc_bot.nick && $config.irc_bot.relay # simple channel symlink
-          @channels.keys.reject{|key| key == v[:target][1..-1].to_sym}.each {|chan| 
-            msg "##{chan}", "[#{v[:target]}] <#{v[:nick]}> #{v[:parameter]}", true
-          }
-        end
-      when "NOTICE" #Automatic replies must never be sent in response to a NOTICE message.
-        if v[:nick] == "NickServ" && ns_params = v[:parameter].match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
-          if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
-            ::IrcBot::User.ns_login @channels, ns_params[:nick]
-            notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
+    if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay # simple channel symlink
+      @channels.keys.reject{|key| key == event.channel}.each {|chan| 
+        msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
+      }
+    end
+  when :notice # Automatic replies must never be sent in response to a NOTICE message.
+    if event.sender.nick == "NickServ" && ns_params = event.params.first.match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
+      if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
+        ::IrcBot::User.ns_login @channels, ns_params[:nick]
+        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty?
+      end
+    else
+      print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack
+    end
+  when :join
+    if $config.irc_bot.nick != event.sender.nick
+      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}", :light_yellow
+      check_nick_login event.sender.nick
+    else
+      @channels[event.channel] = {:users => {}, :flags => []}
+      send_data "MODE #{event.channel}"
+      print_console "Joined channel #{event.channel}", :light_yellow
+    end
+    @channels[event.channel][:users][event.sender.nick] = {}
+  when :part
+    if event.sender.nick == $config.irc_bot.nick
+      @channels.delete event.channel # remove chan if bot parted
+    else
+      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first})", :light_magenta
+      @channels[event.channel][:users].delete event.sender.nick
+    end
+  when :quit
+    print_console "#{event.sender.nick} has quit (#{event.target})", :light_magenta
+    @channels.keys.each {|key| @channels[key][:users].delete event.sender.nick}
+  when :nick
+    @channels.keys.each {|key| @channels[key][:users].rename_key!(event.sender.nick, event.target)}
+    if event.sender.nick == $config.irc_bot.nick
+      $config.irc_bot[:nick] = event.target
+      print_console "You are now known as #{event.target}", :light_yellow
+    else
+      print_console "#{event.sender.nick} is now known as #{event.target}", :light_yellow
+    end
+  when :mode
+    if event.sender.server? # Parse bot's private modes (ix,..)
+      mode = true
+      event.params.first.split("").each do |c|
+        mode = (c=="+") ? true : (c == "-" ? false : mode)
+        next if c == "+" or c == "-" or c == " "
+        mode ? @modes << c : @modes.subtract_once(c)
+      end
+    else # USER modes
+      mode = true
+      if h = str.match(/(?<flags>\S+)\s(?<nicklist>.+)/) #means we have an user list
+        flags = {"q" => :owner, "a" => :admin, "o" => :operator, "h" => :halfop, "v" => :voice, "r" => :registered}
+        operator_count = 0
+        nicks = event.params[1..-1]
+
+        h[:flags].split("").each_with_index do |flag, i|
+          mode = (flag=="+") ? true : (flag == "-" ? false : mode)
+          operator_count += 1 and next if flag == "+" or flag == "-" 
+          next if flag == " "
+          nick = nicks[i-operator_count]
+          if nick[0] != "#" 
+            @channels[event.channel][:users][nick][flags[flag]] = mode 
+          else
+            mode ? @channels[event.channel][:flags] << c : @channels[event.channel][:flags].subtract_once(c)
           end
-        else
-          print_console "NOTICE from #{v[:nick]}: #{v[:parameter]}", :light_cyan if v[:nick] != "Global" # hack
         end
-      when "MODE"
-        chan = v[:target].gsub('#', '').to_sym
-        @channels[chan][:users], @channels[chan][:flags] = ::IrcBot::Parser.parse_mode(v[:parameter], @channels[chan][:users], @channels[chan][:flags])
-      when "JOIN"
-        chan = v[:parameter].gsub('#', '').to_sym
-        if $config.irc_bot.nick != v[:nick]
-          print_console "#{v[:nick]} (#{v[:hostname]}@#{v[:host]}) has joined channel #{v[:parameter]}", :light_yellow
-          check_nick_login v[:nick]
-        else
-          @channels[chan] = {:users => {}, :flags => []}
-          send_data "MODE #{v[:parameter]}"
-          print_console "Joined channel #{v[:parameter]}", :light_yellow
+      else #means we split and parse the changes to the channel array for now
+        str.split("").each do |c|
+          mode = (c=="+") ? true : (c == "-" ? false : mode)
+          next if c == "+" or c == "-" or c == " "
+          mode ? chan_flags << c : chan_flags.subtract_once(c)
         end
-        @channels[chan][:users][v[:nick]] = {}
-      when "PART"
-        if v[:nick] != $config.irc_bot.nick
-          print_console "#{v[:nick]} has left channel #{v[:target]} (#{v[:parameter]})", :light_magenta
-          chan = v[:parameter].gsub('#', '').to_sym
-          @channels[chan][:users].delete v[:nick]
-        else
-          @channels.delete chan # remove chan if bot parted
-        end
-      when "QUIT"
-        print_console "#{v[:nick]} has quit (#{v[:parameter]})", :light_magenta
-        @channels.keys.each {|key| @channels[key][:users].delete v[:nick]}
-      when "NICK"
-        @channels.keys.each {|key| @channels[key][:users].rename_key!(v[:nick], v[:parameter])}
-        if v[:nick] == $config.irc_bot.nick && $config.irc_bot.nick != v[:parameter]
-          print_console "You are now known as #{v[:parameter]}", :light_yellow
-          $config.irc_bot[:nick] = v[:parameter]
-        else
-          print_console "#{v[:nick]} is now known as #{v[:parameter]}", :light_yellow
-        end
+      end
     end
-  end
- #----server message reactor loop---------------------------
-  def server_message_loop v
-    case v[:command]
-      when "NOTICE" # Automatic replies must never be sent in response to a NOTICE message.
-        print_console "#{v[:parameter]}", :light_cyan
-      when "PONG"
-        puts "[ Ping reply from #{v[:server]} ]"
-      when "MODE"
-        if v[:type] == $config.irc_bot.nick
-          @modes = ::IrcBot::Parser.parse_serv_mode(v[:parameter], @modes)
-        else
-          puts "ERROR: MODE CANNOT PARSE!".red
-        end
-      when "001"
-        msg "nickserv", "IDENTIFY #{$config.irc_bot.password}", true
-      when "005"
-        $config.irc_bot.extensions.merge! ::IrcBot::Parser.extentions_parse(v[:parameter])
-      when /00\d/
-        print_console v[:parameter], :light_green if $config.irc_bot.display_logon
-      when "324" # MODE for #channel
-        t = v[:parameter].split(" ")
-        chan = t[0].gsub('#', '').to_sym
-        @channels[chan][:flags] = ::IrcBot::Parser.parse_serv_mode(t[1], @channels[chan][:flags])
-      when "329"
-        params = v[:parameter].match(/(?<chan>#\S+)\s(?<parameter>.+)$/)
-        print_console "#{params[:chan]} created at #{Time.at(params[:parameter].to_i).std_format}", :light_green
-      when "332" # MOTD
-        params = v[:parameter].split(":")
-        message = "Topic for #{params[0].strip!} is: " + params.drop(1).join(":")
-        print_console message, :light_green
-      when "333" # MOTD set by
-        params = v[:parameter].split(" ")
-        print_console "Topic for #{params[0]} set by #{params[1]} at #{Time.at(params[2].to_i).std_format}", :light_green
-      when "353" # users on channel
-        data = v[:parameter].match(/(?<chantype>[\=\@\*])\s(?<target>#?\S+)\s:(?<nicklist>.+)$/) 
-        # chantype:  "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
-        chan = data[:target].gsub('#', '').to_sym
-        data[:nicklist].split(" ").each { |nick| nick, @channels[chan][:users][nick] = ::IrcBot::Parser.parse_names_list nick }
-      when "366" # end of /NAMES list
-        #check users already on chan permissions
-        d = v[:parameter].match(/(?<target>#?\S+) :End of \/NAMES list./)
-        chan = d[:target].gsub('#', '').to_sym
-        @channels[chan][:users].keys.each { |nick| check_nick_login nick if nick != $config.irc_bot.nick}
-      when "375" # START of MOTD
-        # this is immediately after 005 messages usually so
-        send_data "PROTOCTL NAMESX" if $config.irc_bot.extensions.namesx # set up extended NAMES command
-      when "376" # END of MOTD command. Join channel!
-        client_command :join, :channel => $config.irc_bot.channel
-      when /4\d\d/ # Error messages range
-        print_console v[:parameter], :light_red
-        msg $config.irc_bot.channel, "ERROR: #{v[:parameter]}".irc_color(4,0), true #TODO: Output only certain messages to channel.
-      when /(372|26[56]|25[1245])/ #MOTD command (ignore) + some server info
-      else # Anything not implemented will show up as this.
-        print_console "TODO SERV -- #{v[:command]}: #{v[:parameter]}", :yellow
+  when :"001"
+    msg "NickServ", "IDENTIFY #{$config.irc_bot.password}", true if $config.irc_bot[:password]
+  when :"005"
+    event.params.each { |segment|
+      if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
+        param = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] #convert digit only to digits
+        $config.irc_bot.extensions[s[:token].downcase.to_sym] = param
+      else
+        $config.irc_bot.extensions[segment.downcase.to_sym] = true
+      end
+    }
+  when /00\d/
+    print_console event.params, :light_green if $config.irc_bot.display_logon
+  when :'324' # chan mode
+    mode = true
+    event.params[1].split("").each do |c|
+      mode = (c=="+") ? true : (c == "-" ? false : mode)
+      next if c == "+" or c == "-" or c == " "
+      mode ? @channels[event.params.first][:flags] << c : modes.subtract_once(c)
     end
+  when :'329'
+    print_console "#{event.params[0]} created at #{Time.at(event.params[1].to_i).std_format}", :light_green
+  when :'332' # Channel topic
+    message = "Topic for #{event.params.first} is: #{event.params[1]}"
+    print_console message, :light_green
+  when :'333' # Channel topic set by
+    print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).std_format}", :light_green
+  when :'353' # NAMES list
+    # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
+    # param[1] -> chan, param[2] - users
+    event.params[2].split(" ").each { |nick| nick, @channels[event.params[1]][:users][nick] = ::IrcBot::Parser.parse_names_list nick }
+  when :'366' # end of /NAMES list
+    @channels[event.params.first][:users].keys.each { |nick| check_nick_login nick} # check permissions of users
+  when :'375' # START of MOTD
+    # this is immediately after 005 messages usually so set up extended NAMES command
+    send_data "PROTOCTL NAMESX" if $config.irc_bot.extensions[:namesx]
+  when :'376' # END of MOTD command. Join channel(s)!
+    client_command :join, :channel => $config.irc_bot.channel
+  when /(372|26[56]|25[1245])/ #Ignore MOTD and some statuses
+  when /4\d\d/ # Error messages range
+    print_console event.params.join(" "), :light_red
+    msg $config.irc_bot.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true #TODO: Output only certain messages to channel.
+  else
+    print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect}; 
+    target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
   end
+ end
  #----privmsg reactor -------------------------------------
-  def privmsg_reactor v
-    command  = v[:parameter].split[0...1].join(' ')
-    sequence = v[:parameter].split(' ').drop(1).join(' ')
+  def privmsg_reactor event
+    command  = event.params.first.split[0...1].join(' ')
+    sequence = event.params.first.split(' ').drop(1).join(' ')
     cmd = ::IrcBot::Commands[command[1..-1].to_sym]
-    if cmd && !cmd[:disable] && !@banned.include?(v[:nick]) # command exists, not disabled and user not banned
+    if cmd && !cmd[:disable] && !@banned.include?(event.sender.nick) # command exists, not disabled and user not banned
       if cmd[:access_level].nil_zero? # no access level, just execute the function
-        self.instance_exec sequence, v, &cmd[:method] # execute it
+        self.instance_exec sequence, event, &cmd[:method] # execute it
       else # it requires permissions
-        nick = ::IrcBot::Nick.where(:nick => v[:nick])
-        if !::IrcBot::User.ns_login? @channels, v[:nick] # user was not logged in
-          notice v[:nick], "#{v[:nick]}, you are not logged in!"
+        nick = ::IrcBot::Nick.where(:nick => event.sender.nick)
+        if !::IrcBot::User.ns_login? @channels, event.sender.nick # user was not logged in
+          notice event.sender.nick, "#{event.sender.nick}, you are not logged in!"
         elsif nick.count > 0 && nick.first.privileges >= cmd[:access_level] # nick exists and privileges grant access
-          self.instance_exec sequence, v, &cmd[:method]
+          self.instance_exec sequence, event, &cmd[:method]
         end
       end
     end
@@ -202,7 +210,6 @@ class IrcBot::Bot < EM::Connection
     msg $config.irc_bot.channel, "ERROR: #{result.message}".irc_color(4,0)
   end
   #----------------------------------------------------------
-
   def client_command cmd, hash
     send_data Mustache.render(@user_commands[cmd], hash)
   end

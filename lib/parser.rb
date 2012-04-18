@@ -1,20 +1,6 @@
 module IrcBot::Parser
   class << self
 
-    def extentions_parse data #parses 005 extensions messages
-      segments = data.gsub(" :are supported by this server", "").split(" ")
-      tree = segments.inject({}) { |hash, segment|
-        if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
-          params = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] #convert digit only to digits
-          hash[s[:token].downcase.to_sym] = params
-        else
-          hash[segment.downcase.to_sym] = true
-        end
-        hash
-      }
-      return tree
-    end
-
     def parse_names_list string # parses NAMES list
       settings = {}
       modes = $config.irc_bot.modes
@@ -49,17 +35,6 @@ module IrcBot::Parser
         end
       end
       return users, chan_flags
-    end
-
-    def parse_serv_mode str, modes #merge with above
-      modes = [] if !modes
-      mode = true
-      str.split("").each do |c|
-        mode = (c=="+") ? true : (c == "-" ? false : mode)
-        next if c == "+" or c == "-" or c == " "
-        mode ? modes << c : modes.subtract_once(c)
-      end
-      return modes
     end
 
     def parse_esc_codes msg, remove=false # parses IRC escape codes into ANSI or removes them.
