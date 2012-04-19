@@ -49,7 +49,7 @@ class ::Hash
 end
 # // Commands
 class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
-  VERSION = "V0.101D"
+  VERSION = "V0.101E"
   class HelpTable
     attr_accessor :colors, :width
     def initialize(width,lines=[])
@@ -102,44 +102,44 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     ex = ::IrcBot::IrcCommands::IcyCommands
     format("IcyCommands %s by %s", ex::VERSION, ex.mauthor)
   end
-  # // Silence 1.000
-  hlp = hlpF "!silence"
-  new_command(:silence,:return_to_sender,:dev,hlp,0) do |data|
-    $config.irc_bot[:relay] = false
-    notice data[:sender], "Silenced"
-    nil
-  end  
-  # // Relay 1.000
-  hlp = hlpF "!relay"
-  new_command(:relay,:return_to_sender,:dev,hlp,0) do |data|
-    $config.irc_bot[:relay] = true
-    notice data[:sender], "Relay on"
-    nil
-  end  
-  # // Dice 1.004
+  # // Silence 1.000 - Disabled
+  #hlp = hlpF "!silence"
+  #new_command(:silence,:return_to_sender,:dev,hlp,0) do |data|
+  #  $config.irc_bot[:relay] = false
+  #  notice data[:sender], "Silenced"
+  #  nil
+  #end  
+  # // Relay 1.000 - Disabled
+  #hlp = hlpF "!relay"
+  #new_command(:relay,:return_to_sender,:dev,hlp,0) do |data|
+  #  $config.irc_bot[:relay] = true
+  #  notice data[:sender], "Relay on"
+  #  nil
+  #end  
+  # // Dice 1.005
   DICE_LIMIT = 12
   hlp = hlpF "!dice <int sides> [<int dies>]"
-  new_command(:dice,:channel,:any,hlp,1..2) do |data|
+  new_command(:dice,:return_to_sender,:any,hlp,1..2) do |data|
     params  = data[:params]
     ex      = ::IrcBot::IrcCommands::IcyCommands
     sides, diecoun = ex.p2int(params.split(" "),0,1)
     sides   = 1 if(sides<=0)
     diecoun = 1 if(diecoun<=0)
     dice    = [diecoun,DICE_LIMIT].min.times.collect{|i|1+rand(sides)}
-    dice.inject(0){|r,i|r+i}.to_s + " : " + dice.inspect
+    (dice.inject(0){|r,i|r+i}.to_s + " : " + dice.inspect).to_s
   end
-  # // Coin 1.003
+  # // Coin 1.004
   COIN_LIMIT = 12
   hlp = hlpF '!coin <int count>'
-  new_command(:coin,:channel,:any,hlp,1) do |data|
+  new_command(:coin,:return_to_sender,:any,hlp,1) do |data|
     params = data[:params]
     ex     = ::IrcBot::IrcCommands::IcyCommands
     count, = ex.p2int(params.split(" "),0)
     ([[count,0].max,COIN_LIMIT].min).times.collect{|i|rand(2) == 0 ? "O" : "X"}.inspect.gsub('"',"")
   end
-  # // Klik 1.003
+  # // Klik 1.004
   hlp = hlpF '!klik'
-  new_command(:klik,:channel,:any,hlp,0) do |data|
+  new_command(:klik,:return_to_sender,:any,hlp,0) do |data|
     params = data[:params]
     ex     = ::IrcBot::IrcCommands::IcyCommands; n = ex.klik.to_i
     format("KLIK! %s %s", n.to_s, (n == 1 ? "sec" : "secs"))
@@ -150,7 +150,7 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     @then_klik   = Time.now
     @klik
   end
-  # // Poke 1.001
+  # // Poke 1.002
   SILENT_POKE = true
   hlp = hlpF "!poke <string name>"
   new_command(:poke,:user,:registered,hlp,1) do |data|
@@ -159,7 +159,7 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
       notice user, 'Poke disabled (unabled to complete command)'
     else
       notice params.to_s, "#{user} has poked you"
-      notice user, "Poke was successful!" if(SILENT_POKE)
+      notice user, "Poke was successful!" unless(SILENT_POKE)
     end
     nil
   end
