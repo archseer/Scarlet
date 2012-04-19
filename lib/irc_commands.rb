@@ -168,7 +168,7 @@ module IrcBot::IrcCommands
       "Bot usage ban was revoked for #{nicks.join(", ")}."
     end
     on :botnick do |data|
-      client_command :nick, :nick => data[:params].delete(' ')
+      send_cmd :nick, :nick => data[:params].delete(' ')
     end
     on :eval do |data|
       if !Nick.where(:nick => data[:sender]).empty? && Nick.where(:nick => data[:sender]).first.privileges == 9
