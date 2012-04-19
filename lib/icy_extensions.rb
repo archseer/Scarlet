@@ -113,7 +113,7 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
   hlp = hlpF "!relay"
   new_command(:relay,:return_to_sender,:dev,hlp,0) do |data|
     $config.irc_bot[:relay] = true
-    notice data[:sender], "Relay On"
+    notice data[:sender], "Relay on"
     nil
   end  
   # // Dice 1.004
@@ -156,10 +156,10 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
   new_command(:poke,:user,:registered,hlp,1) do |data|
     user, params = data.get_values(:sender,:params)
     unless(respond_to?(:notice))
-      notice user, 'Poke Disabled (unabled to complete command)'
+      notice user, 'Poke disabled (unabled to complete command)'
     else
       notice params.to_s, "#{user} has poked you"
-      notice user, "Poke was successful" if(SILENT_POKE)
+      notice user, "Poke was successful!" if(SILENT_POKE)
     end
     nil
   end
@@ -172,9 +172,9 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     "NREM"  => "Memo does not exist".align(memo_size,:center,memo_padd).irc_color(1,8),
     "FREM"  => "Memo could not be removed".align(memo_size,:center,memo_padd).irc_color(1,8),
     "ABOUT" => "Memo V1.006 by IceDragon".align(memo_size,:center,memo_padd).irc_color(1,12),
-    "NOMEMO"=> "No Memos Avaiable".align(memo_size,:center,memo_padd).irc_color(0,1),
-    "CLEAR" => "All Memos have been cleared.".align(memo_size,:center,memo_padd).irc_color(0,1),
-    "NCLEAR"=> "There are no Memos to clear.".align(memo_size,:center,memo_padd).irc_color(0,5),
+    "NOMEMO"=> "No memos avaiable".align(memo_size,:center,memo_padd).irc_color(0,1),
+    "CLEAR" => "All memos have been cleared.".align(memo_size,:center,memo_padd).irc_color(0,1),
+    "NCLEAR"=> "There are no memos to clear.".align(memo_size,:center,memo_padd).irc_color(0,5),
     "INVAL" => "Invalid parameters given.".align(memo_size,:center,memo_padd).irc_color(1,5)
   }
   MEMO_MSG.default("[NO MESSAGE]")
@@ -233,7 +233,7 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     when "LIST"
       @@help_table.clear_lines()
       @@help_table.width = 60
-      @@help_table.add_line(format("You have %d %s", param.size, param.size == 1 ? "Memo" : "Memos"),1,:center,0)
+      @@help_table.add_line(format("You have %d %s", param.size, param.size == 1 ? "memo" : "memos"),1,:center,0)
       param.each_with_index{|m,i|@@help_table.add_line("#{i} "+m.to_short_s,0,:left,2)}
       @@help_table.to_a
     when "CHECK"
