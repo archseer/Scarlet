@@ -28,10 +28,19 @@ class Scarlet
     end
 
     def msg target, message, silent=false
-      p target
-      p message
-      p silent
       @event.server.msg(target, message, silent)
+    end
+
+    def notice target, message, silent=false
+      @event.server.notice(target, message, silent)
+    end
+
+    def send string
+      @event.server.send string
+    end
+
+    def send_cmd cmd, hash
+      @event.server.send_cmd cmd, hash
     end
 
     def method_missing(method, *args)

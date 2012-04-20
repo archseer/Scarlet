@@ -15,6 +15,5 @@ class IRC
       @matches = nil
     end
 
-
   end
 end
