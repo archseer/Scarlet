@@ -10,7 +10,7 @@ module IrcBot::IrcCommands
 
   class Command
     class << self
-      @@access_level = {:any => 0, :registered => 1, :vip => 2, :dev => 8, :owner => 9}
+      @@access_level = {:any => 0, :registered => 1, :voice => 2, :vip => 3, :super_tester => 6, :op => 7, :dev => 8, :owner => 9}
       @@permissions = {}
       @@help = {}
       @@arity = {}
@@ -150,7 +150,7 @@ module IrcBot::IrcCommands
 
   class BotCommands < Command
     commands_scope :return_to_sender
-    access_levels :botban => :dev, :botunban => :dev, :botnick => :dev, :eval => :any, :party => :registered, :toggle => :dev #eval :dev
+    access_levels :botban => :dev, :botunban => :dev, :botnick => :dev, :eval => :dev, :party => :registered, :toggle => :dev #eval :dev
     help :botban => "Usage: botban <user> [<user>...]", 
       :botunban => "Usage: botunban <user> [<user>...]", 
       :botnick => "Usage: botnick <nick>",
@@ -175,7 +175,7 @@ module IrcBot::IrcCommands
         params = data[:params]
       else
         safe = true
-        names_list = ["a poopy-head", "a meanie", "a retard", "an idiot"]
+        names_list = ["a poopy-head", "a meanie", "a retard", "an idiot", "baka"]
         if data[:params].match(/(.*(Thread|Process|File|Kernel|system|Dir|IO|require|load|ENV|%x|\`|sleep|Modules|send|undef|\/0|INFINITY|loop|variable_set|\$|@|Nick.*privileges.*save!|disconnecting\s*\=\s*true).*)/) 
           params = "\"#{data[:sender]} is #{names_list[rand(4)-1]}.\"" 
         else 

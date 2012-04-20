@@ -66,7 +66,9 @@ class IrcBot::Bot < EM::Connection
     print_chat event.sender.nick, event.params.first
     privmsg_reactor event if event.params.first[0] == $config.irc_bot.control_char
 
-    if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay # simple channel symlink
+    # simple channel symlink
+    # added: now it doesn't relay any bot commands (!)
+    if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
       @channels.keys.reject{|key| key == event.channel}.each {|chan| 
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
       }
@@ -277,6 +279,7 @@ class IrcBot::Bot < EM::Connection
     puts "Timed out waiting for server, reconnecting..."
     send_cmd :quit, :quit => "Ping timeout"
     close_connection_after_writing
+    unbind
   end
 
   def reset_check_connection_timer
