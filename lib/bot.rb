@@ -29,7 +29,7 @@ class IrcBot::Bot < EM::Connection
     puts "DEBUG: Socket has unbound.".red
     if !@disconnecting
       print_console "Connection to server lost.", :light_red
-      #Modules.restart_mod :IrcBot
+      Modules.restart_mod :IrcBot
     end
   end
 
@@ -65,7 +65,7 @@ class IrcBot::Bot < EM::Connection
 
     print_chat event.sender.nick, event.params.first
     privmsg_reactor event if event.params.first[0] == $config.irc_bot.control_char
-
+    Scarlet.new(self, event) if event.params.first.split(' ')[0] == $config.irc_bot.nick
     # simple channel symlink
     # added: now it doesn't relay any bot commands (!)
     if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
@@ -279,7 +279,6 @@ class IrcBot::Bot < EM::Connection
     puts "Timed out waiting for server, reconnecting..."
     send_cmd :quit, :quit => "Ping timeout"
     close_connection_after_writing
-    unbind
   end
 
   def reset_check_connection_timer

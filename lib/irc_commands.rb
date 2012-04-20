@@ -46,8 +46,6 @@ module IrcBot::IrcCommands
           case cmd[:scope]
             when :return_to_sender
               target = event.target == $config.irc_bot.nick ? event.sender.nick : event.target
-            #when :channel
-            #  target = $config.irc_bot.channel
             when :user
               target = event.sender.nick
           end
