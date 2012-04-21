@@ -1,6 +1,6 @@
 class IRC
   class Event
-    attr_accessor :server, :sender, :command, :params, :target, :channel, :matches
+    attr_accessor :server, :sender, :command, :params, :target, :channel
 
     def initialize(server, prefix, command, target, params)
       @server = server
@@ -12,7 +12,6 @@ class IRC
       @target = target
       @channel = target if target and target[0, 1] == '#'
       @params = params
-      @matches = nil
     end
 
   end

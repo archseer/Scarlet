@@ -23,7 +23,7 @@ class Scarlet
 
     def run event, matches
       @event = event
-      @event.matches = matches
+      @event.params = matches
       self.instance_eval &@block
     end
 
@@ -56,6 +56,9 @@ end
 # (msg, notice, send, send_cmd). Also, you have full access to @event's variables
 # even more, you can (and should) omit the '@event' and just use the vars directly.
 # (i.e. @event.sender.nick => sender.nick).
+
+# params is a MatchData object. params or params[0] will return the full string.
+# params[n] will return n-th match capture.
 
 # Do it. For science.
 

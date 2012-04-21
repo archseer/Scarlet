@@ -1,3 +1,7 @@
+base_path = File.expand_path File.dirname(__FILE__)
+load base_path + '/../../../../mpd-ruby/cardinal.rb'
+$bird = Cardinal.new
+
 Scarlet.hear (/what\'s playing\??/) do
   targ = target == $config.irc_bot.nick ? sender.nick : target
   if $bird
@@ -27,4 +31,12 @@ Scarlet.hear (/(?:play )?next(?: song[.!]?)?/) do
   end
 end
 
-#Scarlet.hear ()
+Scarlet.hear (/volume (.*)/) do
+  targ = target == $config.irc_bot.nick ? sender.nick : target
+  if $bird
+    $bird.volume = params[1].to_i
+    msg targ, "I have changed the volume for you."
+  else
+    msg targ, "Cardinal is not running at the moment."
+  end
+end
