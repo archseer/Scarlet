@@ -11,7 +11,7 @@ class Scarlet
     event.params[0] = event.params[0].split(' ').drop(1).join(' ')
     @@listens.keys.each {|key| 
       if matches = key.match(event.params.first)
-        @@listens[key].run event, matches
+        @@listens[key].run event.dup, matches
       end
     }
   end
@@ -55,7 +55,7 @@ end
 # Quick explanation: inside 'hear' blocks, you can use any of server's send commands
 # (msg, notice, send, send_cmd). Also, you have full access to @event's variables
 # even more, you can (and should) omit the '@event' and just use the vars directly.
-# (i.e. @event.sender.nick => sender.nick).
+# (i.e. @event.sender.nick => sender.nick,).
 
 # params is a MatchData object. params or params[0] will return the full string.
 # params[n] will return n-th match capture.
