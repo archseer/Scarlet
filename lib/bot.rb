@@ -173,6 +173,9 @@ class IrcBot::Bot < EM::Connection
     print_console message, :light_green
   when :'333' # Channel topic set by
     print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).std_format}", :light_green
+  when :'433' # Nickname exists
+    $config.irc_bot.nick += "Bot"
+    send_cmd :nick, :nick => $config.irc_bot.nick
   when :'353' # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
     # param[1] -> chan, param[2] - users
