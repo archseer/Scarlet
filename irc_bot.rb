@@ -30,6 +30,10 @@ module IrcBot
       @@bot.close_connection_after_writing
       @@bot.scheduler.remove_all
     end
+
+    def load_commands root
+        Dir["#{root}/commands/**/*.rb"].each {|path| load path }
+    end
   end
   Commands = ::IrcBot.commands
 end
@@ -37,3 +41,4 @@ end
 base_path = File.expand_path File.dirname(__FILE__)
 Modules.load_models base_path
 Modules.load_libs base_path
+Dir["#{base_path}/commands/**/*.rb"].each {|path| load path }

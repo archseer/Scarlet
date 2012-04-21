@@ -28,28 +28,34 @@ class Scarlet
     end
 
     def msg target, message, silent=false
-      @event.server.msg(target, message, silent)
+      server.msg(target, message, silent)
     end
 
     def notice target, message, silent=false
-      @event.server.notice(target, message, silent)
+      server.notice(target, message, silent)
     end
 
     def send string
-      @event.server.send string
+      server.send string
     end
 
     def send_cmd cmd, hash
-      @event.server.send_cmd cmd, hash
+      server.send_cmd cmd, hash
     end
 
     def method_missing(method, *args)
       return @event.send(method, *args) if @event.respond_to?(method)
+      #return @event.server.send(method, *args) if @event.server.respond_to?(method)
       super
     end
   end
 
 end
+
+# Quick explanation: inside 'hear' blocks, you can use any of server's send commands
+# (msg, notice, send, send_cmd). Also, you have full access to @event's variables
+# even more, you can (and should) omit the '@event' and just use the vars directly.
+# (i.e. @event.sender.nick => sender.nick).
 
 # Do it. For science.
 
