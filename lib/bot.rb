@@ -111,6 +111,11 @@ class IrcBot::Bot < EM::Connection
     else
       print_console "#{event.sender.nick} is now known as #{event.target}.", :light_yellow
     end
+  when :kick
+    messg = "#{event.sender.nick} has kicked #{event.params.first} from #{event.target}"
+    messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick
+    messg += "."
+    print_console messg, :light_red
   when :mode
     if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
       mode = true
