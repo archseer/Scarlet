@@ -1,19 +1,41 @@
 class Scarlet
   @@listens = {}
+  @@clearance = {:any => 0, :registered => 1, :voice => 2, :vip => 3, :super_tester => 6, :op => 7, :dev => 8, :owner => 9}
+      
   class << self
-    def hear regex, &block
-      @@listens[regex] = Callback.new(block)
+    def hear regex, clearance=nil, &block
+      @@listens[regex] ||= {}
+      @@listens[regex][:clearance] = (clearance || :any)
+      @@listens[regex][:callback] = Callback.new(block)
     end
   end
 
   def initialize server, event
     event.server = server
     event.params[0] = event.params[0].split(' ').drop(1).join(' ')
-    @@listens.keys.each {|key| 
+    @@listens.keys.each {|key|
       if matches = key.match(event.params.first)
-        @@listens[key].run event.dup, matches
+        @@listens[key][:callback].run event.dup, matches if check_access(event, @@listens[key][:clearance])
       end
     }
+  end
+
+  def check_access event, privilege
+    if ::IrcBot::User.ns_login? event.server.channels, event.sender.nick # check login
+      nick = ::IrcBot::Nick.where(:nick => event.sender.nick)
+      if nick.count == 0
+        msg return_path, "Registration not found, please register."
+        return false
+      elsif nick.first.privileges < @@clearance[privilege]
+        msg return_path, "Your security clearance does not grant access."
+        return false
+      else
+        return true
+      end
+    else
+      msg return_path, "Test subject is not logged in with NickServ."
+      return false
+    end
   end
 
   class Callback
@@ -60,9 +82,15 @@ end
 # params is a MatchData object. params or params[0] will return the full string.
 # params[n] will return n-th match capture.
 
+# return_path is a preset for sending a message back where it came from, either
+# a channel or a private message.
+
 # Do it. For science.
 
 Scarlet.hear (/give me (:?a\s)cookie/) do
-  targ = target == $config.irc_bot.nick ? sender.nick : target
-  msg targ, "\x01ACTION gives #{sender.nick} a cookie!\x01"
+  msg return_path, "\x01ACTION gives #{sender.nick} a cookie!\x01"
+end
+
+Scarlet.hear (/give me (:?a\s)potato/), :dev do
+  msg return_path, "\x01ACTION gives #{sender.nick} a cookie!\x01"
 end

@@ -1,6 +1,7 @@
 class IrcBot::Bot < EM::Connection
   include EventMachine::Protocols::LineText2
   attr_accessor :scheduler, :log, :disconnecting
+  attr_reader :channels
 
   def post_init
     path = File.dirname(__FILE__)
@@ -238,12 +239,6 @@ class IrcBot::Bot < EM::Connection
 
   def check_nick_login nick
     msg "NickServ", "STATUS #{nick}", true
-  end
-
-  def sched_msg(time,str)
-    @scheduler.in time do
-      msg $config.irc_bot.channel, str if !str.blank?
-    end
   end
 
   def create_table array, width
