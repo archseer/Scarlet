@@ -24,16 +24,16 @@ class Scarlet
     if ::IrcBot::User.ns_login? event.server.channels, event.sender.nick # check login
       nick = ::IrcBot::Nick.where(:nick => event.sender.nick)
       if nick.count == 0
-        msg return_path, "Registration not found, please register."
+        event.server.msg event.return_path, "Registration not found, please register."
         return false
       elsif nick.first.privileges < @@clearance[privilege]
-        msg return_path, "Your security clearance does not grant access."
+        event.server.msg event.return_path, "Your security clearance does not grant access."
         return false
       else
         return true
       end
     else
-      msg return_path, "Test subject is not logged in with NickServ."
+      event.server.msg event.return_path, "Test subject is not logged in with NickServ."
       return false
     end
   end
@@ -92,5 +92,5 @@ Scarlet.hear (/give me (:?a\s)cookie/) do
 end
 
 Scarlet.hear (/give me (:?a\s)potato/), :dev do
-  msg return_path, "\x01ACTION gives #{sender.nick} a cookie!\x01"
+  msg return_path, "\x01ACTION gives #{sender.nick} a potato!\x01"
 end
