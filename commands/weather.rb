@@ -16,8 +16,19 @@ Scarlet.hear /weather in (.+)\s?(?:units)?\s?(.*)?/ do
       request.callback {
         h = JSON.parse(request.response)
         location = locations[2].end_with?(", ") ? locations[2].chop.chop : locations[2]
-        r = "Currently in #{location} it is #{h["condition"]["text"].downcase} #{h["condition"]["temperature"]}°#{h["units"]["temperature"]} wind is #{h["wind"]["speed"]}#{h["units"]["speed"]} from #{h["wind"]["direction"]} with a humidity of #{h["atmosphere"]["humidity"]}%, visibility #{h["atmosphere"]["visibility"]}% and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"]}#{h["units"]["pressure"]}."
-        msg return_path, r
+        condition = h["condition"]["text"].downcase
+        condition_description = condition.end_with?("s") ? "there are" : "it is"
+        condition_description = "there is a" if condition.end_with?("shower")
+        condition_description = "there is" if condition.end_with?("rain")
+        h["atmosphere"]["visibility"] = "unknown" if h["atmosphere"]["visibility"].blank?
+        h["atmosphere"]["humidity"] = "unknown" if h["atmosphere"]["humidity"].blank?
+        r = []
+        r << "Currently in #{location} #{condition_description} #{condition}"
+        r << "#{h["condition"]["temperature"].to_i}°#{h["units"]["temperature"]},"
+        r << "winds from #{h["wind"]["direction"]} at #{h["wind"]["speed"].to_i} #{h["units"]["speed"]}."
+        r << "#{h["atmosphere"]["humidity"]}% humidity, #{h["atmosphere"]["visibility"]} #{h["units"]["distance"]} visibility"
+        r << "and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"].to_i} #{h["units"]["pressure"]}."
+        msg return_path, r.join(' ')
       }
     else
       msg return_path, "There was a problem with the location..."
