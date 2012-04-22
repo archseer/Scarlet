@@ -1,14 +1,25 @@
-﻿module IrcBot
+﻿#=========================================#
+# // Date Created : 04/07/2012
+# // Date Modified: 04/18/2012
+# // Created by IceDragon (IceDragon200)
+#=========================================#
+# // ● Change Log
+#=========================================#
+# // ■(04/22/2012)
+# //     Edited IcyCommands:HelpTable
+#=========================================#
+module IrcBot
   class InfoTable
+    VERSION = "0.0001"
     attr_accessor :colors, :width, :padding
     COLOR_SET = {
       "content" => 0,
       "header"  => 1,
       "warning" => 2
     }
-    def initialize(width)
+    def initialize(width=50)
       @width     = width
-      @padding   = 2
+      @padding   = 0
       @colors    = {}
       @colors[0] = [1,0] # // Content
       @colors[1] = [0,1] # // Header
@@ -30,12 +41,10 @@
       self
     end
     def addHeader(string)
-      @headers << string.word_wrap(@width-@padding*2)
-      @headers.flatten!
+      @headers << string
     end  
     def addRow(string)
-      @lines << string.word_wrap(@width-@padding*2)
-      @lines.flatten!
+      @lines << string
       self
     end
     def compile()
@@ -44,3 +53,6 @@
     end
   end
 end
+#=■==========================================================================■=#
+#                           // ● End of File ● //                              #
+#=■==========================================================================■=#
