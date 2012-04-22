@@ -144,7 +144,7 @@ module IrcBot::IrcCommands
       else
         safe = true
         names_list = ["a poopy-head", "a meanie", "a retard", "an idiot"]
-        if data[:params].match(/(.*(Thread|Process|File|Kernel|system|Dir|IO|require|load|ENV|%x|\`|sleep|Modules|send|undef|\/0|INFINITY|loop|variable_set|\$|@|Nick.*privileges.*save!|disconnecting\s*\=\s*true).*)/) 
+        if data[:params].match(/(.*(Thread|Process|File|Kernel|system|Dir|IO|fork|while\s*true|require|load|ENV|%x|\`|sleep|Modules|Socket|send|undef|\/0|INFINITY|loop|variable_set|\$|@|Nick.*privileges.*save!|disconnecting\s*\=\s*true).*)/) 
           params = "\"#{data[:sender]} is #{names_list[rand(4)-1]}.\"" 
         else 
           params = data[:params]

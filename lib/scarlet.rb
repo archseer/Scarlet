@@ -92,7 +92,8 @@ end
 # params[n] will return n-th match capture.
 
 # return_path is a preset for sending a message back where it came from, either
-# a channel or a private message.
+# a channel or a private message. No need to use it directly, just use the 
+# 'reply' command
 
 # Do it. For science.
 
