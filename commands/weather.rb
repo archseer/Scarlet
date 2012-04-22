@@ -11,12 +11,12 @@ Scarlet.hear /weather in (.+)\s?(?:units)?\s?(.*)?/ do
   http.errback { msg return_path, "ERROR! Fatal mistake." }
   http.callback {
     locations = http.response.match(/<loc id="(.+)" type="1">(.+)<\/loc>/)
-
     if locations && locations[1]
       request = EventMachine::HttpRequest.new('http://weather.yahooapis.com/forecastjson').get :query => {'p' => locations[1], 'u' => units}
       request.callback {
         h = JSON.parse(request.response)
-        r = "Currently in #{locations[2]} it is #{h["condition"]["text"].downcase} #{h["condition"]["temperature"]}°#{h["units"]["temperature"]} wind is #{h["wind"]["speed"]}#{h["units"]["speed"]} from #{h["wind"]["direction"]} with a humidity of #{h["atmosphere"]["humidity"]}%, visibility #{h["atmosphere"]["visibility"]}% and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"]}#{h["units"]["pressure"]}."
+        location = locations[2].end_with?(", ") ? locations[2].chop.chop : locations[2]
+        r = "Currently in #{location} it is #{h["condition"]["text"].downcase} #{h["condition"]["temperature"]}°#{h["units"]["temperature"]} wind is #{h["wind"]["speed"]}#{h["units"]["speed"]} from #{h["wind"]["direction"]} with a humidity of #{h["atmosphere"]["humidity"]}%, visibility #{h["atmosphere"]["visibility"]}% and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"]}#{h["units"]["pressure"]}."
         msg return_path, r
       }
     else

@@ -66,7 +66,6 @@ class IrcBot::Bot < EM::Connection
 
     print_chat event.sender.nick, event.params.first
     privmsg_reactor event if event.params.first[0] == $config.irc_bot.control_char
-    Scarlet.new(self, event.dup) if event.params.first.split(' ')[0] =~ /#{$config.irc_bot.nick},?/i
     # simple channel symlink
     # added: now it doesn't relay any bot commands (!)
     if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
@@ -74,6 +73,7 @@ class IrcBot::Bot < EM::Connection
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
       }
     end
+    Scarlet.new(self, event.dup) if event.params.first.split(' ')[0] =~ /#{$config.irc_bot.nick},?/i
   when :notice # Automatic replies must never be sent in response to a NOTICE message.
     if event.sender.nick == "NickServ" && ns_params = event.params.first.match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
       if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
