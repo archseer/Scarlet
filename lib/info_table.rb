@@ -6,7 +6,7 @@
       "header"  => 1,
       "warning" => 2
     }
-    def initialize(width)
+    def initialize(width=50)
       @width     = width
       @padding   = 2
       @colors    = {}
