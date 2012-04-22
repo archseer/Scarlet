@@ -66,6 +66,10 @@ class Scarlet
       server.send string
     end
 
+    def reply message, silent=false
+      server.msg(return_path, message, silent)
+    end
+
     def send_cmd cmd, hash
       server.send_cmd cmd, hash
     end

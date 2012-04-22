@@ -143,7 +143,7 @@ module IrcBot::IrcCommands
         params = data[:params]
       else
         safe = true
-        names_list = ["a poopy-head", "a meanie", "a retard", "an idiot", "baka"]
+        names_list = ["a poopy-head", "a meanie", "a retard", "an idiot"]
         if data[:params].match(/(.*(Thread|Process|File|Kernel|system|Dir|IO|require|load|ENV|%x|\`|sleep|Modules|send|undef|\/0|INFINITY|loop|variable_set|\$|@|Nick.*privileges.*save!|disconnecting\s*\=\s*true).*)/) 
           params = "\"#{data[:sender]} is #{names_list[rand(4)-1]}.\"" 
         else 
@@ -190,9 +190,9 @@ module IrcBot::IrcCommands
 
   class TodoCommands < Command
     commands_scope :return_to_sender
-    access_levels :todo => :registered, :todel => :dev
-    arities :todo => 1..Float::INFINITY, :todel => 1
-    help :todo => "Usage: !todo (<list>|<count>|<show> <id>|<add> <text>)", :todel => "!todel <id>"
+    access_levels :todo => :registered
+    arities :todo => 1..Float::INFINITY
+    help :todo => "Usage: !todo (<list>|<show> <id>)"
     generate_table 40
 
     on :todo do |data|
@@ -200,9 +200,6 @@ module IrcBot::IrcCommands
       sequence = data[:params].split(" ").drop(1).join(" ")
 
       case command.to_sym
-        when :add
-          Todo.new(:msg => sequence, :by => data[:sender]).save!
-          "TODO was added."
         when :list
           c = Todo.all.count
           if c > 0
@@ -223,16 +220,9 @@ module IrcBot::IrcCommands
           else
             "TODO ##{id} could not be found."
           end
-        when :count
-          "TODO count: #{Todo.all.count}"
         else
           "Invalid command."
       end
-    end
-    on :todel do |data|
-      id = data[:params].strip.to_i - 1
-      t = Todo.sort(:created_at).all[id].delete
-      "TODO ##{data[:params]} was deleted."
     end
   end
 end

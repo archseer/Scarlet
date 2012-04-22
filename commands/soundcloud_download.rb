@@ -6,7 +6,7 @@ Scarlet.hear (/download soundcloud favourites/), :owner do
   http.errback { msg return_path, "ERROR! Fatal mistake." }
   base_path = File.expand_path File.dirname(__FILE__)
   http.callback {
-    msg return_path, "Downloading..."
+    reply "Downloading..."
     JSON.parse(http.response).each { |fav|
       download_link = fav["downloadable"] ? fav["download_url"] : fav['stream_url']
       song = EventMachine::HttpRequest.new("#{download_link}?client_id=YOUR_CLIENT_ID").get :redirects => 1
