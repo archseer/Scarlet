@@ -21,25 +21,28 @@
 # // ■(04/10/2012)
 # //    Commands
 # //      poke
-# // ■(04/14/2012)
+# // ■(04/14/2012) V0.101B
 # //    Commands 
 # //      memo (changes)
 # //        added "REM" parameter
 # //        fixed "CLEAR"
-# // ■(04/15/2012)
+# // ■(04/15/2012) V0.101C
 # //    Commands
 # //      memo (changes) 1.007
 # //        updated help
 # //      icver (Added)
 # //      poke (changes) 1.001 
 # //        Notifies of poke success
-# // ■(04/17/2012)
+# // ■(04/17/2012) V0.101D
 # //    Little house keeping
 # //      memo, icver
-# // ■(04/18/2012)
+# // ■(04/18/2012) V0.101E
 # //    Commands
 # //      silence (added)
 # //      relay   (added)
+# // ■(04/22/2012) V0.101F
+# //    Commands
+# //      memo (edit)
 #=========================================#
 # // Added functions
 class ::Hash
@@ -49,31 +52,8 @@ class ::Hash
 end
 # // Commands
 class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
-  VERSION = "V0.101E"
-  class HelpTable
-    attr_accessor :colors, :width
-    def initialize(width,lines=[])
-      @width     = width
-      @colors    = {}
-      @colors[0] = [1,0] # // Content
-      @colors[1] = [0,1] # // Header
-      @colors[2] = [1,8] # // Warning
-      @lines     = []
-      lines.each{|l|add_line(*l)} # // [string, align]
-    end
-    def clear_lines()
-      @lines.clear()
-      self
-    end
-    def add_line(string,color_set=0,align=:left,padding=0)
-      @lines << [string,align,padding,color_set]
-      self
-    end
-    def to_a()
-      @lines.collect{|a|a[0].align(@width,a[1],a[2]).irc_color(*@colors[a[3]])}
-    end
-  end
-  @@help_table = HelpTable.new(60)
+  VERSION = "V0.101F"
+  @@help_table = ::IrcBot::InfoTable.new(60)
   def self.mauthor
     "IceDragon"
   end
@@ -163,7 +143,7 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     end
     nil
   end
-  # // Memo 1.008
+  # // Memo 1.009
   memo_size,memo_padd = 40, 2
   MEMO_MSG = {
     "ADD"   => "Memo successfully added".align(memo_size,:center,memo_padd).irc_color(1,9),
@@ -231,18 +211,18 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     param,=params
     case(type)
     when "LIST"
-      @@help_table.clear_lines()
+      @@help_table.clear()
       @@help_table.width = 60
-      @@help_table.add_line(format("You have %d %s", param.size, param.size == 1 ? "memo" : "memos"),1,:center,0)
-      param.each_with_index{|m,i|@@help_table.add_line("#{i} "+m.to_short_s,0,:left,2)}
-      @@help_table.to_a
+      @@help_table.addHeader(format("You have %d %s", param.size, param.size == 1 ? "memo" : "memos"))
+      param.each_with_index{|m,i|@@help_table.addRow("#{i} "+m.to_short_s)}
+      @@help_table.compile()
     when "CHECK"
       return MEMO_MSG["NOMEMO"] unless(param)
-      @@help_table.clear_lines()
+      @@help_table.clear()
       @@help_table.width = 60
-      @@help_table.add_line(format("Time: %s", param.created_at),1,:center,0)
-      @@help_table.add_line(format("%s: %s", param.sender, param.message),0,:left,0)
-      @@help_table.to_a
+      @@help_table.addHeader(format("Time: %s", param.created_at))
+      @@help_table.addRow(format("%s: %s", param.sender, param.message))
+      @@help_table.compile()
     else # // Empty
       MEMO_MSG[type]
     end
