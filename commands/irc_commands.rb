@@ -61,7 +61,8 @@ module IrcBot::IrcCommands
             result = (self.instance_exec data, &block) #here we exec the function
 
             if result.is_a?(Array) #result processing
-              cmd[:table] ? create_table(result, cmd[:table]).each { |line| msg target, line, true } : result.each { |line| msg target, line, true }
+              #cmd[:table] ? create_table(result, cmd[:table]).each { |line| msg target, line, true } : 
+              result.each { |line| msg target, line, true }
             elsif result.is_a?(String)
               msg target, result
             end
@@ -184,44 +185,6 @@ module IrcBot::IrcCommands
         end
       else
         "You cannot toggle :toggle!" if cmd == :toggle
-      end
-    end
-  end
-
-  class TodoCommands < Command
-    commands_scope :return_to_sender
-    access_levels :todo => :registered
-    arities :todo => 1..Float::INFINITY
-    help :todo => "Usage: !todo (<list>|<show> <id>)"
-    generate_table 40
-
-    on :todo do |data|
-      command = data[:params].split[0...1].join(' ')
-      sequence = data[:params].split(" ").drop(1).join(" ")
-
-      case command.to_sym
-        when :list
-          c = Todo.all.count
-          if c > 0
-            todo_output = ["Last 10 entries:"]
-            Todo.sort(:created_at.desc).limit(10).each_with_index { |t, i|
-              break if i == 10 
-              todo_output << "##{c-i}\t#{t.by}\t\t#{t.created_at.std_format}"
-            }
-            todo_output
-          else
-            "No entries found."
-          end
-        when :show
-          id = sequence.split[0...1].join(' ').to_i
-          t = Todo.sort(:created_at).all[id-1]
-          if t
-            [ "TODO ##{id}", "Date: #{t.created_at.std_format}", "Added by: #{t.by}", "Entry: #{t.msg}"]
-          else
-            "TODO ##{id} could not be found."
-          end
-        else
-          "Invalid command."
       end
     end
   end

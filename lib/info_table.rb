@@ -8,7 +8,7 @@
     }
     def initialize(width)
       @width     = width
-      @padding   = 0
+      @padding   = 2
       @colors    = {}
       @colors[0] = [1,0] # // Content
       @colors[1] = [0,1] # // Header
@@ -30,10 +30,12 @@
       self
     end
     def addHeader(string)
-      @headers << string
+      @headers << string.word_wrap(@width-@padding*2)
+      @headers.flatten!
     end  
     def addRow(string)
-      @lines << string
+      @lines << string.word_wrap(@width-@padding*2)
+      @lines.flatten!
       self
     end
     def compile()

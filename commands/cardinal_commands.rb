@@ -37,7 +37,6 @@ Scarlet.hear (/volume (.*)/) do
 end
 
 # SoundCloud support. Experimental!
-
 Scarlet.hear (/play favourites/) do
   if $bird
     http = EventMachine::HttpRequest.new('http://api.soundcloud.com/resolve.json').get :query => {
