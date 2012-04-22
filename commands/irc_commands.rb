@@ -71,20 +71,6 @@ module IrcBot::IrcCommands
     end
   end
 
-  class RandomCommands < Command
-    commands_scope :return_to_sender
-    access_levels :colors => :dev
-    arities :colors => 0
-
-    on :colors do |data|
-      test = []
-      for i in 0..15
-        test << "#{"%02d" % i}".align(10, :center).irc_color(0, i)
-      end
-      test
-    end
-  end
-
   class BotServ < Command
     commands_scope :return_to_sender
     access_levels :register => :any, :login => :any, :logut => :any, :alias => :registered
@@ -148,26 +134,10 @@ module IrcBot::IrcCommands
 
   class BotCommands < Command
     commands_scope :return_to_sender
-    access_levels :botban => :dev, :botunban => :dev, :botnick => :dev, :eval => :dev, :party => :registered, :toggle => :dev #eval :dev
-    help :botban => "Usage: botban <user> [<user>...]", 
-      :botunban => "Usage: botunban <user> [<user>...]", 
-      :botnick => "Usage: botnick <nick>",
-      :eval => "Usage: eval <ruby code>"
-    arities :botban => 1..Float::INFINITY, :botunban => 1..Float::INFINITY, :botnick => 1, :eval => 1..Float::INFINITY, :party => 0, :toggle => 1
+    access_levels :eval => :dev, :toggle => :dev
+    help :eval => "Usage: eval <ruby code>"
+    arities :eval => 1..Float::INFINITY, :toggle => 1
 
-    on :botban do |data|
-      nicks = data[:params].split(" ")
-      nicks.each {|n| @banned << n }
-      "#{nicks.join(", ")} #{nicks.length == 1 ? "is" : "are"} now banned from using the bot."
-    end
-    on :botunban do |data|
-      nicks = data[:params].split(" ")
-      nicks.each {|n| @banned.delete n }
-      "Bot usage ban was revoked for #{nicks.join(", ")}."
-    end
-    on :botnick do |data|
-      send_cmd :nick, :nick => data[:params].delete(' ')
-    end
     on :eval do |data|
       if !Nick.where(:nick => data[:sender]).empty? && Nick.where(:nick => data[:sender]).first.privileges == 9
         params = data[:params]
@@ -191,9 +161,6 @@ module IrcBot::IrcCommands
       rescue(Exception) => result
         "ERROR: #{result.message}".irc_color(4,0)
       end
-    end
-    on :party do |data|
-      "PARTY! PARTY! YEEEEEEEA BOIIIIIII! ^.^ SO HAPPY, AWESOMEEEEE!"
     end
 
     on :toggle do |data|

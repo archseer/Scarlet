@@ -21,19 +21,24 @@ class Scarlet
   end
 
   def check_access event, privilege
-    if ::IrcBot::User.ns_login? event.server.channels, event.sender.nick # check login
-      nick = ::IrcBot::Nick.where(:nick => event.sender.nick)
-      if nick.count == 0
-        event.server.msg event.return_path, "Registration not found, please register."
-        return false
-      elsif nick.first.privileges < @@clearance[privilege]
-        event.server.msg event.return_path, "Your security clearance does not grant access."
-        return false
+    if !event.server.banned.include? event.sender.nick
+      if ::IrcBot::User.ns_login? event.server.channels, event.sender.nick # check login
+        nick = ::IrcBot::Nick.where(:nick => event.sender.nick)
+        if nick.count == 0
+          event.server.msg event.return_path, "Registration not found, please register."
+          return false
+        elsif nick.first.privileges < @@clearance[privilege]
+          event.server.msg event.return_path, "Your security clearance does not grant access."
+          return false
+        else
+          return true
+        end
       else
-        return true
+        event.server.msg event.return_path, "Test subject #{event.sender.nick} is not logged in with NickServ."
+        return false
       end
     else
-      event.server.msg event.return_path, "Test subject is not logged in with NickServ."
+      event.server.msg event.return_path, "#{event.sender.nick} is banned and cannot use any commands."
       return false
     end
   end

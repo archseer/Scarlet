@@ -1,6 +1,8 @@
+load "modules/irc_bot/lib/output_helper.rb"
 class IrcBot::Bot < EM::Connection
   include EventMachine::Protocols::LineText2
-  attr_accessor :scheduler, :log, :disconnecting
+  include ::OutputHelper
+  attr_accessor :scheduler, :log, :disconnecting, :banned
   attr_reader :channels
 
   def post_init
@@ -157,7 +159,7 @@ class IrcBot::Bot < EM::Connection
   when :"005"
     event.params.each { |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
-        param = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] #convert digit only to digits
+        param = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] # convert digit only to digits
         $config.irc_bot.extensions[s[:token].downcase.to_sym] = param
       else
         $config.irc_bot.extensions[segment.downcase.to_sym] = true
@@ -172,7 +174,7 @@ class IrcBot::Bot < EM::Connection
       next if c == "+" or c == "-" or c == " "
       mode ? @channels[event.params.first][:flags] << c : modes.subtract_once(c)
     end
-  when :'329'
+  when :'329' # Channel created at
     print_console "#{event.params[0]} created at #{Time.at(event.params[1].to_i).std_format}", :light_green
   when :'332' # Channel topic
     message = "Topic for #{event.params.first} is: #{event.params[1]}"
@@ -250,25 +252,6 @@ class IrcBot::Bot < EM::Connection
       arry << (i == 0 ? line.align(width, :center).irc_color(0,1) : line.align(width).irc_color(1,15))
     }
     return arry
-  end
-
-  def print_chat nick, message, silent=false
-    msg = ::IrcBot::Parser.parse_esc_codes message
-    time = "[#{Time.now.strftime("%H:%M")}]"
-    if msg =~ /\x01ACTION\s(.+)\x01/ #detect '/me'
-      puts "#{time} * #{nick} #{$1}".light_blue if !silent
-      @log.info "#{time} * #{nick} #{$1}"
-    else
-      puts "#{time.light_white} <#{nick.light_red}> #{msg}" if !silent
-      @log.info "#{time} <#{nick}> #{::IrcBot::Parser.parse_esc_codes message, true}"
-    end
-  end
-
-  def print_console message, color=nil
-    msg = ::IrcBot::Parser.parse_esc_codes message
-    msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
-    puts color ? msg.colorize(color) : msg
-    @log.info ::IrcBot::Parser.parse_esc_codes message, true
   end
 
   private
