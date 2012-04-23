@@ -3,6 +3,7 @@ Scarlet.hear /google (.+)/ do
   http.errback { reply "ERROR! Fatal mistake." }
   http.callback {
     results = JSON.parse(http.response)
-    reply results['responseData']['results'][0]['url']
+    message = !results['responseData']['results'].empty? ? results['responseData']['results'][0]['url'] : "No search result found."
+    reply message
   }
 end
