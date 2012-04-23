@@ -1,9 +1,11 @@
+# encoding: utf-8
 class Scarlet
   @@listens = {}
   @@clearance = {:any => 0, :registered => 1, :voice => 2, :vip => 3, :super_tester => 6, :op => 7, :dev => 8, :owner => 9}
       
   class << self
     def hear regex, clearance=nil, &block
+      regex = Regexp.new("^#{regex.source}", regex.options)
       @@listens[regex] ||= {}
       @@listens[regex][:clearance] = (clearance || :any)
       @@listens[regex][:callback] = Callback.new(block)
@@ -98,9 +100,20 @@ end
 # Do it. For science.
 
 Scarlet.hear (/give me (:?a\s)cookie/) do
-  msg return_path, "\x01ACTION gives #{sender.nick} a cookie!\x01"
+  reply "\x01ACTION gives #{sender.nick} a cookie!\x01"
 end
 
 Scarlet.hear (/give me (:?a\s)potato/), :dev do
-  msg return_path, "\x01ACTION gives #{sender.nick} a potato!\x01"
+  reply "\x01ACTION gives #{sender.nick} a potato!\x01"
+end
+
+Scarlet.hear (/OMG/) do
+  table = ::IrcBot::InfoTable.new(50)
+  table.addHeader "┌─ TODO #1 ─┐"
+  table.addRow "┌───────── Sup! ────┐"
+  table.addRow "│ Date: sasda       │"
+  table.addRow "│ Added by: a       │"
+  table.addRow "│ Entry: qqqq       │"
+  table.addRow "└───────── Sup! ────┘"
+  table.compile.each {|line| reply line, true }
 end
