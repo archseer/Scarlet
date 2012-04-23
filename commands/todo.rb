@@ -6,9 +6,9 @@ end
 
 # todo delete <id>
 Scarlet.hear /todo delete\s*(\d+)/, :dev do
-  id = params[1].strip.to_i - 1
-  t = ::IrcBot::Todo.sort(:created_at).all[id].delete
-  reply "TODO ##{id+1} was deleted."
+  id = params[1].strip.to_i
+  t = ::IrcBot::Todo.sort(:created_at).all[id-1].delete
+  reply "TODO ##{id} was deleted."
 end
 
 # count todos
@@ -18,17 +18,17 @@ end
 
 # show todo <id>
 Scarlet.hear /show todo\s*(\d+)/ do
-  id = params[1].strip.to_i - 1
+  id = params[1].strip.to_i
   t = ::IrcBot::Todo.sort(:created_at).all[id-1]
   if t
     table = ::IrcBot::InfoTable.new(50)
-    table.addHeader "TODO ##{id+1}"
+    table.addHeader "TODO ##{id}"
     table.addRow "Date: #{t.created_at.std_format}"
     table.addRow "Added by: #{t.by}"
     table.addRow "Entry: #{t.msg}"
     table.compile.each {|line| reply line, true }
   else
-    reply "TODO ##{id+1} could not be found."
+    reply "TODO ##{id} could not be found."
   end
 end
 
