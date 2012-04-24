@@ -105,6 +105,7 @@ module IrcBot
       end
     end
     def addRowO(str,colors=[0,1])
+      addSpace
       @row_override[calc_line] = [str.size,str,colors]
     end
     def row_override(index)
@@ -117,7 +118,7 @@ module IrcBot
       col_table = new
       col_table.clear
       3.times{ col_table.addColumn }
-      col_table.padding = 2
+      col_table.padding = 4
       col_table.addHeader("Speed","IceDragon","Crimson")
       col_table.addRowO("Stuff we like",[1,11])
       col_table.addRow("Hip-Hop","Cookies","Moka~")
