@@ -80,7 +80,7 @@ module IrcBot
     def addSpace()
       @columns.each{|c|c.addSpace()}
     end
-    def calc_line
+    def calc_line()
       @line = @columns.max_by{|c|c.size}
     end  
     def compile()
@@ -98,15 +98,20 @@ module IrcBot
     def row_override(index)
       return nil unless(@row_override.has_key?(index))
       width,str,colors = @row_override[index]
-      str.align(width).irc_color(*colors)
+      str.align(width,:center).irc_color(*colors)
     end
     # // A simple 3 column table
     def self.test()
       col_table = new()
       col_table.clear()
       3.times{col_table.addColumn()}
-      col_table.addHeader("Speed", "Icy", "Crimson")
-      col_table.addRow("")
+      col_table.addHeader("Speed", "IceDragon", "Crimson")
+      col_table.addRowO("Stuff we like",[1,11])
+      col_table.addRow("Hip-Hop", "Cookies", "Moka~")
+      col_table.addRowO("More stuff",[1,11])
+      col_table.addRow("Art", "Moar Cookies", "Anime")
+      col_table.addRowO("End of stuff",[1,0])
+      col_table.compile
     end
   end  
   class InfoTable
