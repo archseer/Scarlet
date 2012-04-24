@@ -97,10 +97,10 @@ module IrcBot
       total_width = @columns.inject(0) { |result,column| result + column.width }
       @row_override.collect do |(key,row_settings)|
         row_settings[0] = total_width
-        [key,value]
+        [key,row_settings]
       end
       row_count = column_rows.max_by{ |a| a.size }.size
-      (0...rows_count).collect do |i| 
+      (0...row_count).collect do |i| 
         row_override(i) || column_rows.collect{|a|a[i]}.join('')
       end
     end
