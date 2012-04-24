@@ -117,3 +117,7 @@ Scarlet.hear (/OMG/) do
   table.addRow "└───────── Sup! ────┘"
   table.compile.each {|line| reply line, true }
 end
+
+Scarlet.hear /test/ do
+  ::IrcBot::ColumnTable.test.each {|line| reply line, true }
+end

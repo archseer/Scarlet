@@ -14,7 +14,7 @@ module IrcBot
         @lines  = []
       end
       def autoWidth
-        @width = @lines.max_by(){|str|str.size}.size
+        @width = @lines.max_by{|str|str.size}.size
         @width += (@width % 2) + 2
         self
       end  
@@ -22,8 +22,8 @@ module IrcBot
         @lines.select!{|a|a[0]!=(type)}
         self
       end
-      def clear()
-        @lines.clear()
+      def clear
+        @lines.clear
         self
       end
       def addLine(type,str,colors)
@@ -36,32 +36,32 @@ module IrcBot
       def addHeader(str="",colors=[0,1])
         addLine(:header,str,colors)
       end
-      def addSpace()
+      def addSpace
         addLine(:space,"",[0,0])
       end
       # // type isnt actually used here.
       # // Its used however for searching, sorting
-      def compile_a()
+      def compile_a
         type,str,cus_color = [nil]*3
         @lines.collect do |row_a|
           type,str,cus_color = row_a
           str.align(@width).irc_color(*cus_color)
         end
       end
-      def size()
+      def size
         @lines.size
       end
     end    
-    def initialize()
+    def initialize
       @columns = []
       @line = 0
       @row_override = {}
     end
-    def clear()
-      @columns.clear()
+    def clear
+      @columns.clear
       self
     end
-    def addColumn()
+    def addColumn
       @columns << Column.new
       self
     end
@@ -77,23 +77,23 @@ module IrcBot
       @columns.each_with_index{|c,i|c.addRow(args[i])}
       self
     end
-    def addSpace()
-      @columns.each{|c|c.addSpace()}
+    def addSpace
+      @columns.each{|c|c.addSpace}
     end
-    def calc_line()
+    def calc_line
       @line = @columns.max_by{|c|c.size}
     end  
-    def compile()
-      col_a = @columns.collect{|c|c.autoWidth().compile_a()}
+    def compile
+      col_a = @columns.collect{|c|c.autoWidth.compile_a}
       tw = @columns.inject(0){|r,c|r+c.width}
-      @row_override.values.eac{|v|v[0]=tw}
-      rows_c= col_a.max_by(){|a|a.size}.size
+      @row_override.values.each{|v|v[0]=tw}
+      rows_c= col_a.max_by{|a|a.size}.size
       (0...rows_c).collect do |i|
         row_override(i) || col_a.inject(""){|r,c|r+c[i]}
       end
     end
     def addRowO(str,colors=[0,1])
-      @row_override[calc_line()] = [str.size,str,colors]
+      @row_override[calc_line] = [str.size,str,colors]
     end
     def row_override(index)
       return nil unless(@row_override.has_key?(index))
@@ -101,7 +101,7 @@ module IrcBot
       str.align(width,:center).irc_color(*colors)
     end
     # // A simple 3 column table
-    def self.test()
+    def self.test
       col_table = new
       col_table.clear
       3.times{col_table.addColumn}
@@ -127,17 +127,17 @@ module IrcBot
       @lines     = []
       @headers   = []
     end
-    def clear()
-      clear_lines()
-      clear_headers()
+    def clear
+      clear_lines
+      clear_headers
       self
     end
-    def clear_headers()
-      @headers.clear()
+    def clear_headers
+      @headers.clear
       self
     end
-    def clear_lines()
-      @lines.clear()
+    def clear_lines
+      @lines.clear
       self
     end
     def addHeader(string)
@@ -147,7 +147,7 @@ module IrcBot
       @lines << string
       self
     end
-    def compile()
+    def compile
       @headers.collect{|s|s.align(@width,:center,@padding).irc_color(*@colors[1])} +
       @lines.collect{|s|s.align(@width,:left,@padding).irc_color(*@colors[0])}
     end
