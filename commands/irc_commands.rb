@@ -52,7 +52,8 @@ module IrcBot::IrcCommands
           # arity check
           if cmd[:arity] && !(cmd[:arity].is_a?(Range) ? cmd[:arity].member?(params.split(" ").length) : params.split(" ").length == cmd[:arity])
             if cmd[:help].is_a?(Array)
-              cmd[:table] ? create_table(cmd[:help], 40).each { |line| msg target, line } : cmd[:help].each { |line| msg target, line }
+              #cmd[:table] ? create_table(cmd[:help], 40).each { |line| msg target, line } : 
+              cmd[:help].each { |line| msg target, line }
             else
               msg target, cmd[:help]
             end

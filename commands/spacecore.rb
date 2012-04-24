@@ -35,7 +35,7 @@ class IrcBot::IrcCommands::SpaceCore < IrcBot::IrcCommands::Command
     "[humming]",
     "Let's go - let's go to space. Let's go to space.",
     "I love space. Love space.",
-    "Atmosphere. Black holes. Astronauts. Nebulas. Jupiter. The Big Dipper.",
+    "Atmosphere. Black holes. Astronauts. Nebulas. Jupiter. The Big Dipper. THE BIG DIPPER!",
     "Orbit. Space orbit. In my spacesuit.",
     "Space...",
     "Ohhh, the Sun. I'm gonna meet the Sun. Oh no! What'll I say? 'Hi! Hi, Sun!' Oh, boy!",

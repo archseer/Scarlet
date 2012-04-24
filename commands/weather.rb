@@ -1,10 +1,10 @@
 # encoding: utf-8
 # TODO if there are mutliple locations, make the user pick. Forecast for today.
 
-Scarlet.hear /weather in (.+)\s?(?:units)?\s?(.*)?/ do
+Scarlet.hear /weather in (.+?)(?:\s*units\s*(.*))?\s*$/ do
   units = 'c'
   units = 'c' if params[2] =~ /celsius/i
-  units = 'f' if params[2] =~ /farenheit/i
+  units = 'f' if params[2] =~ /fahrenheit/i
 
   http = EventMachine::HttpRequest.new('http://xoap.weather.com/search/search').get :query => {'where' => params[1]}
 

@@ -243,17 +243,6 @@ class IrcBot::Bot < EM::Connection
     msg "NickServ", "STATUS #{nick}", true
   end
 
-  def create_table array, width
-    arry = []
-    temp = []
-    array.each {|line| temp << line.word_wrap(width-5)}
-    temp.flatten!
-    temp.each_with_index { |line, i|
-      arry << (i == 0 ? line.align(width, :center).irc_color(0,1) : line.align(width).irc_color(1,15))
-    }
-    return arry
-  end
-
   private
   def check_connection
     puts "Sending PING to server to verify connection..."
