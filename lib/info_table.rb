@@ -87,7 +87,7 @@ module IrcBot
       col_a = @columns.collect{|c|c.autoWidth().compile_a()}
       tw = @columns.inject(0){|r,c|r+c.width}
       @row_override.values.eac{|v|v[0]=tw}
-      rows_c= col_a.max_by(){|a|a.size}
+      rows_c= col_a.max_by(){|a|a.size}.size
       (0...rows_c).collect do |i|
         row_override(i) || col_a.inject(""){|r,c|r+c[i]}
       end
@@ -102,9 +102,9 @@ module IrcBot
     end
     # // A simple 3 column table
     def self.test()
-      col_table = new()
-      col_table.clear()
-      3.times{col_table.addColumn()}
+      col_table = new
+      col_table.clear
+      3.times{col_table.addColumn}
       col_table.addHeader("Speed", "IceDragon", "Crimson")
       col_table.addRowO("Stuff we like",[1,11])
       col_table.addRow("Hip-Hop", "Cookies", "Moka~")
