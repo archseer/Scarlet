@@ -7,7 +7,7 @@ Scarlet.hear (/what\'s playing\??/) do
     if $bird.current_song
       song = $bird.current_song
       message = ["Now playing"]
-      message << (song.title ? "\"#{song.title}\"" : message << "\"#{File.basename(song.file)}\"")
+      message << (song.title ? "\"#{song.title}\"" : "\"#{File.basename(song.file)}\"")
       message << "by \"#{song.artist}\"" if song.artist
       message << "from the album \"#{song.album}\"" if song.album
       reply "#{message.join(' ')}."
