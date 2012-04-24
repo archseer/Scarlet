@@ -14,7 +14,7 @@ module IrcBot
         @lines  = []
       end
       def autoWidth
-        @width = @rows.max_by(){|str|str.size}.size
+        @width = @lines.max_by(){|str|str.size}.size
         @width += (@width % 2) + 2
         self
       end  
