@@ -1,131 +1,105 @@
 ﻿#=========================================#
 # // Date Created : 04/07/2012
-# // Date Modified: 04/23/2012
+# // Date Modified: 04/24/2012
 # // Created by IceDragon (IceDragon200)
 #=========================================#
 module IrcBot
   class ColumnTable
-    VERSION = 0.0001
-    class Column
-      VERSION = 0.0001
-      attr_accessor :width, :padding
-      def initialize(width=50)
-        @width   = width
-        @padding = 2
-        @lines   = []
-      end
-      def autoWidth
-        @width = @lines.max_by{|str|str.size}.size + 2 # // size + spacing
-        @width += (@width % 2) # // Force to even number
-        self
-      end  
-      def clearType(type)
-        @lines.select!{|a|a[0]!=(type)}
-        self
-      end
-      def clear
-        @lines.clear
-        self
-      end
-      def addLine(type,str,colors)
-        @lines << [type,str,colors]
-        self
-      end
-      def addRow(str="",colors=[1,0])
-        addLine(:line,str,colors)
-      end
-      def addHeader(str="",colors=[0,1])
-        addLine(:header,str,colors)
-      end
-      def addSpace
-        addLine(:space,"",[0,0])
-      end
-      # // type isnt actually used here.
-      # // Its used however for searching, sorting
-      def compile_rows
-        type,str,cus_color = [nil]*3
-        @lines.collect do |row_a|
-          type,str,cus_color = row_a
-          str.align(@width,:left,@padding).irc_color(*cus_color)
-        end
-      end
-      def size
-        @lines.size
-      end
-    end    
-    def initialize
-      @columns = []
-      @row_override = {}
-      @line = 0
-      self.padding = 2
+    VERSION = 0.0002
+    def self.mk_table(width,height,&block)
+      Array.new(width) { Array.new(height,&block) }
     end
-    attr_reader :padding
-    def padding=(n)
-      @padding = n
-      @columns.each do |column| column.padding = @padding ; end
+    attr_accessor :padding
+    def initialize(width,height)
+      @cell_color= {}
+      @col_color = {}
+      @row_color = {}
+      @padding = 2
+      resize!(width,height)
+    end
+    attr_reader :width, :height
+    def resize!(width,height)
+      @width, @height = width,height
+      @data = ColumnTable.mk_table(@width,@height) { "" }
     end
     def clear
-      @columns.clear
-      @row_override.clear()
+      @cell_color.clear
+      @col_color.clear
+      @row_color.clear
+      resize!(@width,@height)
+    end
+    def get_cell(x,y)
+      return nil unless(x.between?(0,@width) && y.between?(0,@height))
+      @data[x][y]
+    end
+    def set_cell(x,y,value)
+      return unless(x.between?(0,@width) && y.between?(0,@height))
+      @data[x][y] = value
       self
     end
-    def addColumn
-      @columns << Column.new
+    def set_row(sx,y,*values)
+      values.each_with_index do |str,x|
+        set_cell(sx+x,y,str)
+      end
       self
     end
-    def column(index)
-      @columns[index]
-    end
-    # // String[] args
-    def addHeader(*args)
-      @columns.each_with_index{|c,i|c.addHeader(args[i])}
+    def set_column(x,sy,*values)
+      values.each_with_index do |str,y|
+        set_cell(x,sy+y,str)
+      end
       self
     end
-    def addRow(*args)
-      @columns.each_with_index{|c,i|c.addRow(args[i])}
+    # // color_a = [int background,int text]
+    def cell_color(x,y)
+      @cell_color[[x,y]]
+    end
+    def col_color(x)
+      @col_color[x]
+    end
+    def row_color(y)
+      @row_color[y]
+    end
+    def set_cell_color(x,y,*color_a)
+      @cell_color[[x,y]] = color_a
       self
     end
-    def addSpace
-      @columns.each{|c|c.addSpace}
+    def set_col_color(x,*color_a)
+      @col_color[x] = color_a
       self
     end
-    def calc_line
-      @line = @columns.max_by{|c|c.size}.size
-      @line
-    end  
+    def set_row_color(y,*color_a)
+      @row_color[y] = color_a
+      self
+    end
+    def join_cells(*xys)
+      # // Uggggh
+      self
+    end
+    alias :[] get_cell
+    alias :[]= set_cell
+    # // @data[x] => [String, String, String...]
     def compile
-      column_rows = @columns.collect { |column| column.autoWidth.compile_rows }
-      total_width = @columns.inject(0) { |result,column| result + column.width }
-      @row_override.collect do |(key,row_settings)|
-        row_settings[0] = total_width
-        [key,row_settings]
+      x,y,r,color_a=[nil]*4
+      column_width = Array.new(@width) { |i| @data[i].max_by{|s|s.size}.size+2 }
+      wr,hr = (0...@width), (0...@height)
+      for y in hr
+        wr.inject("") do |r,x|
+          color_a = cell_color(x,y) || col_color(x) || row_color(y) || [0,1]
+          r+@data[x][y].align(column_width[x],:left,@padding).irc_color(*color_a)
+        end
       end
-      row_count = column_rows.max_by{ |a| a.size }.size
-      (0...row_count).collect do |i| 
-        row_override(i) || column_rows.collect{|a|a[i]}.join('')
-      end
-    end
-    def addRowO(str,colors=[0,1])
-      addSpace
-      @row_override[calc_line] = [str.size,str,colors]
-    end
-    def row_override(index)
-      return nil unless(@row_override.has_key?(index))
-      width,str,colors = @row_override[index]
-      str.align(width,:center,@padding).irc_color(*colors)
     end
     # // A simple 3 column table
     def self.test
-      col_table = new
+      col_table = new(3,6)
       col_table.clear
-      3.times{ col_table.addColumn }
       col_table.padding = 2 # // Table padding
-      col_table.addHeader("Speed","IceDragon","Crimson")
-      col_table.addRowO("Stuff we like",[1,11])
-      col_table.addRow("Hip-Hop","Cookies","Moka~")
-      col_table.addRowO("More stuff",[1,11])
-      col_table.addRow("Art","Moar Cookies","Anime")
-      col_table.addRowO("End of stuff",[1,0])
+      col_table.set_row(0,0,"Speed","IceDragon","Crimson").set_row_color(0,1,0)
+      #col_table.join_cells([0,1],[1,1],[2,1]).set_cell(0,1,"Stuff we like")
+      col_table.set_row(0,2,"Hip-Hop","Cookies","Moka~").set_row_color(2,0,1)
+      #col_table.join_cells([0,3],[1,3],[2,3]).set_cell(0,3,"More stuff")
+      col_table.set_row(0,4,"Art","Moar Cookies","Anime").set_row_color(4,0,1)
+      #col_table.join_cells([0,5],[1,5],[2,5]).set_cell(0,5,"End of stuff")
       col_table.compile
     end
   end  
