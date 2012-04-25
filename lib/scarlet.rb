@@ -14,7 +14,11 @@ class Scarlet
 
   def initialize server, event
     event.server = server
-    event.params[0] = event.params[0].split(' ').drop(1).join(' ')
+    if event.params[0].split(' ')[0] =~ /#{$config.irc_bot.nick}[:,]?\s*/i
+      event.params[0] = event.params[0].split(' ').drop(1).join(' ')
+    elsif event.params[0].start_with? "!" #control char
+      event.params[0].slice!(0)
+    end
     @@listens.keys.each {|key|
       if matches = key.match(event.params.first)
         @@listens[key][:callback].run event.dup, matches if check_access(event, @@listens[key][:clearance])
