@@ -2,6 +2,7 @@ base_path = File.expand_path File.dirname(__FILE__)
 load base_path + '/../../../../mpd-ruby/cardinal.rb'
 $bird = Cardinal.new
 
+# what's playing? - Displays the song playing on owner's computer.
 Scarlet.hear (/what\'s playing\??/) do
   if $bird
     if $bird.current_song
@@ -18,7 +19,7 @@ Scarlet.hear (/what\'s playing\??/) do
     reply "Cardinal is not running at the moment."
   end
 end
-
+# next song - Changes the song on owner's computer.
 Scarlet.hear (/(?:play )?next(?: song[.!]?)?/), :owner do
   if $bird
     $bird.next and reply "...and next song."
@@ -26,7 +27,7 @@ Scarlet.hear (/(?:play )?next(?: song[.!]?)?/), :owner do
     reply "Cardinal is not running at the moment."
   end
 end
-
+# volume <number> - Changes the volume on owner's computer.
 Scarlet.hear (/volume (.*)/), :owner do
   if $bird
     $bird.volume = params[1].to_i

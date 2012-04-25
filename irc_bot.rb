@@ -41,4 +41,7 @@ end
 base_path = File.expand_path File.dirname(__FILE__)
 Modules.load_models base_path
 Modules.load_libs base_path
-Dir["#{base_path}/commands/**/*.rb"].each {|path| load path }
+Dir["#{base_path}/commands/**/*.rb"].each {|path| 
+  load path 
+  Scarlet.parse_help path
+}

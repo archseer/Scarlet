@@ -89,25 +89,6 @@ module IrcBot::IrcCommands
     end
   end
 
-  class HelpCommand < Command
-    commands_scope :user
-    access_levels :help => :any
-    arities :help => 0..Float::INFINITY
-    generate_table 70
-
-    on :help do |data|
-      if data[:params].blank?
-        hlp = ["Help for [Bot]"]
-        cmd = []
-        devcmd =[]
-        Commands.keys.each { |k| Commands[k.to_sym][:access_level] ? (Commands[k.to_sym][:access_level] > 1 ? devcmd << k.to_s : cmd << k.to_s) : cmd << k}
-        ["Help for [Bot]", "Devel. commands available: #{devcmd.join(" ")}", "Commands available: #{cmd.join(" ")}"]
-      else
-        Commands[data[:params].to_sym][:help]
-      end
-    end
-  end
-
   class BotCommands < Command
     commands_scope :return_to_sender
     access_levels :eval => :dev, :toggle => :dev

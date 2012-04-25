@@ -1,3 +1,4 @@
+# google <terms> - Returns the first result on google matching <terms>.
 Scarlet.hear /google (.+)/ do
   http = EventMachine::HttpRequest.new('http://ajax.googleapis.com/ajax/services/search/web').get :query => {'v' => '1.0', 'q' => params[1]}
   http.errback { reply "ERROR! Fatal mistake." }

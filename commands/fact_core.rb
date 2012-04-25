@@ -1,3 +1,4 @@
+# fact core - Returns a random quote from Portal 2's Fact core.
 Scarlet.hear (/fact core/) do
 facts = [
 "The situation you are in is very dangerous.",
