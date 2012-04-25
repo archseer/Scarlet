@@ -12,7 +12,7 @@ Scarlet.hear (/when does next (.+?)(?: episode)? air\??/), :registered do
       elsif info[:status] == "Ended"
         reply "The series has ended."
       else
-        reply "Next air date is unknown. Check back in a few days."
+        reply "Next air date is unknown."
       end
     else
       reply "Series \"#{params[1]}\" not found."
