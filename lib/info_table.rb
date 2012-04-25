@@ -15,8 +15,8 @@ module IrcBot
         @lines   = []
       end
       def autoWidth
-        @width = @lines.max_by{|str|str.size}.size
-        @width += (@width % 2) + (@padding*2)
+        @width = @lines.max_by{|str|str.size}.size + 2 # // size + spacing
+        @width += (@width % 2) # // Force to even number
         self
       end  
       def clearType(type)
@@ -90,7 +90,8 @@ module IrcBot
       self
     end
     def calc_line
-      @line = @columns.max_by{|c|c.size}
+      @line = @columns.max_by{|c|c.size}.size
+      @line
     end  
     def compile
       column_rows = @columns.collect { |column| column.autoWidth.compile_rows }
@@ -118,7 +119,7 @@ module IrcBot
       col_table = new
       col_table.clear
       3.times{ col_table.addColumn }
-      col_table.padding = 4
+      col_table.padding = 2 # // Table padding
       col_table.addHeader("Speed","IceDragon","Crimson")
       col_table.addRowO("Stuff we like",[1,11])
       col_table.addRow("Hip-Hop","Cookies","Moka~")
