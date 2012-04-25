@@ -20,7 +20,7 @@ module IrcBot
     attr_reader :width, :height
     def resize!(width,height)
       @width, @height = width,height
-      @data = ColumnTable.mk_table(@width,@height) { "" }
+      @data = ColumnTable.mk_table(@width,@height) { " " }
     end
     def clear
       @cell_color.clear
