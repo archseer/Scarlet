@@ -52,7 +52,6 @@ module IrcBot::IrcCommands
           # arity check
           if cmd[:arity] && !(cmd[:arity].is_a?(Range) ? cmd[:arity].member?(params.split(" ").length) : params.split(" ").length == cmd[:arity])
             if cmd[:help].is_a?(Array)
-              #cmd[:table] ? create_table(cmd[:help], 40).each { |line| msg target, line } : 
               cmd[:help].each { |line| msg target, line }
             else
               msg target, cmd[:help]
@@ -62,7 +61,6 @@ module IrcBot::IrcCommands
             result = (self.instance_exec data, &block) #here we exec the function
 
             if result.is_a?(Array) #result processing
-              #cmd[:table] ? create_table(result, cmd[:table]).each { |line| msg target, line, true } : 
               result.each { |line| msg target, line, true }
             elsif result.is_a?(String)
               msg target, result
@@ -75,21 +73,8 @@ module IrcBot::IrcCommands
 
   class BotServ < Command
     commands_scope :return_to_sender
-    access_levels :register => :any, :login => :any, :logut => :any, :alias => :registered
-    arities :register => 0, :login => 0, :logout => 0
-
-    on :register do |data|
-      if User.ns_login? @channels, data[:sender]
-        if Nick.where(:nick => data[:sender]).empty?
-          nick = Nick.new(:nick => data[:sender]).save!
-          "Successfuly registered with the bot."
-        else
-          "ERROR: You are already registered!".irc_color(4,0)
-        end
-      else
-        "You must login with NickServ first!"
-      end
-    end
+    access_levels :login => :any
+    arities :login => 0
 
     on :login do |data|
       if !Nick.where(:nick => data[:sender]).empty?
@@ -101,17 +86,6 @@ module IrcBot::IrcCommands
       else
         notice data[:sender], "#{data[:sender]}, you do not have an account yet. Type !register."
       end
-    end
-
-    on :logout do |data|
-      if User.ns_login? @channels, data[:sender]
-        User.ns_logout @channels, data[:sender]
-        notice data[:sender], "#{data[:sender]}, you are now logged out."
-      end
-    end
-
-    on :alias do |data|
-      # implement a command where we can 'alias' nicknames
     end
   end
 

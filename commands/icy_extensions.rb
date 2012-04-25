@@ -130,19 +130,6 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     @then_klik   = Time.now
     @klik
   end
-  # // Poke 1.002
-  SILENT_POKE = true
-  hlp = hlpF "!poke <string name>"
-  new_command(:poke,:user,:registered,hlp,1) do |data|
-    user, params = data.get_values(:sender,:params)
-    unless(respond_to?(:notice))
-      notice user, 'Poke disabled (unabled to complete command)'
-    else
-      notice params.to_s, "#{user} has poked you"
-      notice user, "Poke was successful!" unless(SILENT_POKE)
-    end
-    nil
-  end
   # // Memo 1.009
   memo_size,memo_padd = 40, 2
   MEMO_MSG = {
