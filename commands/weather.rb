@@ -1,6 +1,6 @@
 # encoding: utf-8
-# TODO if there are mutliple locations, make the user pick. Forecast for today.
 
+# weather in <location> units <unit> - Displays the current weather stats for <location> in <units>.
 Scarlet.hear /weather in (.+?)(?:\s*units\s*(.*))?\s*$/ do
   units = 'c'
   units = 'c' if params[2] =~ /celsius/i

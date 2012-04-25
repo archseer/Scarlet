@@ -1,6 +1,7 @@
 # encoding: utf-8
 class Scarlet
   @@listens = {}
+  @@help = []
   @@clearance = {:any => 0, :registered => 1, :voice => 2, :vip => 3, :super_tester => 6, :op => 7, :dev => 8, :owner => 9}
       
   class << self
@@ -10,11 +11,30 @@ class Scarlet
       @@listens[regex][:clearance] = (clearance || :any)
       @@listens[regex][:callback] = Callback.new(block)
     end
+
+    def parse_help file
+      File.readlines(file).each do |line|
+        next unless line[0] == '#'
+        next if line.match 'encoding'
+        next unless line.match '-'
+        @@help << line[2..line.length].strip
+      end
+    end
+
+    def get_help command=nil
+      return @@help.sort unless command
+      regex = Regexp.new command, Regexp::IGNORECASE
+      return @@help.select {|h| h.match regex}.sort
+    end
   end
 
   def initialize server, event
     event.server = server
-    event.params[0] = event.params[0].split(' ').drop(1).join(' ')
+    if event.params[0].split(' ')[0] =~ /#{$config.irc_bot.nick}[:,]?\s*/i
+      event.params[0] = event.params[0].split(' ').drop(1).join(' ')
+    elsif event.params[0].start_with? "!" #control char
+      event.params[0].slice!(0)
+    end
     @@listens.keys.each {|key|
       if matches = key.match(event.params.first)
         @@listens[key][:callback].run event.dup, matches if check_access(event, @@listens[key][:clearance])
