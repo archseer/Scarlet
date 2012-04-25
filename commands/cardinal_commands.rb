@@ -19,7 +19,7 @@ Scarlet.hear (/what\'s playing\??/) do
   end
 end
 
-Scarlet.hear (/(?:play )?next(?: song[.!]?)?/) do
+Scarlet.hear (/(?:play )?next(?: song[.!]?)?/), :owner do
   if $bird
     $bird.next and reply "...and next song."
   else
@@ -27,7 +27,7 @@ Scarlet.hear (/(?:play )?next(?: song[.!]?)?/) do
   end
 end
 
-Scarlet.hear (/volume (.*)/) do
+Scarlet.hear (/volume (.*)/), :owner do
   if $bird
     $bird.volume = params[1].to_i
     reply "I have changed the volume for you."
@@ -37,7 +37,7 @@ Scarlet.hear (/volume (.*)/) do
 end
 
 # SoundCloud support. Experimental!
-Scarlet.hear (/play favourites/) do
+Scarlet.hear (/play favourites/), :owner do
   if $bird
     http = EventMachine::HttpRequest.new('http://api.soundcloud.com/resolve.json').get :query => {
       'url' => "http://soundcloud.com/speed-4/favorites", 'client_id' => 'YOUR_CLIENT_ID'}, :redirects => 1

@@ -7,3 +7,7 @@ end
 Scarlet.hear (/party/), :registered do
   reply "PARTY! PARTY! YEEEEEEEA BOIIIIIII! ^.^ SO HAPPY, AWESOMEEEEE!"
 end
+
+Scarlet.hear (/poke (.+)/), :registered do
+  notice params[1], "#{sender.nick} has poked you."
+end
