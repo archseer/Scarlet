@@ -83,10 +83,10 @@ module IrcBot
       column_width = Array.new(@width) { |i| @data[i].max_by{|s|s.size}.size+2 }
       wr,hr = (0...@width), (0...@height)
       hr.collect do |y|
-        wr.inject("") do |r,x|
+        wr.inject("") { |r,x|
           color_a = cell_color(x,y) || col_color(x) || row_color(y) || [0,1]
-          r+@data[x][y].align(column_width[x],:left,@padding).irc_color(*color_a)
-        end
+          r+@data[x][y].align(column_width[x],:left,@padding)#.irc_color(*color_a)
+        } + "[END]"
       end
     end
     # // A simple 3 column table

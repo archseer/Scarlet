@@ -1,11 +1,12 @@
 #=========================================#
 # // Date Created : 04/07/2012
-# // Date Modified: 04/25/2012
+# // Date Modified: 04/26/2012
 # // Created by IceDragon (IceDragon200)
 #=========================================#
 # // ● Current Commands
 #=========================================#
 # // icver, klik, dice, coin, memo
+# // time, hb
 #=========================================#
 # // Added functions
 class ::Hash
@@ -15,7 +16,7 @@ class ::Hash
 end
 # // Commands
 class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
-  VERSION = "V0.1020"
+  VERSION = "V0.1021"
   @@help_table = ::IrcBot::InfoTable.new(60)
   def self.mauthor
     "IceDragon"
@@ -78,6 +79,16 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     @klik        = Time.now - @then_klik
     @then_klik   = Time.now
     @klik
+  end
+  # // Time 1.000
+  hlp = hlpF "!time"
+  new_command(:time,:return_to_sender,:dev,hlp,0) do |data|
+    Time.now
+  end
+  # // HB 1.000 - Happy Birthday
+  hlp = hlpF "!hb"
+  new_command(:hb,:return_to_sender,:dev,hlp,0) do |data|
+    format("Happy Birthday %s!", data[:sender])
   end
   # // Memo 1.009
   memo_size,memo_padd = 40, 2
