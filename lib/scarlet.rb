@@ -55,6 +55,8 @@ class Scarlet
         else
           return true
         end
+      elsif @@clearance[privilege] == 0 # if it doesn't need clearance (:any)
+        return true
       else
         event.server.msg event.return_path, "Test subject #{event.sender.nick} is not logged in with NickServ."
         return false
