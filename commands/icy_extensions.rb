@@ -86,9 +86,9 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
     Time.now
   end
   # // HB 1.000 - Happy Birthday
-  hlp = hlpF "!hb"
-  new_command(:hb,:return_to_sender,:dev,hlp,0) do |data|
-    format("Happy Birthday %s!", data[:sender])
+  hlp = hlpF "!hb <recipient>"
+  new_command(:hb,:return_to_sender,:dev,hlp,1) do |data|
+    format("Happy Birthday %s!", data[:params])
   end
   # // Memo 1.009
   memo_size,memo_padd = 40, 2
