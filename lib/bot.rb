@@ -76,7 +76,7 @@ class IrcBot::Bot < EM::Connection
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
       }
     end
-    Scarlet.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /#{$config.irc_bot.nick}[:,]?\s*/i) || event.params[0].start_with?("!")
+    Scarlet.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{$config.irc_bot.nick}[:,]?\s*/i) || event.params[0].start_with?("!")
   when :notice # Automatic replies must never be sent in response to a NOTICE message.
     if event.sender.nick == "NickServ" && ns_params = event.params.first.match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
       if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
