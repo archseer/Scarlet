@@ -1,48 +1,11 @@
 #=========================================#
 # // Date Created : 04/07/2012
-# // Date Modified: 04/18/2012
+# // Date Modified: 04/25/2012
 # // Created by IceDragon (IceDragon200)
 #=========================================#
 # // ● Current Commands
 #=========================================#
-# // icver, klik, dice, coin, poke, memo
-# // silence, relay
-#=========================================#
-# // ● Change Log
-#=========================================#
-# // ■(04/09/2012)
-# //    Commands
-# //      memo (changes)
-# //        memoF replaced by memo_msg
-# //    Functions
-# //      get_save_contents()
-# //      load_from(contents)
-# //
-# // ■(04/10/2012)
-# //    Commands
-# //      poke
-# // ■(04/14/2012) V0.101B
-# //    Commands 
-# //      memo (changes)
-# //        added "REM" parameter
-# //        fixed "CLEAR"
-# // ■(04/15/2012) V0.101C
-# //    Commands
-# //      memo (changes) 1.007
-# //        updated help
-# //      icver (Added)
-# //      poke (changes) 1.001 
-# //        Notifies of poke success
-# // ■(04/17/2012) V0.101D
-# //    Little house keeping
-# //      memo, icver
-# // ■(04/18/2012) V0.101E
-# //    Commands
-# //      silence (added)
-# //      relay   (added)
-# // ■(04/22/2012) V0.101F
-# //    Commands
-# //      memo (edit)
+# // icver, klik, dice, coin, memo
 #=========================================#
 # // Added functions
 class ::Hash
@@ -52,7 +15,7 @@ class ::Hash
 end
 # // Commands
 class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
-  VERSION = "V0.101F"
+  VERSION = "V0.1020"
   @@help_table = ::IrcBot::InfoTable.new(60)
   def self.mauthor
     "IceDragon"
@@ -81,21 +44,7 @@ class ::IrcBot::IrcCommands::IcyCommands < ::IrcBot::IrcCommands::Command
   new_command(:icver,:return_to_sender,:dev,hlp,0) do |data|
     ex = ::IrcBot::IrcCommands::IcyCommands
     format("IcyCommands %s by %s", ex::VERSION, ex.mauthor)
-  end
-  # // Silence 1.000 - Disabled
-  #hlp = hlpF "!silence"
-  #new_command(:silence,:return_to_sender,:dev,hlp,0) do |data|
-  #  $config.irc_bot[:relay] = false
-  #  notice data[:sender], "Silenced"
-  #  nil
-  #end  
-  # // Relay 1.000 - Disabled
-  #hlp = hlpF "!relay"
-  #new_command(:relay,:return_to_sender,:dev,hlp,0) do |data|
-  #  $config.irc_bot[:relay] = true
-  #  notice data[:sender], "Relay on"
-  #  nil
-  #end  
+  end 
   # // Dice 1.005
   DICE_LIMIT = 12
   hlp = hlpF "!dice <int sides> [<int dies>]"
