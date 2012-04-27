@@ -80,7 +80,7 @@ module IrcBot
     # // @data[x] => [String, String, String...]
     def compile
       x,y,r,color_a=[nil]*4
-      column_width = Array.new(@width) { |i| @data[i].max_by{|s|s.size}.size }
+      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size }
       wr,hr = (0...@width), (0...@height)
       hr.collect do |y|
         wr.inject("") { |r,x|
