@@ -7,8 +7,8 @@ module IrcBot
   module IcyCommands
     # klik - Is a one click stopwatch
     Scarlet.hear /klik/i, :registered do
-      n = ::IrcBot::IrcCommands::IcyCommands.klik.round(2)
-      reply format("KLIK! %0.2f %s", n, (n == 1 ? "sec" : "secs"))
+      n = ::IrcBot::IcyCommands.klik.round(2)
+      reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
     end
     def self.klik
       @klik ||= [Time.now,Time.now]
@@ -18,11 +18,11 @@ module IrcBot
     end
     # time - Prints the current owners time
     Scarlet.hear /time/i, :registered do
-      reply Time.now
+      reply Time.now.std_format
     end
     # hb <name> - Prints a happy birthday to <name>
     Scarlet.hear /hb (\S+)/i, :registered do
-      reply format("Happy Birthday %s!", params[0])
+      reply "Happy Birthday #{params[1]}!"
     end
   end
 end
