@@ -87,7 +87,7 @@ module IrcBot
           color_a = cell_color(x,y) || col_color(x) || row_color(y) || [0,1]
           r+@data[x][y].align(column_width[x],:left,@padding).irc_color(*color_a)
         } #+ "[END]"
-      end + column_width.collect{|i|i.to_s}.join(" ")
+      end + (column_width.collect{|i|i.to_s})
     end
     # // A simple 3 column table
     def self.test
