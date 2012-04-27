@@ -71,54 +71,10 @@ module IrcBot::IrcCommands
     end
   end
 
-  class BotServ < Command
-    commands_scope :return_to_sender
-    access_levels :login => :any
-    arities :login => 0
-
-    on :login do |data|
-      if !Nick.where(:nick => data[:sender]).empty?
-        if !User.ns_login? @channels, data[:sender]
-          check_nick_login data[:sender]
-        else
-          notice data[:sender], "#{data[:sender]}, you are already logged in!"
-        end
-      else
-        notice data[:sender], "#{data[:sender]}, you do not have an account yet. Type !register."
-      end
-    end
-  end
-
   class BotCommands < Command
     commands_scope :return_to_sender
-    access_levels :eval => :dev, :toggle => :dev
-    help :eval => "Usage: eval <ruby code>"
-    arities :eval => 1..Float::INFINITY, :toggle => 1
-
-    on :eval do |data|
-      if !Nick.where(:nick => data[:sender]).empty? && Nick.where(:nick => data[:sender]).first.privileges == 9
-        params = data[:params]
-      else
-        safe = true
-        names_list = ["a poopy-head", "a meanie", "a retard", "an idiot"]
-        if data[:params].match(/(.*(Thread|Process|File|Kernel|system|Dir|IO|fork|while\s*true|require|load|ENV|%x|\`|sleep|Modules|Socket|send|undef|\/0|INFINITY|loop|variable_set|\$|@|Nick.*privileges.*save!|disconnecting\s*\=\s*true).*)/) 
-          params = "\"#{data[:sender]} is #{names_list[rand(4)-1]}.\"" 
-        else 
-          params = data[:params]
-        end
-        params.taint
-      end
-
-      begin
-        t = Thread.new {
-          Thread.current[:output] = "==> #{eval(params)}"
-        }
-        t.join(10)
-        t[:output]
-      rescue(Exception) => result
-        "ERROR: #{result.message}".irc_color(4,0)
-      end
-    end
+    access_levels :toggle => :dev
+    arities :toggle => 1
 
     on :toggle do |data|
       cmd = data[:params].strip.to_sym

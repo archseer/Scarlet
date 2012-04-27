@@ -1,4 +1,17 @@
-# logout - Logs the user out from the bot.
+# login - Logs the user into his bot account.
+Scarlet.hear /login/ do
+  if !::IrcBot::Nick.where(:nick => sender.nick).empty?
+    if !::IrcBot::User.ns_login? server.channels, sender.nick
+      server.check_nick_login sender.nick
+    else
+      notice sender.nick, "#{sender.nick}, you are already logged in!"
+    end
+  else
+    notice sender.nick, "#{sender.nick}, you do not have an account yet. Type !register."
+  end
+end
+
+# logout - Logs the user out from his bot account.
 Scarlet.hear /logout/ do
   if ::IrcBot::User.ns_login? server.channels, sender.nick
     ::IrcBot::User.ns_logout server.channels, sender.nick
