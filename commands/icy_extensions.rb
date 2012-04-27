@@ -35,22 +35,19 @@ module IrcBot
       count, = params[0].to_i
       reply count.times.collect{|i|rand(2) == 0 ? "O" : "X"}.inspect.gsub('"',"")
     end
-    VERSIONS["KLIK"] = "2.0000"
     Scarlet.hear /klik/i do
       n = ::IrcBot::IrcCommands::IcyCommands.klik.round(2)
       reply format("KLIK! %0.2f %s", n, (n == 1 ? "sec" : "secs"))
     end
-    def self.klik()
-      @then_klik ||= Time.now
-      @klik        = Time.now - @then_klik
-      @then_klik   = Time.now
-      @klik
+    def self.klik
+      @klik ||= [Time.now,Time.now]
+      @klik[0] = Time.now - @klik[1]
+      @klik[1] = Time.now
+      @klik[0]
     end
-    VERSIONS["TIME"]= "2.0000"
     Scarlet.hear /time/i do
       Time.now
     end
-    VERSIONS["HB"]= "2.0000"
     Scarlet.hear /hb (\S+)/i
       reply format("Happy Birthday %s!", params[0])
     end
