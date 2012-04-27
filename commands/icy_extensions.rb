@@ -48,7 +48,7 @@ module IrcBot
     Scarlet.hear /time/i do
       Time.now
     end
-    Scarlet.hear /hb (\S+)/i
+    Scarlet.hear /hb (\S+)/i do
       reply format("Happy Birthday %s!", params[0])
     end
     memo_size,memo_padd = 40, 2
