@@ -4,6 +4,7 @@ class ::IrcBot::Nick
   key :nick,            String
   key :aliases,         Array
   key :privileges,      Integer, :default => 1
+  key :win_points,      Integer, :default => 0
   timestamps!
   many :memos
 end
