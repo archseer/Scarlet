@@ -12,5 +12,17 @@ Scarlet.hear (/unban (.+)/), :dev do
 end
 # rename <nick> - Renames the bot to nick.
 Scarlet.hear (/rename\s+(.+)/), :dev do
-  send_cmd :nick, :nick => params[1].chomp
+  send_cmd :nick, :nick => params[1].strip
+end
+
+# filter <phrase> - Bans a specific command phrase.
+# This could be either a single word, or a spaced phrase. 
+# If it's a phrase, it looks for the entire phrase and NOT just
+# individual words.
+Scarlet.hear (/filter (.+)/), :dev do
+  Scarlet.filter << params[1].strip
+end
+# unfilter <phrase> - Unbans a specific command phrase.
+Scarlet.hear (/unfilter (.+)/), :dev do
+  Scarlet.filter.delete params[1].strip
 end

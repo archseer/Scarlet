@@ -13,7 +13,7 @@ Scarlet.hear (/poke (.+)/), :registered do
   notice params[1], "#{sender.nick} has poked you."
 end
 
-Scarlet.hear (/eval (.+)$/), :dev do
+Scarlet.hear (/eval (.+)/), :dev do
   if !::IrcBot::Nick.where(:nick => sender.nick).empty? && ::IrcBot::Nick.where(:nick => sender.nick).first.privileges == 9
     parm = params[1]
   else

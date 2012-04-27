@@ -2,11 +2,12 @@
 class Scarlet
   @@listens = {}
   @@help = []
+  @@filter = []
   @@clearance = {:any => 0, :registered => 1, :voice => 2, :vip => 3, :super_tester => 6, :op => 7, :dev => 8, :owner => 9}
       
   class << self
     def hear regex, clearance=nil, &block
-      regex = Regexp.new("^#{regex.source}", regex.options)
+      regex = Regexp.new("^#{regex.source}$", regex.options)
       @@listens[regex] ||= {}
       @@listens[regex][:clearance] = (clearance || :any)
       @@listens[regex][:callback] = Callback.new(block)
@@ -26,6 +27,10 @@ class Scarlet
       regex = Regexp.new command, Regexp::IGNORECASE
       return @@help.select {|h| h.match regex}.sort
     end
+
+    def filter
+      @@filter
+    end
   end
 
   def initialize server, event
@@ -35,11 +40,21 @@ class Scarlet
     elsif event.params[0].start_with? "!" #control char
       event.params[0].slice!(0)
     end
+
+    if !@@filter.empty? and !event.params[0].start_with?("unfilter") and word = compile_filter.match(event.params[0])
+      event.server.msg event.return_path, "Cannot execute because \"#{word}\" is blocked."
+      return
+    end
+
     @@listens.keys.each {|key|
       if matches = key.match(event.params.first)
         @@listens[key][:callback].run event.dup, matches if check_access(event, @@listens[key][:clearance])
       end
     }
+  end
+
+  def compile_filter
+    Regexp.new "(#{@@filter.join("|")})"
   end
 
   def check_access event, privilege
