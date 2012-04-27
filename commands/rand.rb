@@ -4,7 +4,7 @@
 # // Created by IceDragon (IceDragon200)
 #=========================================#
 module IrcBot
-  module IrcCommands::IcyCommands
+  module IcyCommands
     # klik - Is a one click stopwatch
     Scarlet.hear /klik/i, :registered do
       n = ::IrcBot::IrcCommands::IcyCommands.klik.round(2)

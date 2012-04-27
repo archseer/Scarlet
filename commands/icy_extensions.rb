@@ -6,7 +6,7 @@
 # // ● Current Commands in VERSIONS
 #=========================================#
 module IrcBot
-  module IrcCommands::IcyCommands
+  module IcyCommands
     VERSIONS = {
       "IC"      => "V0.2000",
       "VERSION" => "V2.0000",
@@ -32,9 +32,9 @@ module IrcBot
       if(n)
         n.win_points += 1
         n.save!
-        notice sender.nick, "You gave #{n.nick} a win!" 
+        notice sender.nick, "You gave #{sender.nick} a win!" 
       else
-        notice sender.nick, "You have #{sender.win_points} win points" 
+        notice sender.nick, "You have #{n.win_points} win points" 
       end
     end
   end

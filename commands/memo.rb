@@ -4,7 +4,7 @@
 # // Created by IceDragon (IceDragon200)
 #=========================================#
 module IrcBot
-  module IrcCommands::IcyCommands
+  module IcyCommands
     # // Memo :3
     memo_size,memo_padd = 40, 2
     MEMO_MSG = {

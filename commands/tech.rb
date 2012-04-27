@@ -4,7 +4,7 @@
 # // Created by IceDragon (IceDragon200)
 #=========================================#
 module IrcBot
-  module IrcCommands::IcyCommands
+  module IcyCommands
     # dice <x>d<y> - rolls <x> dies with <y> sides
     Scarlet.hear /dice (\d+)d(\d+)/i, :any do
       sides, diecoun = params[0].to_i, params[1].to_i
