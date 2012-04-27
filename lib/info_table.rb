@@ -78,16 +78,22 @@ module IrcBot
     alias :[] get_cell
     alias :[]= set_cell
     # // @data[x] => [String, String, String...]
+    $iftb_log = {}
     def compile
-      x,y,r,color_a=[nil]*4
-      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size }
+      $iftb_log.clear()
+      x,y,r,color_a,width=[nil]*5
+      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size+2 }
       wr,hr = (0...@width), (0...@height)
+      $iftb_log[:widths] = [] # // key = y ; value = width
+      $iftb_log[:strings]= {}
       hr.collect do |y|
-        wr.inject("") { |r,x|
+        (wr.collect do |x|
           color_a = cell_color(x,y) || col_color(x) || row_color(y) || [0,1]
-          r+@data[x][y].align(column_width[x],:left,@padding).irc_color(*color_a)
-        } #+ "[END]"
-      end + (column_width.collect{|i|i.to_s})
+          width = column_width[x]
+          ($iftb_log[:widths][y]||=[]).push width
+          @data[x][y].align(width,:left,@padding).irc_color(*color_a) + "||"
+        end).join("")
+      end
     end
     # // A simple 3 column table
     def self.test
