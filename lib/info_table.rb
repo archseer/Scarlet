@@ -80,7 +80,7 @@ module IrcBot
     # // @data[x] => [String, String, String...]
     def compile
       x,y,r,color_a,width=[nil]*5
-      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size+@padding }
+      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size+@padding+(@padding%2) }
       wr,hr = (0...@width), (0...@height)
       hr.collect do |y|
         (wr.collect do |x|
