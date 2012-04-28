@@ -44,5 +44,4 @@ Scarlet.hear (/download soundcloud favourites/), :owner do
       }
     }
   }
-
 end

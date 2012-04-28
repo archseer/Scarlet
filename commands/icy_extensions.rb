@@ -30,10 +30,10 @@ Scarlet.hear /win[ ]*(\S*)/i, :registered do
   if(n)
     n.win_points += 1
     n.save!
-    notice sender.nick, "You gave #{sender.nick} a win!" 
+    reply "#{sender.nick} gave #{params[1]} a win!" 
   else
     wins = ::IrcBot::Nick.where(:nick=> sender.nick).first.win_points
-    notice sender.nick, "You have #{wins} #{"win point".pluralize.(n.wins)}" 
+    reply "#{sender.nick} has #{wins} #{"win point".pluralize(wins)}." 
   end
 end
 #=■==========================================================================■=#

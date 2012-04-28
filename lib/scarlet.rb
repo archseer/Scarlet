@@ -122,18 +122,6 @@ class Scarlet
 
 end
 
-# Quick explanation: inside 'hear' blocks, you can use any of server's send commands
-# (msg, notice, send, send_cmd). Also, you have full access to @event's variables
-# even more, you can (and should) omit the '@event' and just use the vars directly.
-# (i.e. @event.sender.nick => sender.nick,).
-
-# params is a MatchData object. params or params[0] will return the full string.
-# params[n] will return n-th match capture.
-
-# return_path is a preset for sending a message back where it came from, either
-# a channel or a private message. No need to use it directly, just use the 
-# 'reply' command
-
 # Do it. For science.
 
 Scarlet.hear (/give me (:?a\s)cookie/) do

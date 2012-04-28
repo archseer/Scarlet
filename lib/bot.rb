@@ -29,7 +29,6 @@ class IrcBot::Bot < EM::Connection
 
   def unbind
     @check_connection_timer.cancel if @check_connection_timer
-    puts "DEBUG: Socket has unbound.".red
     if !@disconnecting
       print_console "Connection to server lost.", :light_red
       reconnect $config.irc_bot.server, $config.irc_bot.port
