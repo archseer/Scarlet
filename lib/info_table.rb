@@ -78,20 +78,15 @@ module IrcBot
     alias :[] get_cell
     alias :[]= set_cell
     # // @data[x] => [String, String, String...]
-    $iftb_log = {}
     def compile
-      $iftb_log.clear()
       x,y,r,color_a,width=[nil]*5
-      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size+2 }
+      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size+4 }
       wr,hr = (0...@width), (0...@height)
-      $iftb_log[:widths] = [] # // key = y ; value = width
-      $iftb_log[:strings]= {}
       hr.collect do |y|
         (wr.collect do |x|
           color_a = cell_color(x,y) || col_color(x) || row_color(y) || [0,1]
           width = column_width[x]
-          ($iftb_log[:widths][y]||=[]).push width
-          @data[x][y].align(width,:left,@padding).irc_color(*color_a) + "||"
+          @data[x][y].align(width,:left,@padding)+"||"#.irc_color(*color_a) + "||"
         end).join("")
       end
     end
@@ -99,12 +94,18 @@ module IrcBot
     def self.test
       col_table = new(3,6)
       col_table.clear
-      col_table.padding = 2 # // Table padding
-      col_table.set_row(0,0,"Speed","IceDragon","Crimson").set_row_color(0,1,0)
+      col_table.padding = 1 # // Table padding
+      col_table.set_row(0,0, "Super", "Happy", "Fun")
+      col_table.set_row(0,1, "Stuff", "Cookies", "Other Stuff")
+      col_table.set_row(0,2, "Another Line", "Yet another line", "Larger Line That makes no sense")
+      col_table.set_row(0,3, "Hello world", "How are you", "Today!")
+      col_table.set_row(0,4, "Wasting", "Lots of time doing this", "Uh huh")
+      col_table.set_row(0,5, "Anime", "R/a/dio", "On F/r/iday")
+      #col_table.set_row(0,0,"Speed","IceDragon","Crimson").set_row_color(0,1,0)
       #col_table.join_cells([0,1],[1,1],[2,1]).set_cell(0,1,"Stuff we like")
-      col_table.set_row(0,2,"Hip-Hop","Cookies","Moka~").set_row_color(2,0,1)
+      #col_table.set_row(0,2,"Hip-Hop","Cookies","Moka~").set_row_color(2,0,1)
       #col_table.join_cells([0,3],[1,3],[2,3]).set_cell(0,3,"More stuff")
-      col_table.set_row(0,4,"Art","Moar Cookies","Anime").set_row_color(4,0,1)
+      #col_table.set_row(0,4,"Art","Moar Cookies","Anime").set_row_color(4,0,1)
       #col_table.join_cells([0,5],[1,5],[2,5]).set_cell(0,5,"End of stuff")
       col_table.compile
     end
