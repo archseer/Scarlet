@@ -21,12 +21,14 @@ module IrcBot
     def resize!(width,height)
       @width, @height = width,height
       @data = ColumnTable.mk_table(@width,@height) { " " }
+      self
     end
     def clear
       @cell_color.clear
       @col_color.clear
       @row_color.clear
       resize!(@width,@height)
+      self
     end
     def get_cell(x,y)
       return nil unless(x.between?(0,@width) && y.between?(0,@height))
@@ -77,10 +79,16 @@ module IrcBot
     end
     alias :[] get_cell
     alias :[]= set_cell
+    def column_widths
+      (0...@width).collect { |x| @data[x].max_by{|s|s.size}.size+@padding+(@padding%2) }
+    end
+    def row_width
+      column_widths.inject(0) { |r,i| r+i }
+    end
     # // @data[x] => [String, String, String...]
     def compile
       x,y,r,color_a,width=[nil]*5
-      column_width = (0...@width).collect { |i| @data[i].max_by{|s|s.size}.size+@padding+(@padding%2) }
+      column_width = column_widths
       wr,hr = (0...@width), (0...@height)
       hr.collect do |y|
         (wr.collect do |x|
