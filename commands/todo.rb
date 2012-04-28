@@ -21,12 +21,14 @@ Scarlet.hear /show todo\s*(\d+)/ do
   id = params[1].strip.to_i
   t = ::IrcBot::Todo.sort(:created_at).all[id-1]
   if t
-    table = ::IrcBot::InfoTable.new(50)
-    table.addHeader "TODO ##{id}"
-    table.addRow "Date: #{t.created_at.std_format}"
-    table.addRow "Added by: #{t.by}"
-    table.addRow "Entry: #{t.msg}"
-    table.compile.each {|line| reply line, true }
+    crt = t.created_at.std_format
+    table = ::IrcBot::ColumnTable.new(2,4)
+    table.padding = 2
+    table.set_row(0,0,"TODO"      ,"#%d"%id).set_row_color(1,0,0)
+    table.set_row(0,1,"Date:"     ,crt     ).set_row_color(0,1,0)
+    table.set_row(0,2,"By:"       ,t.by    ).set_row_color(0,1,0)
+    table.set_row(0,3,"Entry:"    ,t.msg   ).set_row_color(0,1,0)
+    table.compile.each { |line| reply line, true }
   else
     reply "TODO ##{id} could not be found."
   end
