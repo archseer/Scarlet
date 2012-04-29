@@ -33,7 +33,7 @@ end
 # // Add more later like timezone, and some others
 Scarlet.hear /settings (notify_login)[ ](toggle|on|off)/i do
   n = ::IrcBot::Nick.where(:nick => sender.nick).first
-  unless n
+  if(n)
     case(params[1].upcase)
     when "NOTIFY_LOGIN"
       opt = IrcBot::IcyCommands.str2bool(params[2])
