@@ -38,9 +38,10 @@ Scarlet.hear /settings (notify_login)[ ](toggle|on|off)/i do
     when "NOTIFY_LOGIN"
       opt = IrcBot::IcyCommands.str2bool(params[2])
       n.settings[:notify_login] = opt
+      notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
     end
     n.save!
   else
-    notice sender.nick, "You cannot access account settings"
+    notice sender.nick, "You cannot access account settings, are you logged in?"
   end
 end
