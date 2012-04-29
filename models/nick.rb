@@ -5,7 +5,7 @@ class ::IrcBot::Nick
   key :aliases,         Array
   key :privileges,      Integer, :default => 1
   key :win_points,      Integer, :default => 0
-  keu :settings         Hash
+  keu :settings,        Hash
   timestamps!
   many :memos
 end
