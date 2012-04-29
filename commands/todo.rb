@@ -39,11 +39,11 @@ end
 Scarlet.hear /list todos/ do
   c = ::IrcBot::Todo.all.count
   if c > 0
-    todos = ::IrcBot::Todo.sort(:created_at.desc).limit(10)
+    todos = ::IrcBot::Todo.sort(:created_at.desc).limit(10).all
     table = ::IrcBot::ColumnTable.new(3,[10,c].min)
     table.clear 
     table.padding = 3
-    todos[0...10].each_with_index { |t,i|
+    todos.each_with_index { |t,i|
       table.set_row(0,i,"##{c-i}","\t#{t.by}\t","\t#{t.created_at.std_format}").set_row_color(i,1,0)
     }
     header = "Last 10 entries:".align(table.row_width,:center,table.padding).irc_color(0,1)

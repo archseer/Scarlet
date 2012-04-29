@@ -33,7 +33,7 @@ Scarlet.hear /win[ ]*(\S*)/i, :registered do
     n.save!
     reply "#{sender.nick} gave #{params[1]} a win!" 
   elsif(sw)
-    notice "You can't give yourself a win!" 
+    notice sender.nick, "You can't give yourself a win!" 
   else
     wins = ::IrcBot::Nick.where(:nick=> sender.nick).first.win_points
     reply "#{sender.nick} has #{wins} #{"win point".pluralize(wins)}." 

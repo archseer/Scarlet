@@ -41,8 +41,6 @@ class Scarlet
       event.params[0].slice!(0)
     end
     
-    Watchdog.check_event event
-    
     if !@@filter.empty? and !event.params[0].start_with?("unfilter") and word = compile_filter.match(event.params[0])
       event.server.msg event.return_path, "Cannot execute because \"#{word}\" is blocked."
       return
