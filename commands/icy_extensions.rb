@@ -12,7 +12,7 @@ module IrcBot
       "HB"      => "V2.0000",
       "TIME"    => "V2.0001",
       "WIN"     => "V2.0001",
-      ""
+      "SETTINGS"=> "V2.0000",
       "MEMO"    => "V2.0001"
     }
     def self.mauthor

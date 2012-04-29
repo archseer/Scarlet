@@ -39,6 +39,7 @@ Scarlet.hear /settings (notify_login)[ ](toggle|on|off)/i do
       opt = IrcBot::IcyCommands.str2bool(params[2])
       n.settings[:notify_login] = opt
     end
+    n.save!
   else
     notice sender.nick, "You cannot access account settings"
   end
