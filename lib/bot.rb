@@ -80,7 +80,8 @@ class IrcBot::Bot < EM::Connection
     if event.sender.nick == "NickServ" && ns_params = event.params.first.match(/(?:ACC|STATUS)\s(?<nick>\S+)\s(?<digit>\d)$/i)
       if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
         ::IrcBot::User.ns_login @channels, ns_params[:nick]
-        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if !::IrcBot::Nick.where(:nick => ns_params[:nick]).empty? && !$config.irc_bot.testing
+        nik = ::IrcBot::Nick.where(:nick => ns_params[:nick]).first
+        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if nik && nik.settings[:notify_login] && !$config.irc_bot.testing
       end
     else
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack

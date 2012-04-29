@@ -28,3 +28,18 @@ Scarlet.hear /register/ do
     notice sender.nick, "ERROR: You are already registered!"
   end
 end
+
+# settings - Change your account settings with the bot
+# // Add more later like timezone, and some others
+Scarlet.hear /settings (notify_login)[ ](toggle|on|off)/i do
+  n = ::IrcBot::Nick.where(:nick => sender.nick).first
+  unless n
+    case(params[1].upcase)
+    when "NOTIFY_LOGIN"
+      opt = IrcBot::IcyCommands.str2bool(params[2])
+      n.settings[:notify_login] = opt
+    end
+  else
+    notice sender.nick, "You cannot access account settings"
+  end
+end
