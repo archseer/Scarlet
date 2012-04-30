@@ -31,7 +31,10 @@ class IrcBot::Bot < EM::Connection
     @check_connection_timer.cancel if @check_connection_timer
     if !@disconnecting
       print_console "Connection to server lost.", :light_red
-      reconnect $config.irc_bot.server, $config.irc_bot.port
+      reconnect $config.irc_bot.server, $config.irc_bot.port do
+         print_console "Connection to server lost.", :light_blue
+        post_init
+      end
       #Modules.restart_mod :IrcBot
     end
   end
@@ -67,7 +70,6 @@ class IrcBot::Bot < EM::Connection
     end
 
     print_chat event.sender.nick, event.params.first
-    privmsg_reactor event if event.params.first[0] == $config.irc_bot.control_char
     # simple channel symlink
     # added: now it doesn't relay any bot commands (!)
     if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
@@ -207,26 +209,6 @@ class IrcBot::Bot < EM::Connection
     target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
   end
  end
- #----privmsg reactor -------------------------------------
-  def privmsg_reactor event
-    command  = event.params.first.split[0...1].join(' ')
-    sequence = event.params.first.split(' ').drop(1).join(' ')
-    cmd = ::IrcBot::Commands[command[1..-1].to_sym]
-    if cmd && !cmd[:disable] && !@banned.include?(event.sender.nick) # command exists, not disabled and user not banned
-      if cmd[:access_level].nil_zero? # no access level, just execute the function
-        self.instance_exec sequence, event, &cmd[:method] # execute it
-      else # it requires permissions
-        nick = ::IrcBot::Nick.where(:nick => event.sender.nick)
-        if !::IrcBot::User.ns_login? @channels, event.sender.nick # user was not logged in
-          notice event.sender.nick, "#{event.sender.nick}, you are not logged in!"
-        elsif nick.count > 0 && nick.first.privileges >= cmd[:access_level] # nick exists and privileges grant access
-          self.instance_exec sequence, event, &cmd[:method]
-        end
-      end
-    end
-  rescue(Exception) => result
-    msg $config.irc_bot.channel, "ERROR: #{result.message}".irc_color(4,0)
-  end
   #----------------------------------------------------------
   def send_cmd cmd, hash
     send_data Mustache.render(@user_commands[cmd], hash)

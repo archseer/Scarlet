@@ -1,5 +1,5 @@
 base_path = File.expand_path File.dirname(__FILE__)
-load base_path + '/../../../../mpd-ruby/cardinal.rb'
+load base_path + '/../../../../cardinal/cardinal.rb'
 $bird = Cardinal.new
 
 # what's playing? - Displays the song playing on owner's computer.

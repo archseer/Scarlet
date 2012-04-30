@@ -12,7 +12,6 @@ class Hash # instead of hash[:key][:key], hash.key.key
 end
 
 module IrcBot
-  @commands = {}
   @config = {}
   class << self
     attr_accessor :commands, :config
@@ -35,7 +34,6 @@ module IrcBot
         Dir["#{root}/commands/**/*.rb"].each {|path| load path }
     end
   end
-  Commands = ::IrcBot.commands
 end
 
 base_path = File.expand_path File.dirname(__FILE__)
