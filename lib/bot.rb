@@ -11,7 +11,7 @@ class IrcBot::Bot < EM::Connection
     @log.info "\n**** NEW SESSION at #{Time.now}"
 
     @scheduler = Scheduler.new
-    @user_commands = YAML.load_file("#{path}/../commands.yml").symbolize_keys!
+    @irc_commands = YAML.load_file("#{path}/../commands.yml").symbolize_keys!
     @channels = {}
     @banned = []
     @modes = []
@@ -211,7 +211,7 @@ class IrcBot::Bot < EM::Connection
  end
   #----------------------------------------------------------
   def send_cmd cmd, hash
-    send_data Mustache.render(@user_commands[cmd], hash)
+    send_data Mustache.render(@irc_commands[cmd], hash)
   end
 
   def msg target, message, silent=false

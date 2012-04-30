@@ -2,6 +2,7 @@ class ::IrcBot::Ban
   include MongoMapper::Document
   validates_presence_of :username
   key :username,    String
+  key :channel,     Array
   key :by,          String
   key :reason,      String
   key :level,       Integer, :default => 0
