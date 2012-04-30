@@ -13,21 +13,24 @@ end
 
 module IrcBot
   @config = {}
+  @@servers = []
   class << self
     attr_accessor :commands, :config
 
     def loaded
       $config[:irc_bot] = YAML.load_file("#{File.expand_path File.dirname(__FILE__)}/config.yml").symbolize_keys!
       $config.irc_bot.modes.symbolize_values!
-      @@bot = EventMachine::connect $config.irc_bot.server, $config.irc_bot.port, Bot
+      @@servers << EventMachine::connect($config.irc_bot.server, $config.irc_bot.port, Server)
       puts 'IRC Bot has started.'.green
     end
 
     def unload
-      @@bot.send_cmd :quit, :quit => $config.irc_bot.quit
-      @@bot.disconnecting = true
-      @@bot.close_connection_after_writing
-      @@bot.scheduler.remove_all
+      @@servers.each { |server|
+        server.send_cmd :quit, :quit => $config.irc_bot.quit
+        server.disconnecting = true
+        server.close_connection_after_writing
+        server.scheduler.remove_all
+      }
     end
 
     def load_commands root
