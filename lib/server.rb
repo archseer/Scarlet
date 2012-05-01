@@ -16,8 +16,9 @@ class IrcBot::Server
     @scheduler = Scheduler.new
     @irc_commands = YAML.load_file("#{path}/../commands.yml").symbolize_keys!
     @channels = {}
-    @banned = []
-    @modes = []
+    @banned = []      # who's banned here?
+    @modes = []       # bot account's modes (ix,..)
+    @extensions = {}  # what the serverside supports
     @disconnecting = false
   end
 
@@ -156,9 +157,9 @@ class IrcBot::Server
     event.params.each { |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
         param = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] # convert digit only to digits
-        $config.irc_bot.extensions[s[:token].downcase.to_sym] = param
+        @extensions[s[:token].downcase.to_sym] = param
       else
-        $config.irc_bot.extensions[segment.downcase.to_sym] = true
+        @extensions[segment.downcase.to_sym] = true
       end
     }
   when /00\d/
@@ -188,7 +189,7 @@ class IrcBot::Server
     @channels[event.params.first][:users].keys.each { |nick| check_nick_login nick} # check permissions of users
   when :'375' # START of MOTD
     # this is immediately after 005 messages usually so set up extended NAMES command
-    send_data "PROTOCTL NAMESX" if $config.irc_bot.extensions[:namesx]
+    send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => $config.irc_bot.channel
   when /(372|26[56]|25[1245])/ #Ignore MOTD and some statuses
