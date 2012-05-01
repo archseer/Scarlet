@@ -1,11 +1,14 @@
 load "modules/irc_bot/lib/output_helper.rb"
-class IrcBot::Server < EM::Connection
-  include EventMachine::Protocols::LineText2
+class IrcBot::Server
   include ::OutputHelper
   attr_accessor :scheduler, :log, :disconnecting, :banned
+  attr_accessor :connection, :address, :port
   attr_reader :channels
 
-  def post_init
+  def initialize(address, port) #(irc, name, config) irc could/should have own handlers.
+    @address = address
+    @port = port
+
     path = File.dirname(__FILE__)
     @log = Logger.new("#{path}/../logs/irc.log", 'daily')
     @log.info "\n**** NEW SESSION at #{Time.now}"
@@ -16,36 +19,24 @@ class IrcBot::Server < EM::Connection
     @banned = []
     @modes = []
     @disconnecting = false
-    connect
-    reset_check_connection_timer
-  rescue => e
-    p e
-  end
-
-  def connect
-    send_cmd :nick, :nick => $config.irc_bot.nick
-    send_cmd :user, :host => $config.irc_bot.host, :nick => $config.irc_bot.nick, :name => $config.irc_bot.name
   end
 
   def unbind
-    @check_connection_timer.cancel if @check_connection_timer
     if !@disconnecting
       print_console "Connection to server lost.", :light_red
-      reconnect $config.irc_bot.server, $config.irc_bot.port do
-         print_console "Connection to server lost.", :light_blue
+      connection.reconnect address, port do
+        print_console "Reconnected!", :light_blue
         post_init
       end
-      #Modules.restart_mod :IrcBot
     end
   end
 
   def send_data data
-    super "#{data}\r"
+    connection.send_data data
   end
 
   def receive_line line
-    reset_check_connection_timer
-    return if @disconnecting
+    return if disconnecting
     parsed_line = IRC::Parser.parse line
     event = IRC::Event.new(:localhost, parsed_line[:prefix],
                       parsed_line[:command].downcase.to_sym,
@@ -225,25 +216,7 @@ class IrcBot::Server < EM::Connection
   end
 
   def check_nick_login nick
-     #msg "NickServ", "ACC #{nick}", true # freenode
+    #msg "NickServ", "ACC #{nick}", true # freenode
     msg "NickServ", "STATUS #{nick}", true
-  end
-
-  private
-  def check_connection
-    puts "Sending PING to server to verify connection..."
-    send_cmd :ping, :target => $config.irc_bot.server
-    @check_connection_timer = EM::Timer.new(30, method(:timeout))
-  end
-
-  def timeout
-    puts "Timed out waiting for server, reconnecting..."
-    send_cmd :quit, :quit => "Ping timeout"
-    close_connection_after_writing
-  end
-
-  def reset_check_connection_timer
-    @check_connection_timer.cancel if @check_connection_timer
-    @check_connection_timer = EM::Timer.new(100, method(:check_connection))
   end
 end

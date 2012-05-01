@@ -13,24 +13,27 @@ end
 
 module IrcBot
   @config = {}
-  @@servers = []
+  @@servers = {}
   class << self
-    attr_accessor :commands, :config
+    attr_accessor :config
 
     def loaded
       $config[:irc_bot] = YAML.load_file("#{File.expand_path File.dirname(__FILE__)}/config.yml").symbolize_keys!
       $config.irc_bot.modes.symbolize_values!
-      @@servers << EventMachine::connect($config.irc_bot.server, $config.irc_bot.port, Server)
+      @@servers[:default] = Server.new $config.irc_bot.server, $config.irc_bot.port #temp hax
+      @@servers.values.each do |server|
+        server.connection = EventMachine::connect(server.address, server.port, Connection, server)
+      end
       puts 'IRC Bot has started.'.green
     end
 
     def unload
-      @@servers.each { |server|
+      @@servers.values.each do |server|
         server.send_cmd :quit, :quit => $config.irc_bot.quit
         server.disconnecting = true
-        server.close_connection_after_writing
+        server.connection.close_connection_after_writing
         server.scheduler.remove_all
-      }
+      end
     end
 
     def load_commands root
