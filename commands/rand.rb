@@ -1,7 +1,7 @@
 ﻿#=========================================#
 # // Random
 #=========================================#
-module IrcBot
+module Scarlet
   module IcyCommands
     def self.klik
       @klik ||= [Time.now,Time.now]
@@ -13,7 +13,7 @@ module IrcBot
 end
 # klik - Is a one click stopwatch
 Scarlet.hear /klik/i, :registered do
-  n = ::IrcBot::IcyCommands.klik.round(2)
+  n = Scarlet::IcyCommands.klik.round(2)
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
 # time - Prints the current owners time

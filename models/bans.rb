@@ -1,4 +1,4 @@
-class ::IrcBot::Ban
+class Scarlet::Ban
   include MongoMapper::Document
   validates_presence_of :username
   key :username,    String

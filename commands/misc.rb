@@ -1,3 +1,30 @@
+# encoding: utf-8
+# Do it. For science.
+
+Scarlet.hear (/give me (:?a\s)cookie/) do
+  reply "\x01ACTION gives #{sender.nick} a cookie!\x01"
+end
+
+Scarlet.hear (/give me (:?a\s)potato/), :dev do
+  reply "\x01ACTION gives #{sender.nick} a potato!\x01"
+end
+
+Scarlet.hear (/OMG/) do
+  table = ::Scarlet::InfoTable.new(50)
+  table.addHeader "┌─ TODO #1 ─┐"
+  table.addRow "┌───────── Sup! ────┐"
+  table.addRow "│ Date: sasda       │"
+  table.addRow "│ Added by: a       │"
+  table.addRow "│ Entry: qqqq       │"
+  table.addRow "└───────── Sup! ────┘"
+  table.compile.each {|line| reply line, true }
+end
+
+Scarlet.hear /test/ do
+  ::Scarlet::ColumnTable.test.each {|line| reply line, true }
+end
+
+
 # show colors - Draws the entire IRC color pallete.
 Scarlet.hear (/show colors/), :dev do
   for i in 0..15
@@ -14,7 +41,7 @@ Scarlet.hear (/poke (.+)/), :registered do
 end
 
 Scarlet.hear (/eval (.+)/), :dev do
-  if !::IrcBot::Nick.where(:nick => sender.nick).empty? && ::IrcBot::Nick.where(:nick => sender.nick).first.privileges == 9
+  if !Scarlet::Nick.where(:nick => sender.nick).empty? && Scarlet::Nick.where(:nick => sender.nick).first.privileges == 9
     parm = params[1]
   else
     safe = true

@@ -1,5 +1,6 @@
-load "modules/irc_bot/lib/output_helper.rb"
-class IrcBot::Server
+load "modules/scarlet/lib/output_helper.rb"
+module Scarlet
+class Server
   include ::OutputHelper
   attr_accessor :scheduler, :log, :disconnecting, :banned
   attr_accessor :connection, :address, :port
@@ -69,13 +70,13 @@ class IrcBot::Server
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
       }
     end
-    Scarlet.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{$config.irc_bot.nick}[:,]?\s*/i) || event.params[0].start_with?("!")
+    Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{$config.irc_bot.nick}[:,]?\s*/i) || event.params[0].start_with?("!")
   when :notice # Automatic replies must never be sent in response to a NOTICE message.
     if event.sender.nick == "NickServ" 
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
-      if ns_params[:digit] == "3" && !::IrcBot::User.ns_login?(@channels, ns_params[:nick])
-        ::IrcBot::User.ns_login @channels, ns_params[:nick]
-        nik = ::IrcBot::Nick.where(:nick => ns_params[:nick]).first
+      if ns_params[:digit] == "3" && !User.ns_login?(@channels, ns_params[:nick])
+        User.ns_login @channels, ns_params[:nick]
+        nik = Nick.where(:nick => ns_params[:nick]).first
         notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if nik && nik.settings[:notify_login] && !$config.irc_bot.testing
       end
       end
@@ -184,7 +185,7 @@ class IrcBot::Server
   when :'353' # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
     # param[1] -> chan, param[2] - users
-    event.params[2].split(" ").each { |nick| nick, @channels[event.params[1]][:users][nick] = ::IrcBot::Parser.parse_names_list nick }
+    event.params[2].split(" ").each { |nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list nick }
   when :'366' # end of /NAMES list
     @channels[event.params.first][:users].keys.each { |nick| check_nick_login nick} # check permissions of users
   when :'375' # START of MOTD
@@ -220,4 +221,5 @@ class IrcBot::Server
     #msg "NickServ", "ACC #{nick}", true # freenode
     msg "NickServ", "STATUS #{nick}", true
   end
+end
 end

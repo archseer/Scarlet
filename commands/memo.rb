@@ -22,7 +22,7 @@ module IrcBot
     MEMO_MSG.default("[NO MESSAGE]")
     # memo ([about]|[list]|[clear]|[check] <id>|[add] <recipient> <message>|[rem] <id>) - Memo, so much going on its hard to explain
     Scarlet.hear /memo (about|list|clear|check (\d+)|add (\S+) (.+)|rem (\d+))/i, :registered do
-      ex = ::IrcBot::IrcCommands::IcyCommands
+      ex = ::Scarlet::IrcCommands::IcyCommands
       reply case(params[0])
       when /LIST/i
         ex.memo_msg("LIST",(ex.memos(sender.nick)||[]))
@@ -44,24 +44,24 @@ module IrcBot
       end
     end
     def self.memos(nick)
-      n = ::IrcBot::Nick.where(:nick=>nick).first
+      n = Nick.where(:nick=>nick).first
       n ? n.memos : nil
     end
     def self.add_memo(sender,recipient,message)
-      n = ::IrcBot::Nick.where(:nick=>recipient).first
+      n = Scarlet::Nick.where(:nick=>recipient).first
       return false unless(n)
-      n.memos << ::IrcBot::Nick::Memo.new(:sender=>sender, :message=>message)
+      n.memos << Scarlet::Nick::Memo.new(:sender=>sender, :message=>message)
       !!n.save!
     end
     def self.remove_memo(nick,id)
-      n = ::IrcBot::Nick.where(:nick=>recipient).first
+      n = Scarlet::Nick.where(:nick=>recipient).first
       return 0 unless(n)
       m = n.memos.delete_at(id)
       n.save!
       m ? 1 : 2
     end
     def self.clear_memos(recipient)
-      n = ::IrcBot::Nick.where(:nick=>recipient.upcase).first
+      n = Scarlet::Nick.where(:nick=>recipient.upcase).first
       return false unless(n)
       n.memos.clear
       !!n.save!

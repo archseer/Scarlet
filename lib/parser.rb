@@ -1,4 +1,4 @@
-module IrcBot::Parser
+module Scarlet::Parser
   class << self
 
     def parse_names_list string # parses NAMES list

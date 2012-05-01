@@ -1,4 +1,4 @@
-class ::IrcBot::Nick
+class Scarlet::Nick
   include MongoMapper::Document
   validates_presence_of :nick
   key :nick,            String

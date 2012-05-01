@@ -20,9 +20,9 @@ end
 # If it's a phrase, it looks for the entire phrase and NOT just
 # individual words.
 Scarlet.hear (/filter (.+)/), :dev do
-  Scarlet.filter << params[1].strip
+  Command.filter << params[1].strip
 end
 # unfilter <phrase> - Unbans a specific command phrase.
 Scarlet.hear (/unfilter (.+)/), :dev do
-  Scarlet.filter.delete params[1].strip
+  Command.filter.delete params[1].strip
 end

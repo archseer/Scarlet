@@ -1,4 +1,4 @@
-class IrcBot::Connection < EM::Connection
+class Scarlet::Connection < EM::Connection
   include EventMachine::Protocols::LineText2
   def initialize server
     @server = server

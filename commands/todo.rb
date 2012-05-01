@@ -1,28 +1,28 @@
 # todo add <message> - Logs a message on the TODO tracker.
 Scarlet.hear /todo add\s*(.+)/ do
-  ::IrcBot::Todo.new(:msg => params[1], :by => sender.nick).save!
+  Scarlet::Todo.new(:msg => params[1], :by => sender.nick).save!
   reply "TODO was added."
 end
 
 # todo delete <id> - Deletes TODO with <id>.
 Scarlet.hear /todo delete\s*(\d+)/, :dev do
   id = params[1].strip.to_i
-  t = ::IrcBot::Todo.sort(:created_at).all[id-1].delete
+  t = Scarlet::Todo.sort(:created_at).all[id-1].delete
   reply "TODO ##{id} was deleted."
 end
 
 # count todos - Shows the total count of TODO's.
 Scarlet.hear /count todos/ do
-  reply "TODO count: #{::IrcBot::Todo.all.count}"
+  reply "TODO count: #{Scarlet::Todo.all.count}"
 end
 
 # show todo <id> - Shows the message of TODO with <id>.
 Scarlet.hear /show todo\s*(\d+)/ do
   id = params[1].strip.to_i
-  t = ::IrcBot::Todo.sort(:created_at).all[id-1]
+  t = Scarlet::Todo.sort(:created_at).all[id-1]
   if t
     crt = t.created_at.std_format.to_s
-    table = ::IrcBot::ColumnTable.new(2,4)
+    table = Scarlet::ColumnTable.new(2,4)
     table.clear
     table.padding = 3
     table.set_row(0,0,"TODO"      ,"#%d"%id).set_row_color(0,0,1)
@@ -39,8 +39,8 @@ end
 Scarlet.hear /list todos/ do
   c = ::IrcBot::Todo.all.count
   if c > 0
-    todos = ::IrcBot::Todo.sort(:created_at.desc).limit(10).all
-    table = ::IrcBot::ColumnTable.new(3,[10,c].min)
+    todos = Scarlet::Todo.sort(:created_at.desc).limit(10).all
+    table = Scarlet::ColumnTable.new(3,[10,c].min)
     table.clear 
     table.padding = 3
     todos.each_with_index { |t,i|

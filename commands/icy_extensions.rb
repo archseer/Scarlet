@@ -1,7 +1,7 @@
 #=========================================#
 # // IcyCommands (main)
 #=========================================#
-module IrcBot
+module Scarlet
   module IcyCommands
     VERSIONS = {
       "IC"      => "V0.2000",
@@ -30,12 +30,12 @@ module IrcBot
 end
 # version <name> - Shows the version number of <name> command
 Scarlet.hear /version (\S+)/i, :any do
-  ver = IrcBot::IcyCommands::VERSIONS[params[1].upcase]
+  ver = Scarlet::IcyCommands::VERSIONS[params[1].upcase]
   reply ver ? "Version #{ver}" : "unknown #{params[1]}"
 end
 # win <name> - Show some respect to <name>, and give em a win point
 Scarlet.hear /win[ ]*(\S*)/i, :registered do
-  n = ::IrcBot::Nick.where(:nick=> params[1]).first
+  n = Scarlet::Nick.where(:nick=> params[1]).first
   sw = n ? sender.nick.downcase == n.nick.downcase : false
   if(n && !sw)
     n.win_points += 1
@@ -44,7 +44,7 @@ Scarlet.hear /win[ ]*(\S*)/i, :registered do
   elsif(sw)
     reply "You can't give yourself a win!" 
   else
-    wins = ::IrcBot::Nick.where(:nick=> sender.nick).first.win_points
+    wins = Scarlet::Nick.where(:nick=> sender.nick).first.win_points
     reply "#{sender.nick} has #{wins} #{"win point".pluralize(wins)}." 
   end
 end

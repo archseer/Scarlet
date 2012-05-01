@@ -11,7 +11,13 @@ class Hash # instead of hash[:key][:key], hash.key.key
   end
 end
 
-module IrcBot
+module Scarlet; end
+
+base_path = File.expand_path File.dirname(__FILE__)
+Modules.load_models base_path
+Modules.load_libs base_path
+
+module Scarlet
   @config = {}
   @@servers = {}
   class << self
@@ -39,13 +45,14 @@ module IrcBot
     def load_commands root
         Dir["#{root}/commands/**/*.rb"].each {|path| load path }
     end
+
+    def hear regex, clearance=nil, &block
+      Command.hear regex, clearance, &block
+    end
   end
 end
 
-base_path = File.expand_path File.dirname(__FILE__)
-Modules.load_models base_path
-Modules.load_libs base_path
 Dir["#{base_path}/commands/**/*.rb"].each {|path| 
   load path 
-  Scarlet.parse_help path
+  Scarlet::Command.parse_help path
 }

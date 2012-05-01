@@ -3,7 +3,7 @@
 # // Date Modified: 04/24/2012
 # // Created by IceDragon (IceDragon200)
 #=========================================#
-module IrcBot
+module Scarlet
   class ColumnTable
     VERSION = 0.0002
     def self.mk_table(width,height,&block)

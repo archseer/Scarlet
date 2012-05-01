@@ -1,4 +1,4 @@
-class ::IrcBot::Todo
+class Scarlet::Todo
   include MongoMapper::Document
   validates_presence_of :msg
   key :msg,             String
