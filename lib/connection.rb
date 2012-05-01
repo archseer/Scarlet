@@ -28,7 +28,7 @@ class Scarlet::Connection < EM::Connection
   private
   def check_connection
     puts "Sending PING to server to verify connection..."
-    send_cmd :ping, :target => $config.irc_bot.server
+    @server.send_cmd :ping, :target => $config.irc_bot.server
     @check_connection_timer = EM::Timer.new(30, method(:timeout))
   end
 
