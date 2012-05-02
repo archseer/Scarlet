@@ -2,7 +2,7 @@ load "modules/scarlet/lib/output_helper.rb"
 module Scarlet
 class Server
   include ::OutputHelper
-  attr_accessor :scheduler, :log, :disconnecting, :banned
+  attr_accessor :scheduler, :log, :disconnecting, :banned, :log
   attr_accessor :connection, :address, :port
   attr_reader :channels
 
@@ -10,12 +10,12 @@ class Server
     @address = address
     @port = port
 
-    path = File.dirname(__FILE__)
-    @log = Logger.new("#{path}/../logs/irc.log", 'daily')
-    @log.info "\n**** NEW SESSION at #{Time.now}"
+    @path = File.dirname(__FILE__)
+    @log = Log.new
+    @log.start_log :connection
 
     @scheduler = Scheduler.new
-    @irc_commands = YAML.load_file("#{path}/../commands.yml").symbolize_keys!
+    @irc_commands = YAML.load_file("#{@path}/../commands.yml").symbolize_keys!
     @channels = {}
     @banned = []      # who's banned here?
     @modes = []       # bot account's modes (ix,..)
@@ -62,7 +62,7 @@ class Server
       return
     end
 
-    print_chat event.sender.nick, event.params.first
+    print_chat event.sender.nick, event.params.first, false, event.channel
     # simple channel symlink
     # added: now it doesn't relay any bot commands (!)
     if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
@@ -85,20 +85,22 @@ class Server
     end
   when :join
     if $config.irc_bot.nick != event.sender.nick
-      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow
+      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow, event_channel
       check_nick_login event.sender.nick
     else
+      @log.start_log event.channel
       @channels[event.channel] = {:users => {}, :flags => []}
       send_data "MODE #{event.channel}"
-      print_console "Joined channel #{event.channel}.", :light_yellow
+      print_console "Joined channel #{event.channel}.", :light_yellow, event.channel
     end
     @channels[event.channel][:users][event.sender.nick] = {}
   when :part
     if event.sender.nick == $config.irc_bot.nick
-      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
+      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta, event.channel
       @channels.delete event.channel # remove chan if bot parted
+      @log.close_log event.channel
     else
-      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
+      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta, event.channel
       @channels[event.channel][:users].delete event.sender.nick
     end
   when :quit
@@ -116,7 +118,7 @@ class Server
     messg = "#{event.sender.nick} has kicked #{event.params.first} from #{event.target}"
     messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick
     messg += "."
-    print_console messg, :light_red
+    print_console messg, :light_red, event.target
   when :mode
     if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
       mode = true
@@ -209,12 +211,14 @@ class Server
 
   def msg target, message, silent=false
     send_data "PRIVMSG #{target} :#{message}"
-    print_chat $config.irc_bot.nick, message, silent
+    log_name = target[0] == '#' ? target : :connection
+    print_chat $config.irc_bot.nick, message, silent, log_name unless silent
   end
 
   def notice target, message, silent=false
     send_data "NOTICE #{target} :#{message}"
-    print_console ">#{target}< #{message}", :light_cyan unless silent
+    log_name = target[0] == '#' ? target : :connection
+    print_console ">#{target}< #{message}", :light_cyan, log_name unless silent
   end
 
   def check_nick_login nick
