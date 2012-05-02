@@ -1,4 +1,4 @@
-join: "JOIN {{channel}}"
-part: "PART {{channel}}"
-quit: "QUIT :{{quit}}"
-ping: "PING {{target}}"
+join: "JOIN {{{channel}}"
+part: "PART {{{channel}}}"
+quit: "QUIT :{{{quit}}}"
+ping: "PING {{{target}}}"

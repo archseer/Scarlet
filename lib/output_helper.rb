@@ -1,5 +1,6 @@
 module OutputHelper
   def print_chat nick, message, silent=false, log_name=:connection
+    log_name ||= :connection
     msg = Scarlet::Parser.parse_esc_codes message
     time = "[#{Time.now.strftime("%H:%M")}]"
     if msg =~ /\x01ACTION\s(.+)\x01/ #detect '/me'
