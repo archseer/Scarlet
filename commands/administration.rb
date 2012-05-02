@@ -5,8 +5,10 @@ Scarlet.hear (/ban (\d+) (.+)/), :dev do
   nicks.each { |n| 
     nck  = Scarlet::Nick.where(:nick=>n).first # << Is there a good reason for this?
     bnck = (Scarlet::Ban.where(:nick=>nck.nick) or [nil]).first
-    bnck.level = lvl if(bnck)
-    bnck.save!
+    if(bnck)
+      bnck.level = lvl 
+      bnck.save!
+    end
   }
   reply "#{nicks.join(", ")} #{nicks.length == 1 ? "is" : "are"} now banned from using #{$config.irc_bot.nick} with ban level #{lvl}."
 end
@@ -17,8 +19,10 @@ Scarlet.hear (/unban (.+)/), :dev do
   nicks.each { |n| 
     nck  = Scarlet::Nick.where(:nick=>n).first # << Is there a good reason for this?
     bnck = (Scarlet::Ban.where(:nick=>nck.nick) or [nil]).first
-    bnck.level = 0 if(bnck)
-    bnck.save!
+    if(bnck)
+      bnck.level = 0 
+      bnck.save!
+    end
   }
   reply "#{$config.irc_bot.nick} ban was revoked for #{nicks.join(", ")}."
 end
