@@ -1,5 +1,5 @@
 # ban <user> - Bans a user from using the bot.
-Scarlet.hear (/ban [0-3] (.+)/), :dev do
+Scarlet.hear (/ban ([0-3]) (.+)/), :dev do
   lvl   = params[1].to_i
   nicks = params[2].split(" ")
   nicks.each { |n| 
