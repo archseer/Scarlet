@@ -4,7 +4,7 @@
 
 Scarlet.hear /help\s*(.*)?$/i, :dev do
   query = params[1].blank? ? nil : params[1] 
-  Command.get_help(query).each { |line|
+  Scarlet::Command.get_help(query).each { |line|
     notice sender.nick, line
   }
 end
