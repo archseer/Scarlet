@@ -1,16 +1,14 @@
 # ban <user> - Bans a user from using the bot.
-Scarlet.hear (/ban [0-4] (.+)/), :dev do
+Scarlet.hear (/ban [0-3] (.+)/), :dev do
   lvl   = params[1].to_i
   nicks = params[2].split(" ")
   nicks.each { |n| 
     nck = Scarlet::Nick.where(:nick=>n).first # << Is there a good reason for this?
     ban = Scarlet::Ban.where(:nick=>nck.nick).first or Scarlet::Ban.new(:nick=>nck.nick)
-    if(ban)
-      ban.level = lvl 
-      ban.by = sender.nick
-      ban.reason = ""
-      ban.save!
-    end
+    ban.level = lvl 
+    ban.by = sender.nick
+    ban.reason = ""
+    ban.save!
   }
   reply "#{nicks.join(", ")} #{nicks.length == 1 ? "is" : "are"} now banned from using #{$config.irc_bot.nick} with ban level #{lvl}."
 end
