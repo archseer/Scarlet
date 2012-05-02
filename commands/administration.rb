@@ -2,9 +2,8 @@
 Scarlet.hear (/ban ([0-3]) (.+)/), :dev do
   lvl   = params[1].to_i
   nicks = params[2].split(" ")
-  nicks.each { |n| 
-    nck = Scarlet::Nick.where(:nick=>n).first # << Is there a good reason for this?
-    ban = Scarlet::Ban.where(:nick=>nck.nick).first or Scarlet::Ban.new(:nick=>nck.nick)
+  nicks.each { |nick_str| 
+    ban = Scarlet::Ban.where(:nick=>nick_str).first or Scarlet::Ban.new(:nick=>nck.nick_str)
     ban.level = lvl 
     ban.by = sender.nick
     ban.reason = ""
@@ -16,9 +15,8 @@ end
 # unban <user> - Unbans a user from using the bot.
 Scarlet.hear (/unban (.+)/), :dev do
   nicks = params[1].split(" ")
-  nicks.each { |n| 
-    nck = Scarlet::Nick.where(:nick=>n).first 
-    ban = (Scarlet::Ban.where(:nick=>nck.nick) or [nil]).first
+  nicks.each { |nick_str| 
+    ban = Scarlet::Ban.where(:nick=>nick_str).first
     if(ban)
       ban.level = 0 
       ban.by = sender.nick
