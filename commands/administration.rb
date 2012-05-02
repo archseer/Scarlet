@@ -1,13 +1,23 @@
 # ban <user> - Bans a user from using the bot.
-Scarlet.hear (/ban (.+)/), :dev do
-  nicks = params[1].split(" ")
-  nicks.each {|n| server.banned << n }
-  reply "#{nicks.join(", ")} #{nicks.length == 1 ? "is" : "are"} now banned from using #{$config.irc_bot.nick}."
+Scarlet.hear (/ban (\d+) (.+)/), :dev do
+  lvl   = params[1].to_i
+  nicks = params[2].split(" ")
+  nicks.each { |n| 
+    nck  = Scarlet::Nick.where(:nick=>n).first # << Is there a good reason for this?
+    bnck = (Scarlet::Ban.where(:nick=>nck) or [nil]).first
+    bnck.level = lvl if(bnck)
+  }
+  reply "#{nicks.join(", ")} #{nicks.length == 1 ? "is" : "are"} now banned from using #{$config.irc_bot.nick} with ban level #{lvl}."
 end
+
 # unban <user> - Unbans a user from using the bot.
 Scarlet.hear (/unban (.+)/), :dev do
   nicks = params[1].split(" ")
-  nicks.each {|n| server.banned.delete n }
+  nicks.each { |n| 
+    nck  = Scarlet::Nick.where(:nick=>n).first # << Is there a good reason for this?
+    bnck = (Scarlet::Ban.where(:nick=>nck) or [nil]).first
+    bnck.level = 0 if(bnck)
+  }
   reply "#{$config.irc_bot.nick} ban was revoked for #{nicks.join(", ")}."
 end
 # rename <nick> - Renames the bot to nick.
