@@ -60,7 +60,7 @@ class Command
 
   def check_access event, privilege
     nck  = Scarlet::Nick.where(:nick=>event.sender.nick).first
-    nban = (Scarlet::Ban.where(:nick=>nck) or [nil]).first
+    nban = (Scarlet::Ban.where(:nick=>nck.nick) or [nil]).first
     if nban and nban.level > 0
       event.server.msg event.return_path, "#{event.sender.nick} is banned and cannot use any commands."
       return false
