@@ -3,7 +3,7 @@ Scarlet.hear (/ban ([0-3]) (.+)/), :dev do
   lvl   = params[1].to_i
   nicks = params[2].split(" ")
   nicks.each { |nick_str| 
-    ban = Scarlet::Ban.where(:nick=>nick_str).first or Scarlet::Ban.new(:nick=>nck.nick_str)
+    ban = Scarlet::Ban.where(:nick=>nick_str).first or Scarlet::Ban.new(:nick=>nick_str)
     ban.level = lvl 
     ban.by = sender.nick
     ban.reason = ""
