@@ -85,7 +85,7 @@ class Server
     end
   when :join
     if $config.irc_bot.nick != event.sender.nick
-      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow, event_channel
+      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow, event.channel
       check_nick_login event.sender.nick
     else
       @log.start_log event.channel
