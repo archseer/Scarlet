@@ -17,7 +17,7 @@ Scarlet.hear /klik/i, :registered do
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
 # time - Prints the current owners time
-Scarlet.hear /time/i, :registered do
+Scarlet.hear /time( \d+)?/i, :registered do
   reply Time.now.std_format
 end
 # hb <name> - Prints a happy birthday to <name>
