@@ -30,15 +30,25 @@ Scarlet.hear /register/ do
 end
 
 # settings - Change your account settings with the bot
-# // Add more later like timezone, and some others
-Scarlet.hear /settings (notify_login)[ ](toggle|on|off)/i do
+# // notify_login 
+# // timeoffset
+# // 
+Scarlet.hear /settings (notify_login[ ](?:toggle|on|off)|timeoffset[ ]((?:day|hour|minute|second)s?)(\d+))/i do
   n = Scarlet::Nick.where(:nick => sender.nick).first
   if(n)
-    case(params[1].upcase)
-    when "NOTIFY_LOGIN"
-      opt = Scarlet::IcyCommands.str2bool(params[2])
+    case(params[1])
+    when /notify_login[ ](?:toggle|on|off)/i
+      opt = Scarlet::IcyCommands.str2bool($1)
       n.settings[:notify_login] = opt
       notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
+    when /timeoffset[ ](day|hour|minute|second|check)s?[ ](\d+)/i
+      n.settings[:timeoffset] ||= {:day=>0,:hour=>0,:minute=>0,:second=>0} # // Preset
+      type, value = $1, $2.to_i
+      unless(type.upcase == "CHECK")
+        n.settings[:timeoffset][type.downcase.to_sym] = value
+      else
+        notice sender.nick, "Your current time Offset: Days[%d] Hours[%d] Minutes[%d] Seconds[%d]" % n.settings[:timeoffset].get_values(:day,:hour,:minute,:second)
+      end
     end
     n.save!
   else
