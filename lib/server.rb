@@ -2,7 +2,7 @@ load "modules/scarlet/lib/output_helper.rb"
 module Scarlet
 class Server
   include ::OutputHelper
-  attr_accessor :scheduler, :log, :disconnecting, :banned, :log
+  attr_accessor :scheduler, :log, :reconnect, :banned, :log
   attr_accessor :connection, :address, :port
   attr_reader :channels
 
@@ -20,17 +20,26 @@ class Server
     @banned = []      # who's banned here?
     @modes = []       # bot account's modes (ix,..)
     @extensions = {}  # what the serverside supports
-    @disconnecting = false
+    @reconnect = true
+  end
+
+  def disconnect
+    send_cmd :quit, :quit => $config.irc_bot.quit
+    @reconnect = false
+    connection.close_connection(true)
   end
 
   def unbind
-    if !@disconnecting
-      print_console "Connection to server lost.", :light_red
-      connection.reconnect address, port do
-        print_console "Reconnected!", :light_blue
-        post_init
-      end
-    end
+    @channels = {}
+    @modes = []
+    @extensions = {}
+    
+    puts "Connection to server lost.".light_red
+    reconnect = lambda {
+      connection.reconnect(address, port) rescue return EM.add_timer(3) { reconnect.call }
+      connection.post_init
+    }
+    EM.add_timer(3) { reconnect.call } if @reconnect
   end
 
   def send_data data
@@ -38,7 +47,7 @@ class Server
   end
 
   def receive_line line
-    return if disconnecting
+    #return if !reconnect
     parsed_line = IRC::Parser.parse line
     event = IRC::Event.new(:localhost, parsed_line[:prefix],
                       parsed_line[:command].downcase.to_sym,

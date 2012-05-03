@@ -23,6 +23,7 @@ class Scarlet::Connection < EM::Connection
 
   def unbind
     @check_connection_timer.cancel if @check_connection_timer
+    @server.unbind
   end
 
   private

@@ -35,9 +35,7 @@ module Scarlet
 
     def unload
       @@servers.values.each do |server|
-        server.send_cmd :quit, :quit => $config.irc_bot.quit
-        server.disconnecting = true
-        server.connection.close_connection_after_writing
+        server.disconnect
         server.log.close_all
         server.scheduler.remove_all
       end
