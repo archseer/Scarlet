@@ -37,7 +37,7 @@ end
 
 # list todos - Displays a list with the latest 10 TODO's.
 Scarlet.hear /list todos/ do
-  c = ::IrcBot::Todo.all.count
+  c = Scarlet::Todo.all.count
   if c > 0
     todos = Scarlet::Todo.sort(:created_at.desc).limit(10).all
     table = Scarlet::ColumnTable.new(3,[10,c].min)

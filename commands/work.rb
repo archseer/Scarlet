@@ -25,29 +25,19 @@ Scarlet.hear /work/ do
     $days[current_date] << length
   end
 
-  puts $days
+  #puts $days
   # total calculation
-  $days.values.each {|a|
-    a.each {|t| $total += t}
-  }
-  #puts $total
+  $days.values.each {|a| a.each {|t| $total += t} }
 
   total = $days.inject(0) {|sum, (k,v)|
     puts k.strftime("# %A, #{k.day.ordinalize} %B %Y")
-    all = v.inject(0){|dt, t| 
-      #reply "- #{t} min"
-      dt += t
-    }
-    #reply "->Daily total: #{all} min"
-    sum += all
+    sum += v.inject(0){|dt, t| dt += t }
   }
-
 
   def weekdays_left
     DateTime.now.next_week.to_date.mjd - DateTime.now.to_date.mjd
   end
 
   reply "> #{total} mins or #{sprintf "%.2f", total/60.0} hours -> #{p_floor(total, 30)/60.0} rounded hours: #{p_floor(total, 30)/60 * 15}€"
-  reply "#{weekdays_left} days left until next week. Still got to do #{$max - sprintf("%.2f", $total/60.0).to_f} hours." #get the amount of days till next week.
-  #puts
+  reply "#{weekdays_left} days left until next week. Still got to do #{sprintf("%.2f", $max - $total/60.0).to_f} hours."
 end
