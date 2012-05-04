@@ -1,3 +1,4 @@
+nick: "NICK {{{nick}}}"
 join: "JOIN {{{channel}}}"
 part: "PART {{{channel}}}"
 quit: "QUIT :{{{quit}}}"

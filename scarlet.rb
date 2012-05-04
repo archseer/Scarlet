@@ -5,8 +5,12 @@ require 'mustache'
 
 class Hash # instead of hash[:key][:key], hash.key.key
   def method_missing(method, *params)
+    # if it ends with = it's a setter, so set the value
+    return self[method.to_s.chomp('=').to_sym] = params[0] if method.to_s.end_with? '='
+    # if it contains that key, return the value
     return self[method.to_s] if self.keys.collect {|key| key}.include?(method.to_s)
     return self[method.to_sym] if self.keys.collect {|key| key}.include?(method.to_sym)
+    #return nil # if it doesn't exist, return nil. Do not error
     super
   end
 end
@@ -26,9 +30,15 @@ module Scarlet
     def loaded
       $config[:irc_bot] = YAML.load_file("#{File.expand_path File.dirname(__FILE__)}/config.yml").symbolize_keys!
       $config.irc_bot.modes.symbolize_values!
-      @@servers[:default] = Server.new $config.irc_bot.server, $config.irc_bot.port #temp hax
+      # create servers
+      $config.irc_bot.servers.each do |name, cfg|
+        @@servers[name] = Server.new cfg
+      end
+      # for now for safety delete the servers list after it gets loaded
+      $config.irc_bot.delete :servers
+      # connect servers
       @@servers.values.each do |server|
-        server.connection = EventMachine::connect(server.address, server.port, Connection, server)
+        server.connection = EventMachine::connect(server.config.address, server.config.port, Connection, server)
       end
       puts 'IRC Bot has started.'.green
     end

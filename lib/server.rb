@@ -5,10 +5,12 @@ class Server
   attr_accessor :scheduler, :log, :reconnect, :banned, :log
   attr_accessor :connection, :address, :port
   attr_reader :channels
+  # new
+  attr_accessor :current_nick, :config
 
-  def initialize(address, port) #(irc, name, config) irc could/should have own handlers.
-    @address = address
-    @port = port
+  def initialize(config) # irc could/should have own handlers.
+    @config = config
+    @current_nick = config.nick || @current_nick
 
     @path = File.dirname(__FILE__)
     @log = Log.new
@@ -16,7 +18,7 @@ class Server
 
     @scheduler = Scheduler.new
     @irc_commands = YAML.load_file("#{@path}/../commands.yml").symbolize_keys!
-    @channels = {}
+    @channels = {}    # holds data abbout the users on channel
     @banned = []      # who's banned here?
     @modes = []       # bot account's modes (ix,..)
     @extensions = {}  # what the serverside supports
@@ -36,7 +38,7 @@ class Server
     
     puts "Connection to server lost.".light_red
     reconnect = lambda {
-      connection.reconnect(address, port) rescue return EM.add_timer(3) { reconnect.call }
+      connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
       connection.post_init
     }
     EM.add_timer(3) { reconnect.call } if @reconnect
@@ -74,26 +76,26 @@ class Server
     print_chat event.sender.nick, event.params.first, false, event.channel
     # simple channel symlink
     # added: now it doesn't relay any bot commands (!)
-    if event.channel && event.sender.nick != $config.irc_bot.nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
+    if event.channel && event.sender.nick != @current_nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
       @channels.keys.reject{|key| key == event.channel}.each {|chan| 
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
       }
     end
-    Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{$config.irc_bot.nick}[:,]?\s*/i) || event.params[0].start_with?("!")
+    Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{@current_nick}[:,]?\s*/i) || event.params[0].start_with?("!")
   when :notice # Automatic replies must never be sent in response to a NOTICE message.
     if event.sender.nick == "NickServ" 
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
       if ns_params[:digit] == "3" && !User.ns_login?(@channels, ns_params[:nick])
         User.ns_login @channels, ns_params[:nick]
         nik = Nick.where(:nick => ns_params[:nick]).first
-        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{$config.irc_bot.nick}." if nik && nik.settings[:notify_login] && !$config.irc_bot.testing
+        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{@current_nick}." if nik && nik.settings[:notify_login] && !$config.irc_bot.testing
       end
       end
     else
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack
     end
   when :join
-    if $config.irc_bot.nick != event.sender.nick
+    if @current_nick != event.sender.nick
       print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow, event.channel
       check_nick_login event.sender.nick
     else
@@ -104,7 +106,7 @@ class Server
     end
     @channels[event.channel][:users][event.sender.nick] = {}
   when :part
-    if event.sender.nick == $config.irc_bot.nick
+    if event.sender.nick == @current_nick
       print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta, event.channel
       @channels.delete event.channel # remove chan if bot parted
       @log.close_log event.channel
@@ -117,8 +119,8 @@ class Server
     @channels.keys.each {|key| @channels[key][:users].delete event.sender.nick}
   when :nick
     @channels.keys.each {|key| @channels[key][:users].rename_key!(event.sender.nick, event.target)}
-    if event.sender.nick == $config.irc_bot.nick
-      $config.irc_bot[:nick] = event.target
+    if event.sender.nick == @current_nick
+      @current_nick = event.target
       print_console "You are now known as #{event.target}.", :light_yellow
     else
       print_console "#{event.sender.nick} is now known as #{event.target}.", :light_yellow
@@ -164,7 +166,7 @@ class Server
       end
     end
   when :"001"
-    msg "NickServ", "IDENTIFY #{$config.irc_bot.password}", true if $config.irc_bot[:password]
+    msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password
   when :"005"
     event.params.each { |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
@@ -191,8 +193,8 @@ class Server
   when :'333' # Channel topic set by
     print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).std_format}", :light_green
   when :'433' # Nickname exists
-    $config.irc_bot.nick += "Bot"
-    send_cmd :nick, :nick => $config.irc_bot.nick
+    @current_nick += "Bot"
+    send_cmd :nick, :nick => @current_nick
   when :'353' # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
     # param[1] -> chan, param[2] - users
@@ -203,11 +205,11 @@ class Server
     # this is immediately after 005 messages usually so set up extended NAMES command
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
-    send_cmd :join, :channel => $config.irc_bot.channel
+    send_cmd :join, :channel => @config.channel
   when /(372|26[56]|25[1245])/ #Ignore MOTD and some statuses
   when /4\d\d/ # Error messages range
     print_console event.params.join(" "), :light_red
-    msg $config.irc_bot.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true #TODO: Output only certain messages to channel.
+    msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true #TODO: Output only certain messages to channel.
   else
     print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect}; 
     target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
@@ -221,7 +223,7 @@ class Server
   def msg target, message, silent=false
     send_data "PRIVMSG #{target} :#{message}"
     log_name = target[0] == '#' ? target : :connection
-    print_chat $config.irc_bot.nick, message, silent, log_name unless silent
+    print_chat @current_nick, message, silent, log_name unless silent
   end
 
   def notice target, message, silent=false

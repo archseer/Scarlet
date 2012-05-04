@@ -22,7 +22,7 @@ Scarlet.hear /show todo\s*(\d+)/ do
   t = Scarlet::Todo.sort(:created_at).all[id-1]
   if t
     crt = t.created_at.std_format.to_s
-    msgs = msg.word_wrap
+    msgs = t.msg.word_wrap
     table = Scarlet::ColumnTable.new(2,4+msgs.size)
     table.clear
     table.padding = 3
