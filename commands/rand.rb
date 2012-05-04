@@ -17,8 +17,24 @@ Scarlet.hear /klik/i, :registered do
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
 # time - Prints the current owners time
-Scarlet.hear /time( \d+)?/i, :registered do
-  reply Time.now.std_format
+Scarlet.hear /time (\S+)?/i, :registered do
+  if param[1]
+    reply Time.now
+  else
+    nick = Scarlet::Nick.where(:nick=>param[1]).first
+    if(nick)
+      offset,tof = 0, nick.settings[:timeoffset]
+      if(tof)
+        offset += tof[:day].day
+        offset += tof[:hour].hour
+        offset += tof[:minute].minute
+        offset += tof[:sec].seconds
+      end
+      reply Time.at(Time.now.gmtime + offset)
+    else
+      reply "Cannot view time for #{param[1]}"
+    end
+  end
 end
 # hb <name> - Prints a happy birthday to <name>
 Scarlet.hear /hb (\S+)/i, :registered do
