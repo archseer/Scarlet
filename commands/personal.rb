@@ -41,7 +41,7 @@ Scarlet.hear /settings (notify_login[ ](?:toggle|on|off)|timeoffset[ ]((?:day|ho
       opt = Scarlet::IcyCommands.str2bool($1)
       n.settings[:notify_login] = opt
       notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
-    when /timeoffset[ ](day|hour|minute|second|check)s?[ ](\d+)/i
+    when /timeoffset[ ](day|hour|minute|second|check)s?[ ]([+-]?\d+)/i
       n.settings[:timeoffset] ||= {:day=>0,:hour=>0,:minute=>0,:second=>0} # // Preset
       type, value = $1, $2.to_i
       unless(type.upcase == "CHECK")
