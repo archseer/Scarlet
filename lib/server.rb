@@ -2,15 +2,13 @@ load "modules/scarlet/lib/output_helper.rb"
 module Scarlet
 class Server
   include ::OutputHelper
-  attr_accessor :scheduler, :log, :reconnect, :banned, :log
-  attr_accessor :connection, :address, :port
+  attr_accessor :scheduler, :log, :reconnect, :banned
+  attr_accessor :connection, :current_nick, :config
   attr_reader :channels
-  # new
-  attr_accessor :current_nick, :config
 
   def initialize(config) # irc could/should have own handlers.
     @config = config
-    @current_nick = config.nick || @current_nick
+    @current_nick = config.nick #|| @current_nick
 
     @path = File.dirname(__FILE__)
     @log = Log.new
@@ -18,10 +16,10 @@ class Server
 
     @scheduler = Scheduler.new
     @irc_commands = YAML.load_file("#{@path}/../commands.yml").symbolize_keys!
-    @channels = {}    # holds data abbout the users on channel
+    @channels = {}    # holds data about the users on channel
     @banned = []      # who's banned here?
     @modes = []       # bot account's modes (ix,..)
-    @extensions = {}  # what the serverside supports
+    @extensions = {}  # what the server-side supports
     @reconnect = true
   end
 
@@ -36,8 +34,8 @@ class Server
     @modes = []
     @extensions = {}
     
-    puts "Connection to server lost.".light_red
     reconnect = lambda {
+      puts "Connection to server lost. Reconnecting...".light_red
       connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
       connection.post_init
     }
@@ -49,7 +47,6 @@ class Server
   end
 
   def receive_line line
-    #return if !reconnect
     parsed_line = IRC::Parser.parse line
     event = IRC::Event.new(:localhost, parsed_line[:prefix],
                       parsed_line[:command].downcase.to_sym,
@@ -74,8 +71,7 @@ class Server
     end
 
     print_chat event.sender.nick, event.params.first, false, event.channel
-    # simple channel symlink
-    # added: now it doesn't relay any bot commands (!)
+    # simple channel symlink. added: now it doesn't relay any bot commands (!)
     if event.channel && event.sender.nick != @current_nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
       @channels.keys.reject{|key| key == event.channel}.each {|chan| 
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
@@ -165,6 +161,14 @@ class Server
         end
       end
     end
+  when :topic # Channel topic was changed
+    print_console "#{event.sender.nick} changed #{event.channel} topic to #{event.params.first}", :light_green
+  when :error # Either the server acknowledged disconnect, or there was a serious issue with something
+    if event.topic.start_with? "Closing Link"
+      puts "Disconnection from #{@config.address} successful.".blue
+    else
+      puts "ERROR: #{event.params.join(" ")}".red
+    end
   when :"001"
     msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password
   when :"005"
@@ -176,9 +180,9 @@ class Server
         @extensions[segment.downcase.to_sym] = true
       end
     }
-  when /00\d/
+  when /00\d/ # Login procedure
     print_console event.params, :light_green if $config.irc_bot.display_logon
-  when :'324' # chan mode
+  when :'324' # Chan mode
     mode = true
     event.params[1].split("").each do |c|
       mode = (c=="+") ? true : (c == "-" ? false : mode)

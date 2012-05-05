@@ -5,7 +5,7 @@ require 'mustache'
 
 class Hash # instead of hash[:key][:key], hash.key.key
   def method_missing(method, *params)
-    # if it ends with = it's a setter, so set the value
+    # if it ends with = it's a setter, so set the value - SLOPPY CODE, CLEAN!
     return self[method.to_s.chomp('=').to_sym] = params[0] if method.to_s.end_with? '='
     # if it contains that key, return the value
     return self[method.to_s] if self.keys.collect {|key| key}.include?(method.to_s)
@@ -29,7 +29,6 @@ module Scarlet
 
     def loaded
       $config[:irc_bot] = YAML.load_file("#{File.expand_path File.dirname(__FILE__)}/config.yml").symbolize_keys!
-      $config.irc_bot.modes.symbolize_values!
       # create servers
       $config.irc_bot.servers.each do |name, cfg|
         @@servers[name] = Server.new cfg

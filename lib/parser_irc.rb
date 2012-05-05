@@ -8,7 +8,7 @@ class IRC
 
       if RUBY_VERSION >= '1.9'
         #TODO: add unicode support
-        line.force_encoding('ascii').encode! 'ascii', :invalid => :replace, :undef => :replace
+        line.force_encoding('utf-8').encode! 'utf-8', :invalid => :replace, :undef => :replace
         line = line.chars.select(&:valid_encoding?).join
       end
 
