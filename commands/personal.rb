@@ -31,7 +31,7 @@ end
 
 # settings - Change your account settings with the bot
 # // notify_login 
-# // timeoffset
+# // timezone
 # // 
 Scarlet.hear /settings (.*)/i do
   n = Scarlet::Nick.where(:nick => sender.nick).first
@@ -41,13 +41,21 @@ Scarlet.hear /settings (.*)/i do
       opt = Scarlet::IcyCommands.str2bool($1)
       n.settings[:notify_login] = opt
       notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
-    when /timeoffset[ ]*(?:GMT([+-]?\d+))?/i
-      time_off = $1
-      n.settings[:timeoffset] ||= 0
-      n.settings[:timeoffset] = time_off.to_i if(time_off)
-      notice sender.nick, "Your current time Offset: GMT%d" % n.settings[:timeoffset]
+    when /timezone(?:[ ](.+))?/i
+      timezone = $1
+      # // << Work some magic that finds the proper zone here >_>
+      if timezone
+        zones, regex = ActiveSupport::TimeZone.zones_map.keys, Regexp.new(timezone,"i")
+        properzone = zones.find { |s| s =~ regex }
+        if properzone
+          n.settings[:timezone] = properzone
+        else
+          notice sender.nick, "Your Time Zone may not be supported, or you made a mistake: %s" % timezone
+        end
+      end
+      notice sender.nick, "Your current Time Zone is: %s" % n.settings[:timezone]
     else
-      reply "Invalid setting, %s" % params[1]
+      reply "Unknown or Invalid setting, %s" % params[1]
     end
     n.save!
   else

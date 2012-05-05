@@ -23,8 +23,12 @@ Scarlet.hear /time(?: (\S+))?/i, :registered do
   else
     nick = Scarlet::Nick.where(:nick=>params[1]).first
     if nick
-      offset = nick.settings[:timeoffset] || 0
-      reply Time.at(Time.now.gmtime + offset.hour).to_s
+      zone_str = nick.settings[:timezone] 
+      if zone_str
+        reply Time.now.in_time_zone(zone_str)
+      else
+        reply "Your timezone is not set: Use !settings timezone your_timezone_string"
+      end
     else
       reply 'Cannot view time for "%s".' % params[1]
     end
