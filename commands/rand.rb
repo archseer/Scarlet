@@ -23,14 +23,8 @@ Scarlet.hear /time (\S+)?/i, :registered do
   else
     nick = Scarlet::Nick.where(:nick=>param[1]).first
     if(nick)
-      offset,tof = 0, nick.settings[:timeoffset]
-      if(tof)
-        offset += tof[:day].day
-        offset += tof[:hour].hour
-        offset += tof[:minute].minute
-        offset += tof[:sec].seconds
-      end
-      reply Time.at(Time.now.gmtime + offset)
+      offset = nick.settings[:timeoffset] || 0
+      reply Time.at(Time.now.gmtime + offset.hour)
     else
       reply "Cannot view time for #{param[1]}"
     end

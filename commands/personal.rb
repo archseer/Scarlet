@@ -1,5 +1,5 @@
 # login - Logs the user into his bot account.
-Scarlet.hear /login/ do
+Scarlet.hear /login/i do
   if !Scarlet::Nick.where(:nick => sender.nick).empty?
     if !Scarlet::User.ns_login? server.channels, sender.nick
       server.check_nick_login sender.nick
@@ -12,7 +12,7 @@ Scarlet.hear /login/ do
 end
 
 # logout - Logs the user out from his bot account.
-Scarlet.hear /logout/ do
+Scarlet.hear /logout/i do
   if Scarlet::User.ns_login? server.channels, sender.nick
     Scarlet::User.ns_logout server.channels, sender.nick
     notice sender.nick, "#{sender.nick}, you are now logged out."
@@ -20,7 +20,7 @@ Scarlet.hear /logout/ do
 end
 
 # register - Registers an account with the bot.
-Scarlet.hear /register/ do
+Scarlet.hear /register/i do
   if Scarlet::Nick.where(:nick => sender.nick).empty?
     nick = Scarlet::Nick.new(:nick => sender.nick).save!
     notice sender.nick, "Successfuly registered with the bot."
@@ -41,13 +41,13 @@ Scarlet.hear /settings (notify_login[ ](?:toggle|on|off)|timeoffset[ ]((?:day|ho
       opt = Scarlet::IcyCommands.str2bool($1)
       n.settings[:notify_login] = opt
       notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
-    when /timeoffset[ ](day|hour|minute|second|check)s?[ ]([+-]?\d+)/i
-      n.settings[:timeoffset] ||= {:day=>0,:hour=>0,:minute=>0,:second=>0} # // Preset
-      type, value = $1, $2.to_i
-      unless(type.upcase == "CHECK")
-        n.settings[:timeoffset][type.downcase.to_sym] = value
+    when /timeoffset[ ]*(?:GMT([+-]?\d+))?/i
+      time_off = $1
+      n.settings[:timeoffset] ||= 0
+      if(time_off)
+        n.settings[:timeoffset] = time_off.to_i
       else
-        notice sender.nick, "Your current time Offset: Days[%d] Hours[%d] Minutes[%d] Seconds[%d]" % n.settings[:timeoffset].get_values(:day,:hour,:minute,:second)
+        notice sender.nick, "Your current time Offset: GMT%d" % n.settings[:timeoffset]
       end
     end
     n.save!
