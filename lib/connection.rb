@@ -29,7 +29,7 @@ class Scarlet::Connection < EM::Connection
   private
   def check_connection
     puts "Sending PING to server to verify connection..."
-    @server.send_cmd :ping, :target => @server.address
+    @server.send_cmd :ping, :target => @server.config.address
     @check_connection_timer = EM::Timer.new(30, method(:timeout))
   end
 
