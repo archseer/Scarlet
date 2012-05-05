@@ -164,7 +164,7 @@ class Server
   when :topic # Channel topic was changed
     print_console "#{event.sender.nick} changed #{event.channel} topic to #{event.params.first}", :light_green
   when :error # Either the server acknowledged disconnect, or there was a serious issue with something
-    if event.topic.start_with? "Closing Link"
+    if event.target.start_with? "Closing Link"
       puts "Disconnection from #{@config.address} successful.".blue
     else
       puts "ERROR: #{event.params.join(" ")}".red
