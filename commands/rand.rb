@@ -19,7 +19,7 @@ end
 # time - Prints the current owners time
 Scarlet.hear /time(?: (\S+))?/i, :registered do
   unless params[1]
-    reply Time.now
+    reply Time.now.to_s
   else
     nick = Scarlet::Nick.where(:nick=>params[1]).first
     if nick
