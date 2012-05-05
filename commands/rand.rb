@@ -18,15 +18,15 @@ Scarlet.hear /klik/i, :registered do
 end
 # time - Prints the current owners time
 Scarlet.hear /time (\S+)?/i, :registered do
-  unless(params[1])
+  unless params[1]
     reply Time.now
   else
-    nick = Scarlet::Nick.where(:nick=>param[1]).first
-    if(nick)
+    nick = Scarlet::Nick.where(:nick=>params[1]).first
+    if nick
       offset = nick.settings[:timeoffset] || 0
-      reply Time.at(Time.now.gmtime + offset.hour)
+      reply Time.at(Time.now.gmtime + offset.hour).to_s
     else
-      reply "Cannot view time for #{param[1]}"
+      reply "Cannot view time for \"#{params[1]}\"."
     end
   end
 end
