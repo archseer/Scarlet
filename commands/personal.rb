@@ -33,7 +33,7 @@ end
 # // notify_login 
 # // timeoffset
 # // 
-Scarlet.hear /settings (notify_login[ ](?:toggle|on|off)|timeoffset[ ]((?:day|hour|minute|second)s?)(\d+))/i do
+Scarlet.hear /settings (.*)/i do
   n = Scarlet::Nick.where(:nick => sender.nick).first
   if(n)
     case(params[1])
@@ -44,11 +44,10 @@ Scarlet.hear /settings (notify_login[ ](?:toggle|on|off)|timeoffset[ ]((?:day|ho
     when /timeoffset[ ]*(?:GMT([+-]?\d+))?/i
       time_off = $1
       n.settings[:timeoffset] ||= 0
-      if(time_off)
-        n.settings[:timeoffset] = time_off.to_i
-      else
-        notice sender.nick, "Your current time Offset: GMT%d" % n.settings[:timeoffset]
-      end
+      n.settings[:timeoffset] = time_off.to_i if(time_off)
+      notice sender.nick, "Your current time Offset: GMT%d" % n.settings[:timeoffset]
+    else
+      reply "Invalid setting, %s" % params[1]
     end
     n.save!
   else

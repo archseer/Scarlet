@@ -17,7 +17,7 @@ Scarlet.hear /klik/i, :registered do
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
 # time - Prints the current owners time
-Scarlet.hear /time (\S+)?/i, :registered do
+Scarlet.hear /time(?: (\S+))?/i, :registered do
   unless params[1]
     reply Time.now
   else
@@ -26,7 +26,7 @@ Scarlet.hear /time (\S+)?/i, :registered do
       offset = nick.settings[:timeoffset] || 0
       reply Time.at(Time.now.gmtime + offset.hour).to_s
     else
-      reply "Cannot view time for \"#{params[1]}\"."
+      reply 'Cannot view time for "%s".' % params[1]
     end
   end
 end
