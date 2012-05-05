@@ -3,7 +3,7 @@ module Scarlet
 class Server
   include ::OutputHelper
   attr_accessor :scheduler, :log, :reconnect, :banned
-  attr_accessor :connection, :current_nick, :config
+  attr_accessor :connection, :current_nick, :config, :ircd
   attr_reader :channels
 
   def initialize(config) # irc could/should have own handlers.
@@ -171,6 +171,8 @@ class Server
     end
   when :"001"
     msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password
+  when :"004"
+    @ircd = event.params[1]
   when :"005"
     event.params.each { |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
@@ -181,7 +183,7 @@ class Server
       end
     }
   when /00\d/ # Login procedure
-    print_console event.params, :light_green if $config.irc_bot.display_logon
+    print_console event.params.first, :light_green if $config.irc_bot.display_logon
   when :'324' # Chan mode
     mode = true
     event.params[1].split("").each do |c|
@@ -237,8 +239,8 @@ class Server
   end
 
   def check_nick_login nick
-    #msg "NickServ", "ACC #{nick}", true # freenode
-    msg "NickServ", "STATUS #{nick}", true
+    msg "NickServ", "ACC #{nick}", true if @ircd =~ /ircd-seven/i # freenode
+    msg "NickServ", "STATUS #{nick}", true if @ircd =~ /unreal/i
   end
 end
 end
