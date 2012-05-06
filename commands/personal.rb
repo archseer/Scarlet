@@ -45,13 +45,14 @@ Scarlet.hear /settings (.*)/i do
       timezone = $1
       # // << Work some magic that finds the proper zone here >_>
       if timezone
-        zones, regex = ActiveSupport::TimeZone.zones_map.keys, Regexp.new(timezone,"i")
-        properzone = zones.find { |s| s =~ regex }
-        if properzone
+        # // Fix the zone search later
+        #zones, regex = ActiveSupport::TimeZone.zones_map.keys, Regexp.new(timezone,"i")
+        properzone = timezone #zones.find { |s| s =~ regex }
+        #if properzone
           n.settings[:timezone] = properzone
-        else
-          notice sender.nick, "Your Time Zone may not be supported, or you made a mistake: %s" % timezone
-        end
+        #else
+        #  notice sender.nick, "Your Time Zone may not be supported, or you made a mistake: %s" % timezone
+        #end
       end
       notice sender.nick, "Your current Time Zone is: %s" % n.settings[:timezone]
     else
