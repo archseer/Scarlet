@@ -39,6 +39,6 @@ Scarlet.hear /hb (\S+)/i, :registered do
 end
 # update <name>? - Just to nag the crap out of Speed
 Scarlet.hear /update(?: (\S+))?/i, :registered do
-  notice params[1]||"Speed", "%s asks that you Update Me!" % sender.nick
-  notice sender.nick, "Notice sent"
+  notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
+  notice sender.nick, "Notice sent."
 end
