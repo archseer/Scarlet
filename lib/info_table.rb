@@ -92,8 +92,8 @@ module Scarlet
         (wr.collect do |x|
           color_a = cell_color(x,y) || col_color(x) || row_color(y) || [0,1]
           width = column_width[x]
-          @data[x][y].align(width,:left,@padding).irc_color(*color_a)[0,width]
-        end).join("")
+          @data[x][y].align(width,:left,@padding).irc_color(*color_a)
+        end)[0,column_width.inject(:+)].join("")
       end
     end
     # // A simple 3 column table
