@@ -4,7 +4,7 @@ Scarlet.hear /add todo\s*(.+)/i do
   reply "TODO was added."
 end
 
-# todo delete <id> - Deletes TODO with <id>.
+# delete todo <id> - Deletes TODO with <id>.
 Scarlet.hear /delete todo\s*(\d+)/i, :dev do
   id = params[1].strip.to_i
   t = Scarlet::Todo.sort(:created_at).all[id-1].delete
