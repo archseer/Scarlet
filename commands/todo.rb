@@ -24,12 +24,12 @@ Scarlet.hear /show todo\s*(\d+)/ do
     crt   = t.created_at.std_format.to_s
     table = Scarlet::ColumnTable.new(2,4)
     table.clear
-    table.padding = 3
+    table.padding = 1
     table.set_row(0,0,"TODO"      ,"#%d"%id).set_row_color(0,0,1)
     table.set_row(0,1,"Date:"     ,crt     ).set_row_color(1,1,0)
     table.set_row(0,2,"By:"       ,t.by    ).set_row_color(2,1,0)
     table.set_row(0,3,"Entry:"    ,""      ).set_row_color(3,1,0)
-    wd, pad = table.column_widths.inject(:+), table.padding
+    wd, pad = table.row_width, table.padding
     msgs = t.msg.word_wrap(wd)
     table.compile.each { |line| reply line, true }
     msgs.each_with_index { |s,i| reply s.align(wd,:left,pad).irc_color(1,0) }
@@ -45,7 +45,7 @@ Scarlet.hear /list todos/ do
     todos = Scarlet::Todo.sort(:created_at.desc).limit(10).all
     table = Scarlet::ColumnTable.new(3,[10,c].min)
     table.clear 
-    table.padding = 3
+    table.padding = 1
     todos.each_with_index { |t,i|
       table.set_row(0,i,"##{c-i}","\t#{t.by}\t","\t#{t.created_at.std_format}").set_row_color(i,1,0)
     }

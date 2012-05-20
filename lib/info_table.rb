@@ -81,7 +81,7 @@ module Scarlet
       (0...@width).collect { |x| @data[x].max_by{|s|s.size}.size+@padding+(@padding%2) }
     end
     def row_width
-      column_widths.inject(0) { |r,i| r+i }
+      column_widths.inject(:+)
     end
     # // @data[x] => [String, String, String...]
     def compile
@@ -92,8 +92,8 @@ module Scarlet
         (wr.collect do |x|
           color_a = cell_color(x,y) || col_color(x) || row_color(y) || [0,1]
           width = column_width[x]
-          @data[x][y].align(width,:left,@padding).irc_color(*color_a)
-        end)[0,column_width.inject(:+)].join("")
+          @data[x][y].dup.align(width,:left,@padding).irc_color(*color_a)
+        end).join("")
       end
     end
     # // A simple 3 column table
