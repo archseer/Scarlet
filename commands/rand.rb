@@ -20,15 +20,11 @@ Scarlet.hear /time(?: (\S+))?/i, :registered do
     reply Time.now.to_s
   else
     nck = params[1].gsub(/-me/i,sender.nick)
-    nick = Scarlet::Nick.where(nck).first
+    nick = Scarlet::Nick.where(:nick => nck).first
     if nick
       zone_str = nick.settings[:timezone] 
       if zone_str
-        begin
-          reply Time.now.in_time_zone(zone_str) 
-        rescue(Exception) => ex
-          #reply "Invalid timezone: %s" % zone_str
-        end
+        reply Time.now.in_time_zone(zone_str).to_s
       else
         reply "Your timezone is not set: Use !settings timezone your_timezone_string"
       end
