@@ -48,7 +48,7 @@ end
 Scarlet.hear (/unfilter (.+)/), :dev do
   Scarlet::Command.filter.delete params[1].strip
 end
-
+# restart - Restarts the bot.
 Scarlet.hear /restart/, :dev do
   reply 'Restarting myself...'
   server.send_cmd :quit, :quit => $config.irc_bot.quit
