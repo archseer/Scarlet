@@ -222,7 +222,7 @@ class Server
   when :'375' # START of MOTD
     hsh = Scarlet.base_mode_list.dup
     prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
-    supmodes = @extensions[:prefix].match(/\(([qaohv]*)\)([~&@%+]*)/)[1,2]
+    supmodes = @extensions[:prefix].match(/\((\w+)\)(.+)/)[1,2]
     #supmodes[0],supmodes[1] # // :prefix(s), :symbol(s)
     supped = prefix2key.keys & supmodes[0].split("")
     @mode_list = Hash[supped.collect { |prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
