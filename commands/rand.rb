@@ -42,7 +42,8 @@ end
 Scarlet.hear /hb (\S+)/i, :registered do
   reply "Happy Birthday #{params[1]}!"
 end
-# update me <name>? - Just to nag the crap out of Speed
-Scarlet.hear /update me (\S+)?/i, :registered do
+# update <name>? - Just to nag the crap out of Speed
+Scarlet.hear /update(?: (\S+))?/i, :registered do
   notice params[1]||"Speed", "%s asks that you Update Me!" % sender.nick
+  notice sender.nick, "Notice sent"
 end
