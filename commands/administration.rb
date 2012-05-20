@@ -4,9 +4,10 @@ Scarlet.hear /bot ban ([0-3]) (.+)(?:\: (.+))?/i, :dev do
   nicks = params[2].split(" ").compact
   reason= params[3].to_s
 begin 
+  list = []
   sender_nik = Scarlet::Nick.where(:nick=>sender.nick).first
   nicks.each { |nick_str| 
-    notice sender.nick, "%s is currently not present on this network"
+    #notice sender.nick, "%s is currently not present on this network"
     Scarlet::Ban.new(:nick=>nick_str).save! if Scarlet::Ban.where(:nick=>nick_str).empty?
     usr = Scarlet::Ban.where(:nick=>nick_str).first
     nck = Scarlet::Nick.where(:nick=>nick_str).first
@@ -14,12 +15,17 @@ begin
       usr.level = lvl 
       usr.by = sender.nick
       usr.reason = reason
+      list << usr.nick
     else
-      notice sender.nick, "You cannot ban: %s" % nick_str
+      notice sender.nick, "You cannot ban %s" % nick_str
     end  
     usr.save!
   }
-  reply "#{nicks.join ", "} #{nicks.length == 1 ? "is" : "are"} now banned from using #{server.current_nick} with ban level #{lvl}."
+  if list.size > 0
+    reply "#{list.join ", "} #{list.length == 1 ? "is" : "are"} now banned from using #{server.current_nick} with ban level #{lvl}."
+  else
+    reply "No one was banned."
+  end
 rescue => ex
   notice sender.nick, "Ban Failed #{ex.message}"
 end  
@@ -70,6 +76,6 @@ end
 # kick <nick>
 ["op","hop","voice","ban","kick"].each { |str|
   Scarlet.hear /#{str} (\S+)/i, :dev do
-    send_data "#{str.upcase} %s" % params[1]
+    server.send_data "#{str.upcase} %s" % params[1]
   end
 }  
