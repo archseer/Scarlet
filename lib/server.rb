@@ -1,5 +1,15 @@
 load "modules/scarlet/lib/output_helper.rb"
 module Scarlet
+  # // All known modes
+  @base_mode_list = {
+    :owner      => {:name=>'owner'     ,:prefix=>'q',:symbol=>'~'},
+    :admin      => {:name=>'admin'     ,:prefix=>'a',:symbol=>'&'},
+    :op         => {:name=>'operator'  ,:prefix=>'o',:symbol=>'@'},
+    :hop        => {:name=>'halfop'    ,:prefix=>'h',:symbol=>'%'},
+    :voice      => {:name=>'voice'     ,:prefix=>'v',:symbol=>'+'},
+    :registered => {:name=>'registered',:prefix=>'r',:symbol=>'' }
+  }
+  def self.base_mode_list; @base_mode_list; end
 class Server
   include ::OutputHelper
   attr_accessor :scheduler, :log, :reconnect, :banned
@@ -22,28 +32,9 @@ class Server
     @extensions = {}  # what the server-side supports
     @reconnect = true
     
-    # // All known modes
-    @base_mode_list = {
-      :owner      => {:name=>'owner'     ,:prefix=>'q',:symbol=>'~'},
-      :admin      => {:name=>'admin'     ,:prefix=>'a',:symbol=>'&'},
-      :op         => {:name=>'operator'  ,:prefix=>'o',:symbol=>'@'},
-      :hop        => {:name=>'halfop'    ,:prefix=>'h',:symbol=>'%'},
-      :voice      => {:name=>'voice'     ,:prefix=>'v',:symbol=>'+'},
-      :registered => {:name=>'registered',:prefix=>'r',:symbol=>'' }
-    }
     @mode_list = {} # Temp
   end
-  # // Only return supported modes
   attr_reader :base_mode_list, :mode_list
-  def filter_mode_list
-    hsh = @base_mode_list.dup
-    prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
-    supmodes = @extensions[:prefix].match(/\(([qaohv]*)\)([~&@%+]*)/)[1,2]
-    #supmodes[0] # // :prefix(s)
-    #supmodes[1] # // :symbol(s)
-    supped = prefix2key.keys&supmodes[0].split("")
-    @mode_list = Hash[supped.collect { |prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
-  end
   def disconnect
     send_cmd :quit, :quit => $config.irc_bot.quit
     @reconnect = false
@@ -229,7 +220,12 @@ class Server
   when :'366' # end of /NAMES list
     @channels[event.params.first][:users].keys.each { |nick| check_nick_login nick} # check permissions of users
   when :'375' # START of MOTD
-    filter_mode_list
+    hsh = Scarlet.base_mode_list.dup
+    prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
+    supmodes = @extensions[:prefix].match(/\(([qaohv]*)\)([~&@%+]*)/)[1,2]
+    #supmodes[0],supmodes[1] # // :prefix(s), :symbol(s)
+    supped = prefix2key.keys & supmodes[0].split("")
+    @mode_list = Hash[supped.collect { |prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
     # this is immediately after 005 messages usually so set up extended NAMES command
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
