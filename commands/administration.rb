@@ -17,7 +17,7 @@ begin
     end  
     usr.save!
   }
-  reply "#{nicks.join ", "} #{nicks.length == 1 ? "is" : "are"} now banned from using #{$config.irc_bot.nick} with ban level #{lvl}."
+  reply "#{nicks.join ", "} #{nicks.length == 1 ? "is" : "are"} now banned from using #{server.current_nick} with ban level #{lvl}."
 rescue => ex
   notice sender.nick, "Ban Failed #{ex.message}"
 end  
@@ -35,7 +35,7 @@ Scarlet.hear /unban (.+)/i, :dev do
       ban.save!
     end
   }
-  reply "#{$config.irc_bot.nick} ban was revoked for #{nicks.join(", ")}."
+  reply "#{server.current_nick} ban was revoked for #{nicks.join(", ")}."
 end
 # rename <nick> - Renames the bot to nick.
 Scarlet.hear /rename\s+(.+)/i, :dev do
