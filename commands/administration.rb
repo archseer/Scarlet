@@ -15,7 +15,7 @@ begin
       usr.by = sender.nick
       usr.reason = reason
     end  
-    ban.save!
+    usr.save!
   }
   reply "#{nicks.join ", "} #{nicks.length == 1 ? "is" : "are"} now banned from using #{$config.irc_bot.nick} with ban level #{lvl}."
 rescue => ex
