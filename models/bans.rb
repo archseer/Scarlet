@@ -1,8 +1,8 @@
 class Scarlet::Ban
   include MongoMapper::Document
   validates_presence_of :nick
-  key :nick   ,     String
-  key :channel,     Array
+  key :nick,        String
+  key :servers,     Array
   key :by,          String
   key :reason,      String
   key :level,       Integer, :default => 0
