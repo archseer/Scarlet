@@ -33,9 +33,10 @@ class Server
     }
   end
   # // Only return supported modes
+  attr_reader :base_mode_list
   def mode_list
     hsh = @base_mode_list.dup
-    prefix2key = hsh.remap{|k,v|[v[:symbol],k]}
+    prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
     supmodes = @extensions[:prefix].match(/\(([qaohv]*)\)([~&@%+]*)/)[1,2]
     #supmodes[0] # // :prefix(s)
     #supmodes[1] # // :symbol(s)
