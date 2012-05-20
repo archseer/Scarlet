@@ -1,9 +1,12 @@
 module Scarlet::Parser
   class << self
 
-    def parse_names_list string # parses NAMES list
+    def parse_names_list server, string # parses NAMES list
       settings = {}
-      modes = {'~' => :owner, '&' => :admin, '@' => :operator, '%' => :halfop, '+'=> :voice}
+      mlist = server.mode_list.dup
+      mlist.delete(:registered)
+      modes = mlist.remap{ |k,v| [v[:symbol], v[:name].to_sym]] }
+      #{'~' => :owner, '&' => :admin, '@' => :operator, '%' => :halfop, '+'=> :voice}
       matdata = string.match(/([\+%@&~]*)(\S+)/)
       umodes, name = matdata[1].split(""), matdata[2]
       modes.values.each{|v|settings[v]=false}

@@ -21,8 +21,27 @@ class Server
     @modes = []       # bot account's modes (ix,..)
     @extensions = {}  # what the server-side supports
     @reconnect = true
+    
+    # // All known modes
+    @base_mode_list = {
+      :owner      => {:name=>'owner'     ,:prefix=>'q',:symbol=>'~'},
+      :admin      => {:name=>'admin'     ,:prefix=>'a',:symbol=>'&'},
+      :op         => {:name=>'operator'  ,:prefix=>'o',:symbol=>'@'},
+      :hop        => {:name=>'halfop'    ,:prefix=>'h',:symbol=>'%'},
+      :voice      => {:name=>'voice'     ,:prefix=>'v',:symbol=>'+'},
+      :registered => {:name=>'registered',:prefix=>'r',:symbol=>'' }
+    }
   end
-
+  # // Only return supported modes
+  def mode_list
+    hsh = @base_mode_list.dup
+    prefix2key = hsh.remap{|k,v|[v[:symbol],k]}
+    supmodes = @extensions[:prefix].match(/\(([qaohv]*)\)([~&@%+]*)/)[1,2]
+    #supmodes[0] # // :prefix(s)
+    #supmodes[1] # // :symbol(s)
+    supped = prefix2key.keys&supmodes[0].split("")
+    Hash[supped.collect { |prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
+  end
   def disconnect
     send_cmd :quit, :quit => $config.irc_bot.quit
     @reconnect = false
@@ -138,7 +157,7 @@ class Server
       mode = true
       event.params.compact!
       if event.params.count > 1 # means we have an user list
-        flags = {"q" => :owner, "a" => :admin, "o" => :operator, "h" => :halfop, "v" => :voice, "r" => :registered}
+        flags = mode_list.remap { |k,v| [v[:prefix],v[:name].to_sym] }
         operator_count = 0
         nicks = event.params[1..-1]
 
@@ -204,7 +223,7 @@ class Server
   when :'353' # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
     # param[1] -> chan, param[2] - users
-    event.params[2].split(" ").each { |nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list nick }
+    event.params[2].split(" ").each { |nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick }
   when :'366' # end of /NAMES list
     @channels[event.params.first][:users].keys.each { |nick| check_nick_login nick} # check permissions of users
   when :'375' # START of MOTD

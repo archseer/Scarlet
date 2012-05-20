@@ -72,6 +72,13 @@ class Hash
     self[newkey] = self.delete(key) if self[key]
     return self
   end
+  def get_values *args
+    args.collect{|sym|self[sym]}
+  end
+  # // rename this later
+  def remap
+    Hash[self.collect{|(key,value)|yield key,value}]
+  end
 end
 
 class File

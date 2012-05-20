@@ -74,8 +74,25 @@ end
 # voice <nick>
 # ban <nick>
 # kick <nick>
-["op","hop","voice","ban","kick"].each { |str|
-  Scarlet.hear /#{str} (\S+)/i, :dev do
-    server.send_data "#{str.upcase} %s" % params[1]
+#flags = {"q"=>:owner,"a"=>:admin,"o"=>:operator,"h"=>:halfop,"v"=>:voice,"r"=> :registered}
+[["admin",[:+,:admin]],["deadmin",[:-,:admin]],
+ ["op"   ,[:+,:op]]   ,["deop"   ,[:-,:op]],
+ ["hop"  ,[:+,:hop]]  ,["dehop"  ,[:-,:hop]],
+ ["voice",[:+,:voice]],["devoice",[:-,:voice]]
+].each { |str| 
+  Scarlet.hear /#{str[0]} (\S+)/i, :dev do
+    op,md = str[1]
+    mhsh = server.mode_list[md]
+    
+    unless mhsh
+      notice sender.nick, "Unsupported mode: #{md}"
+    else
+      mode = op.to_s + mhsh[:prefix].to_s
+      server.send_data "mode %s #{mode} %s" % [channel,params[1]]
+    end
   end
 }  
+#Scarlet.hear /kick (\S+(?:\s*,\s*\S+)*)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
+Scarlet.hear /kick (\S+)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
+  server.send_data "KICK %s %s %s" [params[2]||channel,params[1],params[3]]
+end
