@@ -6,7 +6,7 @@ class Object
   end
   def to_bool
     !!self
-  end unless method_defined? :to_bool
+  end
 end
 
 class Array
