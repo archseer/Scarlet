@@ -4,6 +4,9 @@ class Object
   def nil_zero?
     self.nil? || self == 0
   end
+  def to_bool
+    !!self
+  end unless method_defined? :to_bool
 end
 
 class Array
@@ -47,6 +50,14 @@ class String
 
   def irc_color fg, bg
     "\x03#{"%02d" % fg},#{"%02d" % bg}#{self}\x03"
+  end
+  def str2bool(bool=false)
+    case(self.upcase)
+    when "TOGGLE", "SWITCH" ; !bool
+    when "ON", "TRUE"       ; true
+    when "OFF", "FALSE"     ; false
+    else                    ; bool
+    end
   end
 end
 

@@ -38,7 +38,7 @@ Scarlet.hear /settings (.*)/i do
   if(n)
     case(params[1])
     when /notify_login[ ](?:toggle|on|off)/i
-      opt = Scarlet::IcyCommands.str2bool($1)
+      opt = $1.str2bool(!!n.settings[:notify_login])
       n.settings[:notify_login] = opt
       notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
     when /timezone(?:[ ](.+))?/i

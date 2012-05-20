@@ -1,23 +1,23 @@
 # todo add <message> - Logs a message on the TODO tracker.
-Scarlet.hear /todo add\s*(.+)/ do
+Scarlet.hear /add todo\s*(.+)/i do
   Scarlet::Todo.new(:msg => params[1], :by => sender.nick).save!
   reply "TODO was added."
 end
 
 # todo delete <id> - Deletes TODO with <id>.
-Scarlet.hear /todo delete\s*(\d+)/, :dev do
+Scarlet.hear /delete todo\s*(\d+)/i, :dev do
   id = params[1].strip.to_i
   t = Scarlet::Todo.sort(:created_at).all[id-1].delete
   reply "TODO ##{id} was deleted."
 end
 
 # count todos - Shows the total count of TODO's.
-Scarlet.hear /count todos/ do
+Scarlet.hear /count todo(?:s)?/i do
   reply "TODO count: #{Scarlet::Todo.all.count}"
 end
 
 # show todo <id> - Shows the message of TODO with <id>.
-Scarlet.hear /show todo\s*(\d+)/ do
+Scarlet.hear /show todo\s*(\d+)/i do
   id = params[1].strip.to_i
   t = Scarlet::Todo.sort(:created_at).all[id-1]
   if t
@@ -39,7 +39,7 @@ Scarlet.hear /show todo\s*(\d+)/ do
 end
 
 # list todos - Displays a list with the latest 10 TODO's.
-Scarlet.hear /list todos/ do
+Scarlet.hear /list todo(?:s)?/i do
   c = Scarlet::Todo.all.count
   if c > 0
     todos = Scarlet::Todo.sort(:created_at.desc).limit(10).all
