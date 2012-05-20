@@ -30,7 +30,7 @@ Scarlet.hear /show todo\s*(\d+)/ do
     table.set_row(0,2,"By:"       ,t.by    ).set_row_color(2,1,0)
     table.set_row(0,3,"Entry:"    ,""      ).set_row_color(3,1,0)
     wd, pad = table.column_widths.inject(:+), table.padding
-    msgs = t.msg.word_wrap(wh)
+    msgs = t.msg.word_wrap(wd)
     table.compile.each { |line| reply line, true }
     msgs.each_with_index { |s,i| reply s.align(wd,:left,pad).irc_color(1,0) }
   else
