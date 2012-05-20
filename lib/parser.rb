@@ -5,7 +5,7 @@ module Scarlet::Parser
       settings = {}
       mlist = server.mode_list.dup
       mlist.delete(:registered)
-      modes = mlist.remap{ |k,v| [v[:symbol], v[:name].to_sym]] }
+      modes = mlist.remap{ |k,v| [v[:symbol], v[:name].to_sym] }
       #{'~' => :owner, '&' => :admin, '@' => :operator, '%' => :halfop, '+'=> :voice}
       matdata = string.match(/([\+%@&~]*)(\S+)/)
       umodes, name = matdata[1].split(""), matdata[2]
