@@ -18,7 +18,7 @@ Scarlet.hear (/download soundcloud favourites/), :owner do
           filename = "#{fav['user']['username']} - #{fav['title'].gsub("/", "")}.mp3"
         end
 
-        path = "#{base_path}/../../../../mpd-ruby/downloads/#{filename}"
+        path = "#{base_path}/../../../../cardinal/downloads/#{filename}"
         File.open(path, "wb") { |file| file.write(song.response)}
         if addtags == true
           file = TagLib::MPEG::File.new(path)
