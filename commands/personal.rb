@@ -29,36 +29,31 @@ Scarlet.hear /register/i do
   end
 end
 
-# settings - Change your account settings with the bot
+# // settings - Change your account settings with the bot
 # // notify_login 
 # // timezone
 # // 
-Scarlet.hear /settings (.*)/i do
+# set timezone <timezone> - self-explanatory; used with !time command
+Scarlet.hear /set(?: my)? timezone (.+)/i do
   n = Scarlet::Nick.where(:nick => sender.nick).first
-  if(n)
-    case(params[1])
-    when /notify_login[ ](?:toggle|on|off)/i
-      opt = $1.str2bool(!!n.settings[:notify_login])
-      n.settings[:notify_login] = opt
-      notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
-    when /timezone(?:[ ](.+))?/i
-      timezone = $1
-      # // << Work some magic that finds the proper zone here >_>
-      if timezone
-        # // Fix the zone search later
-        #zones, regex = ActiveSupport::TimeZone.zones_map.keys, Regexp.new(timezone,"i")
-        properzone = timezone #zones.find { |s| s =~ regex }
-        #if properzone
-          n.settings[:timezone] = properzone
-        #else
-        #  notice sender.nick, "Your Time Zone may not be supported, or you made a mistake: %s" % timezone
-        #end
-      end
+  if n
+    if TZInfo::Timezone.all_identifiers.include? params[1]
+      n.settings[:timezone] = params[1]
       notice sender.nick, "Your current Time Zone is: %s" % n.settings[:timezone]
     else
-      reply "Unknown or Invalid setting, %s" % params[1]
+      notice sender.nick, "Invalid Time Zone: %s" % params[1]
     end
-    n.save!
+  else
+    notice sender.nick, "You cannot access account settings, are you logged in?"
+  end
+end
+# notify login <toggle|on|off> - Should you be notified when you auto-login?
+Scarlet.hear /notify(?: me(?: on)?)? login (?:toggle|on|off)/i do
+  n = Scarlet::Nick.where(:nick => sender.nick).first
+  if n 
+    opt = params[1].str2bool(!!n.settings[:notify_login])
+    n.settings[:notify_login] = opt
+    notice sender.nick, "You will #{opt ? "NOT" : ""} be notified on bot login"
   else
     notice sender.nick, "You cannot access account settings, are you logged in?"
   end

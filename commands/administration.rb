@@ -15,6 +15,7 @@ begin
       usr.level = lvl 
       usr.by = sender.nick
       usr.reason = reason
+      usr.servers |= [server.config.address]
       list << usr.nick
     else
       notice sender.nick, "You cannot ban %s" % nick_str
@@ -40,6 +41,7 @@ Scarlet.hear /bot unban (.+)/i, :dev do
       ban.level = 0 
       ban.by = sender.nick
       ban.reason = ""
+      ban.server.delete(server.config.address)
       ban.save!
     end
   }
