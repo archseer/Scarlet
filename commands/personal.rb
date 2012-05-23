@@ -48,7 +48,7 @@ Scarlet.hear /set(?: my)? timezone (.+)/i do
   end
 end
 # notify login <toggle|on|off> - Should you be notified when you auto-login?
-Scarlet.hear /notify(?: me)? login (?:toggle|on|off)/i do
+Scarlet.hear /notify(?: me)? login (toggle|on|off)/i do
   n = Scarlet::Nick.where(:nick => sender.nick).first
   if n 
     opt = params[1].str2bool(!!n.settings[:notify_login])
