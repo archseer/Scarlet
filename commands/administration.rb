@@ -2,8 +2,7 @@
 Scarlet.hear /bot ban ([0-3]) (.+)(?:\: (.+))?/i, :dev do
   lvl   = params[1].to_i
   nicks = params[2].split(" ").compact
-  reason= params[3].to_s
-begin 
+  reason= params[3].to_s 
   list = []
   sender_nik = Scarlet::Nick.where(:nick=>sender.nick).first
   nicks.each { |nick_str| 
@@ -27,15 +26,15 @@ begin
   else
     reply "No one was banned."
   end
-rescue => ex
-  notice sender.nick, "Ban Failed #{ex.message}"
-end  
 end
 
 # bot unban <user> - Unbans a user from using the bot.
 Scarlet.hear /bot unban (.+)/i, :dev do
   nicks = params[1].split " "
+  sender_nik = Scarlet::Nick.where(:nick=>sender.nick).first
+  list = []
   nicks.each { |nick_str| 
+    next if sender_nik.nick.upcase == nick_str.upcase
     ban = Scarlet::Ban.where(:nick=>nick_str).first
     if ban
       ban.level = 0 
@@ -43,9 +42,10 @@ Scarlet.hear /bot unban (.+)/i, :dev do
       ban.reason = ""
       ban.server.delete(server.config.address)
       ban.save!
+      list << ban.nick
     end
   }
-  reply "#{server.current_nick} ban was revoked for #{nicks.join(", ")}."
+  reply "#{server.current_nick} ban was revoked for #{list.join(", ")}."
 end
 # rename <nick> - Renames the bot to nick.
 Scarlet.hear /rename\s+(.+)/i, :dev do
@@ -71,11 +71,11 @@ Scarlet.hear /restart/i, :dev do
 end
 
 # // Good ol' bot commands
-# op <nick>
-# hop <nick>
-# voice <nick>
-# ban <nick>
-# kick <nick>
+# op <nick> - Give Operator Status to <nick>
+# hop <nick> - Give Half-Op Status to <nick>
+# voice <nick> - Give Voice Status to <nick>
+#//ban <str> - Bans <str>
+# kick <nick> - Kicks <nick>
 #flags = {"q"=>:owner,"a"=>:admin,"o"=>:operator,"h"=>:halfop,"v"=>:voice,"r"=> :registered}
 [["admin",[:+,:admin]],["deadmin",[:-,:admin]],
  ["op"   ,[:+,:op]]   ,["deop"   ,[:-,:op]],
