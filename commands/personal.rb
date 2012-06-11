@@ -53,7 +53,7 @@ Scarlet.hear /notify(?: me)? login (toggle|on|off)/i do
   if n 
     opt = params[1].str2bool(!!n.settings[:notify_login])
     n.settings[:notify_login] = opt
-    notice sender.nick, "You will #{opt ? "" : "NOT"} be notified on bot login"
+    notice sender.nick, "You will #{opt ? "" : "NOT "}be notified on bot login"
   else
     notice sender.nick, "You cannot access account settings, are you logged in?"
   end

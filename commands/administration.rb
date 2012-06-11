@@ -82,7 +82,7 @@ end
  ["hop"  ,[:+,:hop]]  ,["dehop"  ,[:-,:hop]],
  ["voice",[:+,:voice]],["devoice",[:-,:voice]]
 ].each { |str| 
-  Scarlet.hear /#{str[0]} (\S+)/i, :dev do
+  Scarlet.hear /#{str[0]}\s(\S+)/i, :dev do
     op,md = str[1]
     mhsh = server.mode_list[md]
     
@@ -95,6 +95,10 @@ end
   end
 }  
 #Scarlet.hear /kick (\S+(?:\s*,\s*\S+)*)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
-Scarlet.hear /kick (\S+)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
-  server.send_data "KICK %s %s %s" [params[2]||channel,params[1],params[3]]
+# kick <nick> <channel> : <reason>
+Scarlet.hear/kick\s(\S+)(?:\s(\#\S+))?(?:\s\:\s(.+))?/i, :dev do
+  channel = params[2]||channel
+  target  = params[1]
+  reason  = params[3]||""
+  server.send_data "KICK %s %s %s" [,params[1],params[3]]
 end
