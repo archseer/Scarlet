@@ -84,12 +84,11 @@ end
 ].each { |str| 
   Scarlet.hear /#{str[0]}\s(\S+)/i, :dev do
     op,md = str[1]
-    mhsh = server.mode_list[md]
-    
-    unless mhsh
+    modes_hsh = server.mode_list[md]
+    unless modes_hsh
       notice sender.nick, "Unsupported mode: #{md}"
     else
-      mode = op.to_s + mhsh[:prefix].to_s
+      mode = op.to_s + modes_hsh[:prefix].to_s
       server.send_data "mode %s #{mode} %s" % [channel,params[1]]
     end
   end
@@ -100,5 +99,5 @@ Scarlet.hear/kick\s(\S+)(?:\s(\#\S+))?(?:\s\:\s(.+))?/i, :dev do
   channel = params[2]||channel
   target  = params[1]
   reason  = params[3]||""
-  server.send_data "KICK %s %s %s" [,params[1],params[3]]
+  server.send_data "KICK #{channel} #{target} #{reason}"
 end
