@@ -95,9 +95,6 @@ end
 }  
 #Scarlet.hear /kick (\S+(?:\s*,\s*\S+)*)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
 # kick <nick> <channel> : <reason>
-Scarlet.hear /kick\s(\S+)(?:\s(\#\S+))?(?:\s\:\s(.+))?/i, :dev do
-  channel = params[2]||channel
-  target  = params[1]
-  reason  = params[3]||""
-  server.send_data "KICK #{channel} #{target} #{reason}"
+Scarlet.hear /kick\s(?<nick>\S+)(?<channel>\s\#\S+)?(?:\s\:\s(?<reason>.+))?/i, :dev do
+  server.send_data "KICK #{param[:channel]||channel} #{param[:nick]} #{param[:reason]}"
 end
