@@ -13,11 +13,11 @@ quotes = [
 ]
 reply quotes.sample
 end
-Scarlet.hear /murder/ do
+Scarlet.hear /murder(?:\s(\S+))?/ do
   quotes = [
     "puts a bullet to %s head",
     "snaps %s's neck",
     "uppercuts %s"
   ]
-  action quotes.sample % context_nick(sender.nick)
+  action quotes.sample % context_nick(params[1]||sender.nick)
 end
