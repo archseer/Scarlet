@@ -1,4 +1,4 @@
-# murder - Quotes one of GLaDOS's murder quotes.
+# murder core - Quotes one of GLaDOS's murder quotes.
 Scarlet.hear /murder core/ do
 quotes = [
 "What are you doing? Stop it! I... I... We are pleased that you made it through the final challenge where we pretended we were going to murder you.",
@@ -13,6 +13,8 @@ quotes = [
 ]
 reply quotes.sample
 end
+# murder - Returns a random kill scenario for the killing of random user.
+# murder <user> - Returns a random kill scenario for the killing of the specified user.
 Scarlet.hear /murder(?:\s(\S+))?/ do
   quotes = [
     "puts a bullet to %s head",
