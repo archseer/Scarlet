@@ -1,11 +1,11 @@
 # encoding: utf-8
 # Do it. For science.
 
-Scarlet.hear (/give me (:?a\s)cookie/) do
+Scarlet.hear (/give me a cookie/) do
   reply "\x01ACTION gives #{sender.nick} a cookie!\x01"
 end
 
-Scarlet.hear (/give me (:?a\s)potato/), :dev do
+Scarlet.hear (/give me a potato/), :dev do
   reply "\x01ACTION gives #{sender.nick} a potato!\x01"
 end
 
@@ -37,7 +37,8 @@ Scarlet.hear (/party/), :registered do
 end
 # poke <nick> - Sends a notice to <nick>, saying you poked him.
 Scarlet.hear (/poke (.+)/), :registered do
-  notice params[1], "#{sender.nick} has poked you."
+  nick = context_nick params[1]
+  notice nick, "#{sender.nick} has poked you."
 end
 
 Scarlet.hear (/eval (.+)/), :dev do

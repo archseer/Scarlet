@@ -112,10 +112,22 @@ class Command
       server.send_cmd cmd, hash
     end
 
-    def method_missing(method, *args)
-      return @event.send(method, *args) if @event.respond_to?(method)
+    def action msg, silent=false
+      server.msg return_path, "\001ACTION #{msg}\001", silent
+    end
+
+    def method_missing method, *args 
+      return @event.send method, *args  if @event.respond_to? method 
       #return @event.server.send(method, *args) if @event.server.respond_to?(method)
       super
+    end
+
+    def context_nick nick
+      case nick.downcase
+      when "you"; server.current_nick
+      when "me" ; sender.nick
+      else      ; nick
+      end
     end
   end
 end
