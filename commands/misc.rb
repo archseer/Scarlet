@@ -1,12 +1,9 @@
 # encoding: utf-8
 # Do it. For science.
 
-Scarlet.hear (/give me a cookie/) do
-  reply "\x01ACTION gives #{sender.nick} a cookie!\x01"
-end
-
-Scarlet.hear (/give me a potato/), :dev do
-  reply "\x01ACTION gives #{sender.nick} a potato!\x01"
+# give me <item> - Responds with an action, "giving" the user the requested item.
+Scarlet.hear (/give me (.+)/) do
+  reply "\x01ACTION gives #{params[1]} to #{sender.nick}!\x01"
 end
 
 Scarlet.hear (/OMG/) do
