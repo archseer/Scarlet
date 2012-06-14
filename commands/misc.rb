@@ -60,7 +60,7 @@ Scarlet.hear (/eval (.+)/), :dev do
       Thread.current[:output] = "==> #{eval(parm)}"
     }
     t.join(10)
-    reply t[:output]
+    reply t[:output] if t.size > 4
   rescue(Exception) => result
     reply "ERROR: #{result.message}".irc_color(4,0)
   end
