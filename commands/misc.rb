@@ -17,11 +17,6 @@ Scarlet.hear (/OMG/) do
   table.compile.each {|line| reply line, true }
 end
 
-Scarlet.hear /test/ do
-  ::Scarlet::ColumnTable.test.each {|line| reply line, true }
-end
-
-
 # show colors - Draws the entire IRC color pallete.
 Scarlet.hear (/show colors/), :dev do
   for i in 0..15
