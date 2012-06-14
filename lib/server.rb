@@ -14,8 +14,7 @@ class Server
   include ::OutputHelper
   attr_accessor :scheduler, :log, :reconnect, :banned
   attr_accessor :connection, :current_nick, :config, :ircd
-  attr_reader :channels
-  attr_reader :extensions #temp
+  attr_reader :channels, :extensions
   def initialize(config) # irc could/should have own handlers.
     @config = config
     @current_nick = config.nick #|| @current_nick
