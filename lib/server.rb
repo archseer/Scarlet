@@ -91,7 +91,7 @@ class Server
     # check for http:// URL's and output their titles (TO IMPROVE! THESE INDENTS ARE ANNOYING!)
     event.params.first.match(/(http:\/\/[^ ]*)/) {|url|
       begin
-        EM::HttpRequest.new(url).get.callback {|http| 
+        EM::HttpRequest.new(url).get(:redirects => 1).callback {|http| 
           http.response.match(/<title>(.*)<\/title>/) {|title|
             msg event.return_path, "Title: #{title[1]}" #(domain)
           }
