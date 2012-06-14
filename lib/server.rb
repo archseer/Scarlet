@@ -89,6 +89,15 @@ class Server
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
       }
     end
+    # check for http:// URL's and output their titles (TO IMPROVE! THESE INDENTS ARE ANNOYING!)
+    event.params.first.match(/(http:\/\/[^ ]*)/) {|url|
+      EM::HttpRequest.new(url).get.callback {|http| 
+        http.response.match(/<title>(.*)<\/title>/) {|title|
+          msg event.return_path, "Title: #{title[1]}" #(domain)
+        }
+      }
+    }
+
     Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{@current_nick}[:,]?\s*/i) || event.params[0].start_with?("!")
   when :notice # Automatic replies must never be sent in response to a NOTICE message.
     if event.sender.nick == "NickServ" 
