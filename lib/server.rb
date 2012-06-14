@@ -90,11 +90,14 @@ class Server
     end
     # check for http:// URL's and output their titles (TO IMPROVE! THESE INDENTS ARE ANNOYING!)
     event.params.first.match(/(http:\/\/[^ ]*)/) {|url|
-      EM::HttpRequest.new(url).get.callback {|http| 
-        http.response.match(/<title>(.*)<\/title>/) {|title|
-          msg event.return_path, "Title: #{title[1]}" #(domain)
+      begin
+        EM::HttpRequest.new(url).get.callback {|http| 
+          http.response.match(/<title>(.*)<\/title>/) {|title|
+            msg event.return_path, "Title: #{title[1]}" #(domain)
+          }
         }
-      }
+      rescue(Exception)
+      end
     }
 
     Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{@current_nick}[:,]?\s*/i) || event.params[0].start_with?("!")
