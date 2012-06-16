@@ -1,5 +1,5 @@
 # murder core - Quotes one of GLaDOS's murder quotes.
-Scarlet.hear /murder core/ do
+Scarlet.hear /murda core/ do
 quotes = [
 "What are you doing? Stop it! I... I... We are pleased that you made it through the final challenge where we pretended we were going to murder you.",
 "Remember when the platform was sliding into the fire pit and I said 'Goodbye' and you were like [no way] and then I was all 'we pretended we were going to murder you'? That was great!",
