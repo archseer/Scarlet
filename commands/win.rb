@@ -8,7 +8,7 @@ Scarlet.hear /win(?:\s(\S+))?/i, :registered do
     nick.save!
     reply "#{sender.nick} gave #{params[1]} a win!" 
   elsif given and !nick
-    reply "You can't win %s" % params[1]  
+    reply "You can't win %s." % params[1]  
   elsif same 
     reply "You can't give yourself a win!" 
   else
