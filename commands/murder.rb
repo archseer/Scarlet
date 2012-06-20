@@ -21,6 +21,16 @@ Scarlet.hear /murder(?:\s(\S+))?/ do
     "snaps %s's neck",
     "uppercuts %s"
   ]
-  u = channel ? server.channels[channel].users.keys.sample : sender.nick
-  action quotes.sample % context_nick(params[1]||u)
+  if channel
+    users = server.channels[channel].users.keys.dup
+    users.delete(server.config.nick)
+    u = params[1]||users.sample
+  else
+    u = sender.nick
+  end
+  if u
+    action quotes.sample % context_nick(u)
+  else
+    reply 'No one to murder, how boring'
+  end
 end
