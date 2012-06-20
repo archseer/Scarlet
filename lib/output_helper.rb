@@ -1,3 +1,4 @@
+# for outputting and logging messages
 module OutputHelper
   def print_chat nick, message, silent=false, log_name=:connection
     log_name ||= :connection

@@ -12,4 +12,4 @@ end
 # // 0 - No Ban
 # // 1 - Suspension
 # // 2 - Bot Ban
-# // 3 - Ban (From Channel)
+# // 3 - Ban (from Channel)

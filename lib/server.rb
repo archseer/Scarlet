@@ -101,7 +101,8 @@ class Server
     }
 
     Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{@current_nick}[:,]?\s*/i) || event.params[0].start_with?("!")
-  when :notice # Automatic replies must never be sent in response to a NOTICE message.
+  when :notice
+    # handle NickServ login checks
     if event.sender.nick == "NickServ" 
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
       if ns_params[:digit] == "3" && !User.ns_login?(@channels, ns_params[:nick])
@@ -110,8 +111,8 @@ class Server
         notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{@current_nick}." if nik && nik.settings[:notify_login] && !$config.irc_bot.testing
       end
       end
-    else
-      print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack
+    else # not from NickServ -- normal notice
+      print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack, ignore notices from Global (wallops?)
     end
   when :join
     if @current_nick != event.sender.nick
@@ -146,9 +147,11 @@ class Server
     end
   when :kick
     messg = "#{event.sender.nick} has kicked #{event.params.first} from #{event.target}"
-    messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick
+    messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick # reason for kick, if given
     messg += "."
     print_console messg, :light_red, event.target
+    # TODO: remove the kicked user from channels[#channel] array or if scarlet was kicked, delete that chan's array.
+    # NOTE: This may automatically be done with part? Check first before coding.
   when :mode
     if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
       mode = true
@@ -157,26 +160,25 @@ class Server
         next if c == "+" or c == "-" or c == " "
         mode ? @modes << c : @modes.subtract_once(c)
       end
-    else # USER modes
+    else # USER/CHAN modes
       mode = true
       event.params.compact!
-      if event.params.count > 1 # means we have an user list
+      if event.params.count > 1 # user list - USER modes
         flags = mode_list.remap { |k,v| [v[:prefix],v[:name].to_sym] }
         operator_count = 0
         nicks = event.params[1..-1]
 
         event.params.first.split("").each_with_index do |flag, i|
           mode = (flag=="+") ? true : (flag == "-" ? false : mode)
-          operator_count += 1 and next if flag == "+" or flag == "-" 
-          next if flag == " "
+          operator_count += 1 and next if flag == "+" or flag == "-" or flag == " "
           nick = nicks[i-operator_count]
-          if nick[0] != "#" 
+          if nick[0] != "#"
             @channels[event.channel][:users][nick][flags[flag]] = mode 
-          else
+          else # hmm, we check again if it's a channel mode? this doesn't make sense
             mode ? @channels[event.channel][:flags] << c : @channels[event.channel][:flags].subtract_once(c)
           end
         end
-      else # means we apply the flags to the channel.
+      else # CHAN modes
         event.params.first.split("").each do |c|
           mode = (c=="+") ? true : (c == "-" ? false : mode)
           next if c == "+" or c == "-" or c == " "
@@ -195,8 +197,8 @@ class Server
   when :"001"
     msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password
   when :"004"
-    @ircd = event.params[1]
-  when :"005"
+    @ircd = event.params[1] # grab the name of the ircd that the server is using
+  when :"005" # PROTOCTL NAMESX reply with a list of options
     event.params.each { |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
         param = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] # convert digit only to digits
@@ -222,30 +224,29 @@ class Server
   when :'333' # Channel topic set by
     print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).std_format}", :light_green
   when :'433' # Nickname exists
-    @current_nick += "Bot"
-    send_cmd :nick, :nick => @current_nick
+    @current_nick += "Bot" and send_cmd :nick, :nick => @current_nick # dumb retry, append "Bot" to nick and resend NICK
   when :'353' # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
     # param[1] -> chan, param[2] - users
-    event.params[2].split(" ").each { |nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick }
+    event.params[2].split(" ").each {|nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick }
   when :'366' # end of /NAMES list
-    @channels[event.params.first][:users].keys.each { |nick| check_nick_login nick} # check permissions of users
+    @channels[event.params.first][:users].keys.each {|nick| check_nick_login nick} # check permissions of users
   when :'375' # START of MOTD
     hsh = Scarlet.base_mode_list.dup
     prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
     supmodes = @extensions[:prefix].match(/\((\w+)\)(.+)/)[1,2]
     #supmodes[0],supmodes[1] # // :prefix(s), :symbol(s)
     supped = prefix2key.keys & supmodes[0].split("")
-    @mode_list = Hash[supped.collect { |prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
+    @mode_list = Hash[supped.collect {|prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
     # this is immediately after 005 messages usually so set up extended NAMES command
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
   when /(372|26[56]|25[1245])/ # ignore MOTD and some statuses
-  when /4\d\d/ # Error messages range
+  when /4\d\d/ # Error message range
     print_console event.params.join(" "), :light_red
     msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true
-  else
+  else # unknown message, print it out as a TODO
     print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect}; 
     target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
   end

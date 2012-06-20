@@ -1,5 +1,7 @@
-# IRCBot! Currently one channel based.
-# uses mustache templating and blank?
+# Scarlet - an IRC bot which is slowly becoming an automated assistant framework
+# Goal: Make it adapter based and not limited to a protocol.
+#----------------------------------------------------------------
+# uses mustache for templating and active_support
 # errors - light_red, info - light_blue, success - light_green
 require 'mustache'
 
@@ -15,8 +17,7 @@ class Hash # instead of hash[:key][:key], hash.key.key
   end
 end
 
-module Scarlet; end
-
+module Scarlet; end # Stub class so we can safely load in files
 base_path = File.expand_path File.dirname(__FILE__)
 Modules.load_models base_path
 Modules.load_libs base_path
@@ -39,7 +40,7 @@ module Scarlet
       @@servers.values.each do |server|
         server.connection = EventMachine::connect(server.config.address, server.config.port, Connection, server)
       end
-      puts 'IRC Bot has started.'.green
+      puts 'Scarlet process has started.'.green
     end
 
     def unload
@@ -54,12 +55,15 @@ module Scarlet
         Dir["#{root}/commands/**/*.rb"].each {|path| load path }
     end
 
+    # DSL delegator to Command. (Scarlet.hear is more expressive than Command.hear)
     def hear regex, clearance=nil, &block
       Command.hear regex, clearance, &block
     end
   end
 end
 
+# load custom commands - TODO: move it inside def load_commands 
+# (which is unused at the moment) and execute it inside def loaded.
 Dir["#{base_path}/commands/**/*.rb"].each {|path| 
   load path 
   Scarlet::Command.parse_help path

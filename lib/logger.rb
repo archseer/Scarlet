@@ -1,3 +1,4 @@
+# Simple logger utility
 module Scarlet
   class Log
     def initialize
