@@ -81,6 +81,7 @@ class Command
     end
     return true
   end
+
   class Callback
     def initialize block
       @block = block
@@ -116,9 +117,9 @@ class Command
       server.msg return_path, "\001ACTION #{msg}\001", silent
     end
 
-    def method_missing method, *args 
+    # DSL delegator, no need to use @event to access it's methods
+    def method_missing method, *args
       return @event.send method, *args if @event.respond_to? method 
-      #return @event.server.send(method, *args) if @event.server.respond_to?(method)
       super
     end
 

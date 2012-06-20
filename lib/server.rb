@@ -117,7 +117,7 @@ class Server
   when :join
     if @current_nick != event.sender.nick
       print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow, event.channel
-      check_nick_login event.sender.nick
+      check_ns_login event.sender.nick
     else
       @log.start_log event.channel
       @channels[event.channel] = {:users => {}, :flags => []}
@@ -167,14 +167,13 @@ class Server
         flags = mode_list.remap { |k,v| [v[:prefix],v[:name].to_sym] }
         operator_count = 0
         nicks = event.params[1..-1]
-
         event.params.first.split("").each_with_index do |flag, i|
           mode = (flag=="+") ? true : (flag == "-" ? false : mode)
           operator_count += 1 and next if flag == "+" or flag == "-" or flag == " "
           nick = nicks[i-operator_count]
           if nick[0] != "#"
             @channels[event.channel][:users][nick][flags[flag]] = mode 
-          else # hmm, we check again if it's a channel mode? this doesn't make sense
+          else # this checks for cases like "MODE +v+n Speed #bugs", but there's an error with event.params not including #bugs TODO
             mode ? @channels[event.channel][:flags] << c : @channels[event.channel][:flags].subtract_once(c)
           end
         end
@@ -230,7 +229,7 @@ class Server
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each {|nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick }
   when :'366' # end of /NAMES list
-    @channels[event.params.first][:users].keys.each {|nick| check_nick_login nick} # check permissions of users
+    @channels[event.params.first][:users].keys.each {|nick| check_ns_login nick} # check permissions of users
   when :'375' # START of MOTD
     hsh = Scarlet.base_mode_list.dup
     prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
@@ -268,7 +267,7 @@ class Server
     print_console ">#{target}< #{message}", :light_cyan, log_name unless silent
   end
 
-  def check_nick_login nick
+  def check_ns_login nick
     msg "NickServ", "ACC #{nick}", true if @ircd =~ /ircd-seven/i # freenode
     msg "NickServ", "STATUS #{nick}", true if @ircd =~ /unreal/i
   end
