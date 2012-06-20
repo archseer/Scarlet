@@ -21,5 +21,6 @@ Scarlet.hear /murder(?:\s(\S+))?/ do
     "snaps %s's neck",
     "uppercuts %s"
   ]
-  action quotes.sample % context_nick(params[1]||sender.nick)
+  u = server.channels[channel].users.keys.sample
+  action quotes.sample % context_nick(params[1]||u)
 end
