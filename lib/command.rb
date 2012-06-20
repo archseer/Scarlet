@@ -100,8 +100,8 @@ class Command
       server.notice(target, message, silent)
     end
 
-    def send string
-      server.send string
+    def send_data string
+      server.send_data string
     end
 
     def reply message, silent=false
@@ -117,7 +117,7 @@ class Command
     end
 
     def method_missing method, *args 
-      return @event.send method, *args  if @event.respond_to? method 
+      return @event.send method, *args if @event.respond_to? method 
       #return @event.server.send(method, *args) if @event.server.respond_to?(method)
       super
     end
