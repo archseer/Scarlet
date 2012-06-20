@@ -120,7 +120,7 @@ class Server
     else
       @log.start_log event.channel
       @channels[event.channel] = {:users => {}, :flags => []}
-      send_data "MODE #{event.channel}"
+      send_cmd :mode, :mode => event.channel
       print_console "Joined channel #{event.channel}.", :light_yellow, event.channel
     end
     @channels[event.channel][:users][event.sender.nick] = {}
