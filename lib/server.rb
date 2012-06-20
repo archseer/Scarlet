@@ -225,7 +225,7 @@ class Server
     @current_nick += "Bot"
     send_cmd :nick, :nick => @current_nick
   when :'353' # NAMES list
-    # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for others (public channels).
+    # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each { |nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick }
   when :'366' # end of /NAMES list
@@ -241,10 +241,10 @@ class Server
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
-  when /(372|26[56]|25[1245])/ #Ignore MOTD and some statuses
+  when /(372|26[56]|25[1245])/ # ignore MOTD and some statuses
   when /4\d\d/ # Error messages range
     print_console event.params.join(" "), :light_red
-    msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true #TODO: Output only certain messages to channel.
+    msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true
   else
     print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect}; 
     target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
