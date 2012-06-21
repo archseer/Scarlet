@@ -28,7 +28,16 @@ class String
     return text if line_width <= 0
     text.gsub(/\n/, ' ').gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1\n").strip.split("\n")
   end
-
+  def character_wrap characters=490
+    text = self
+    return text if characters <= 0
+    result,r = [],""
+    text.split(' ').each do |word|
+      (result << r;r = "") unless r.size + word.size <= characters
+      r += word
+    end
+    result
+  end
   def align width = 70, orientation = :left, padding=2
     text = self
     text.strip!
