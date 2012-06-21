@@ -2,9 +2,9 @@ class IRC
   class Event
     attr_accessor :server, :sender, :command, :params, :target, :channel, :return_path
 
-    def initialize(server, prefix, command, target, params)
+    def initialize server, prefix, command, target, params
       @server = server
-      @sender = Sender.new(prefix)
+      @sender = Sender.new prefix
       #unless @sender.server? and server.users.include? @sender.nick
       #  @sender.user = server.user[@sender.nick]
       #end

@@ -4,8 +4,8 @@ class Command
   @@listens = {}
   @@help = []
   @@filter = []
-  @@clearance = {:any => 0, :registered => 1, :voice => 2, :vip => 3, :super_tester => 6, :op => 7, :dev => 8, :owner => 9}
-      
+  @@clearance = {any: 0, registered: 1, voice: 2, vip: 3, super_tester: 6, op: 7, dev: 8, owner: 9}
+
   class << self
     def hear regex, clearance=nil, &block
       regex = Regexp.new("^#{regex.source}$", regex.options)
@@ -41,7 +41,7 @@ class Command
     elsif event.params[0].start_with? "!" #control char
       event.params[0].slice!(0)
     end
-    
+
     if !@@filter.empty? and !event.params[0].start_with?("unfilter") and word = compile_filter.match(event.params[0])
       event.server.msg event.return_path, "Cannot execute because \"#{word}\" is blocked."
       return
@@ -94,11 +94,11 @@ class Command
     end
 
     def msg target, message, silent=false
-      server.msg(target, message, silent)
+      server.msg target, message, silent
     end
 
     def notice target, message, silent=false
-      server.notice(target, message, silent)
+      server.notice target, message, silent
     end
 
     def send_data string
@@ -106,7 +106,7 @@ class Command
     end
 
     def reply message, silent=false
-      server.msg(return_path, message, silent)
+      server.msg return_path, message, silent
     end
 
     def send_cmd cmd, hash
@@ -119,7 +119,7 @@ class Command
 
     # DSL delegator, no need to use @event to access it's methods
     def method_missing method, *args
-      return @event.send method, *args if @event.respond_to? method 
+      return @event.send method, *args if @event.respond_to? method
       super
     end
 

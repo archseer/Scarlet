@@ -10,8 +10,8 @@ class Object
 end
 
 class Array
-  def subtract_once(*values)
-    values = Set.new values 
+  def subtract_once *values
+    values = Set.new values
     self.replace reject { |e| values.include?(e) && values.delete(e) }
   end
 end
@@ -51,8 +51,8 @@ class String
   def irc_color fg, bg
     "\x03#{"%02d" % fg},#{"%02d" % bg}#{self}\x03"
   end
-  def str2bool(bool=false)
-    case(self.upcase)
+  def str2bool bool=false
+    case self.upcase
     when "TOGGLE", "SWITCH" ; !bool
     when "ON", "TRUE"       ; true
     when "OFF", "FALSE"     ; false
@@ -63,26 +63,43 @@ end
 
 class Hash
   def symbolize_values
-    inject({}) do |hsh, (key, value)| hsh[key] = value.to_s.to_sym ; hsh ; end
+    inject Hash.new do |hsh, (key, value)| hsh[key] = value.to_s.to_sym ; hsh ; end
   end
   def symbolize_values!
-    self.replace(symbolize_values())
-  end
-  def rename_key! key, newkey
-    self[newkey] = self.delete(key) if self[key]
-    return self
+    self.replace symbolize_values
   end
   def get_values *args
     args.collect{|sym|self[sym]}
   end
-  # // rename this later
-  def remap
-    Hash[self.collect{|(key,value)|yield key,value}]
+
+  def replace_key *args,&block
+    dup.replace_key! *args,&block
+  end
+  def replace_key! hash={}
+    k,v = [nil]*2
+    if block_given?
+      keyz = self.keys
+      keyz.each do |k| v = yield k ; self[v] = self.delete k end
+    else
+      hash.each_pair do |k,v| self[v] = self.delete k end
+    end
+    self
+  end
+  def remap &block
+    dup.remap! &block
+  end
+  def remap!
+    key,value = [nil]*2
+    hsh = self.each_pair.to_a; self.clear
+    hsh.each do |(key,value)|
+      key,value = yield key,value; self[key] = value
+    end
+    self
   end
 end
 
 class File
-  def tail(n)
+  def tail n
     buffer = 1024
     idx = (size - buffer).abs
     chunks = []

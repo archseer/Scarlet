@@ -4,10 +4,10 @@ module Scarlet::Parser
     def parse_names_list server, string # parses NAMES list
       settings = {}
       mlist = server.mode_list.dup
-      mlist.delete(:registered)
+      mlist.delete :registered
       modes = mlist.remap{ |k,v| [v[:symbol], v[:name].to_sym] }
       #{'~' => :owner, '&' => :admin, '@' => :operator, '%' => :halfop, '+'=> :voice}
-      matdata = string.match(/([\+%@&~]*)(\S+)/)
+      matdata = string.match /([\+%@&~]*)(\S+)/
       umodes, name = matdata[1].split(""), matdata[2]
       modes.values.each{|v|settings[v]=false}
       umodes.each {|k|settings[modes[k]]=true}
@@ -24,5 +24,13 @@ module Scarlet::Parser
       new_msg
     end
 
+    # // Using a C styled approach (Pointer mode_array),
+    def parse_modes new_modes, mode_array, mode=true
+      new_modes.each do |c|
+        mode = (c=="+") ? true : (c == "-" ? false : mode)
+        next if c == "+" or c == "-" or c == " "
+        mode ? mode_array << c : mode_array.subtract_once(c)
+      end
+    end
   end
 end

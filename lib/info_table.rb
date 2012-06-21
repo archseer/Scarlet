@@ -1,7 +1,4 @@
-﻿#=========================================#
-# // Info Table 
-#=========================================#
-module Scarlet
+﻿module Scarlet
   class ColumnTable
     VERSION = 0.0002
     def self.mk_table width,height, &block
@@ -96,7 +93,7 @@ module Scarlet
         end).join("")
       end
     end
-  end  
+  end
   class InfoTable
     VERSION = 0.0002
     attr_accessor :colors, :width, :padding
@@ -125,7 +122,7 @@ module Scarlet
     end
     def addHeader string
       @headers << string
-    end  
+    end
     def addRow string
       @lines << string
       self
