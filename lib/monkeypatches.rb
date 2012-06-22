@@ -28,13 +28,14 @@ class String
     return text if line_width <= 0
     text.gsub(/\n/, ' ').gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1\n").strip.split("\n")
   end
-  def character_wrap characters=490
+  def character_wrap characters=459
     text = self
     return text if characters <= 0
+    white_space = " "
     result,r = [],""
     text.split(' ').each do |word|
-      (result << r;r = "") unless r.size + word.size <= characters
-      r += word
+      (result << r;r = "") if r.size + word.size > characters
+      r << word+white_space
     end
     result << r unless r.empty?
     result
