@@ -59,11 +59,11 @@ class Server
     when /PRIVMSG\s(\S+)\s(.+)/i
       trg,text=$1,$2
       stack = []
-      text.character_wrap(459).each do |s| stack << 'PRIVMSG %s %s' % [trh,s] end
+      text.character_wrap(459).each do |s| stack << 'PRIVMSG %s %s' % [trg,s] end
     when /NOTICE\s(\S+)\s(.+)/i
       trg,text=$1,$2
       stack = []
-      text.character_wrap(459).each do |s| stack << 'NOTICE %s %s' % [trh,s] end
+      text.character_wrap(459).each do |s| stack << 'NOTICE %s %s' % [trg,s] end
     else
       stack = [data]
     end
