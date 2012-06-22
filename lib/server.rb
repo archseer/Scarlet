@@ -54,8 +54,8 @@ class Server
   end
 
   def send_data data
-    connection.send_data data
-    return # // Lazy to comment out the code
+    #connection.send_data data
+    #return # // Lazy to comment out the code
     case data
     when /PRIVMSG\s(\S+)\s(.+)/i
       trg,text=$1,$2
