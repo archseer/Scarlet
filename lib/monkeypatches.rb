@@ -36,6 +36,7 @@ class String
       (result << r;r = "") unless r.size + word.size <= characters
       r += word
     end
+    result << r unless r.empty?
     result
   end
   def align width = 70, orientation = :left, padding=2
