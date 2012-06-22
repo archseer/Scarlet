@@ -54,20 +54,20 @@ class Server
   end
 
   def send_data data
-    #connection.send_data data
-    case data
-    when /PRIVMSG\s(\S+)\s(.+)/i
-      trg,text=$1,$2
-      stack = []
-      text.character_wrap(459).each do |s| stack << 'PRIVMSG %s %s' % [trg,s] end
-    when /NOTICE\s(\S+)\s(.+)/i
-      trg,text=$1,$2
-      stack = []
-      text.character_wrap(459).each do |s| stack << 'NOTICE %s %s' % [trg,s] end
-    else
-      stack = [data]
-    end
-    stack.each do |d| connection.send_data d end
+    connection.send_data data
+    #case data
+    #when /PRIVMSG\s(\S+)\s(.+)/i
+    #  trg,text=$1,$2
+    #  stack = []
+    #  text.character_wrap(459).each do |s| stack << 'PRIVMSG %s %s' % [trg,s] end
+    #when /NOTICE\s(\S+)\s(.+)/i
+    #  trg,text=$1,$2
+    #  stack = []
+    #  text.character_wrap(459).each do |s| stack << 'NOTICE %s %s' % [trg,s] end
+    #else
+    #  stack = [data]
+    #end
+    #stack.each do |d| connection.send_data d end
   end
 
   def receive_line line
