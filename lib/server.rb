@@ -69,6 +69,7 @@ class Server
       stack = [data]
     end
     stack.each do |d| connection.send_data d end
+    nil
   end
 
   def receive_line line
