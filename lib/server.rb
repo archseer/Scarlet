@@ -165,8 +165,12 @@ class Server
     messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick # reason for kick, if given
     messg += "."
     print_console messg, :light_red, event.target
-    # TODO: remove the kicked user from channels[#channel] array or if scarlet was kicked, delete that chan's array.
-    # NOTE: This may automatically be done with part? Check first before coding.
+    # we process this the same way as a part.
+    if event.params.first == @current_nick
+      @channels.delete event.channel and @log.close_log event.channel # if scarlet was kicked, delete that chan's array.
+    else
+      @channels[event.target][:users].delete event.params.first # remove the kicked user from channels[#channel] array 
+    end
   when :mode
     ev_params = event.params.first.split("")
     if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
