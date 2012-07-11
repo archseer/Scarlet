@@ -24,9 +24,6 @@ Scarlet.hear (/show colors/), :dev do
   end
 end
 
-Scarlet.hear (/party/), :registered do
-  reply "PARTY! PARTY! YEEEEEEEA BOIIIIIII! ^.^ SO HAPPY, AWESOMEEEEE!"
-end
 # poke <nick> - Sends a notice to <nick>, saying you poked him.
 Scarlet.hear (/poke (.+)/), :registered do
   nick = context_nick params[1]

@@ -33,10 +33,7 @@ Scarlet.hear /time(?: (\S+))?/i, :registered do
     end
   end
 end
-# hb <name> - Prints a happy birthday to <name>
-Scarlet.hear /hb (\S+)/i, :registered do
-  reply "Happy Birthday #{params[1]}!"
-end
+
 # update <name>? - Just to nag the crap out of Speed
 Scarlet.hear /update(?: (\S+))?/i, :registered do
   notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
