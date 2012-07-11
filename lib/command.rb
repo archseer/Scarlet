@@ -38,7 +38,7 @@ class Command
     event.server = server
     if event.params[0].split(' ')[0] =~ /#{server.current_nick}[:,]?\s*/i
       event.params[0] = event.params[0].split(' ').drop(1).join(' ')
-    elsif event.params[0].start_with? "!" #control char
+    elsif event.params[0].starts_with? server.config.control_char
       event.params[0].slice!(0)
     end
 

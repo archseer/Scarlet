@@ -14,10 +14,11 @@ class Server
   include ::OutputHelper
   attr_accessor :scheduler, :log, :reconnect, :banned
   attr_accessor :connection, :current_nick, :config, :ircd
-  attr_reader :channels, :extensions
+  attr_reader :channels, :extensions, :control_char
   def initialize config  # irc could/should have own handlers.
     @config = config
     @current_nick = config.nick #|| @current_nick
+    @config[:control_char] ||= Scarlet.config.control_char
 
     @path = File.dirname(__FILE__)
     @log = Log.new
@@ -35,7 +36,7 @@ class Server
   end
   attr_reader :base_mode_list, :mode_list
   def disconnect
-    send_cmd :quit, :quit => $config.irc_bot.quit
+    send_cmd :quit, :quit => Scarlet.config.quit
     @reconnect = false
     connection.close_connection(true)
   end
@@ -56,6 +57,7 @@ class Server
   def send_data data
     #connection.send_data data
     #return # // Lazy to comment out the code
+    # TODO: cleanup this mess
     case data
     when /PRIVMSG\s(\S+)\s(.+)/i
       trg,text=$1,$2
@@ -83,7 +85,7 @@ class Server
  def handle_event event
   case event.command
   when :ping
-    puts("[ Server ping ]") if $config.irc_bot.display_ping
+    puts("[ Server ping ]") if Scarlet.config.display_ping
     send_data "PONG :#{event.target}"
   when :pong
     puts "[ Ping reply from #{event.sender.host} ]"
@@ -98,7 +100,7 @@ class Server
 
     print_chat event.sender.nick, event.params.first, false, event.channel
     # simple channel symlink. added: now it doesn't relay any bot commands (!)
-    if event.channel && event.sender.nick != @current_nick && $config.irc_bot.relay && event.params.first[0] != $config.irc_bot.control_char
+    if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != @config.control_char
       @channels.keys.reject{|key| key == event.channel}.each {|chan|
         msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
       }
@@ -115,7 +117,7 @@ class Server
       end
     }
 
-    Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{@current_nick}[:,]?\s*/i) || event.params[0].start_with?("!")
+    Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{@current_nick}[:,]?\s*/i) || event.params[0].starts_with?(@config.control_char)
   when :notice
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
@@ -123,7 +125,7 @@ class Server
       if ns_params[:digit] == "3" && !User.ns_login?(@channels, ns_params[:nick])
         User.ns_login @channels, ns_params[:nick]
         nik = Nick.where(:nick => ns_params[:nick]).first
-        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{@current_nick}." if nik && nik.settings[:notify_login] && !$config.irc_bot.testing
+        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{@current_nick}." if nik && nik.settings[:notify_login] && !Scarlet.config.testing
       end
       end
     else # not from NickServ -- normal notice
@@ -218,7 +220,7 @@ class Server
       end
     end
   when /00\d/ # Login procedure
-    print_console event.params.first, :light_green if $config.irc_bot.display_logon
+    print_console event.params.first, :light_green if Scarlet.config.display_logon
   when :'324' # Chan mode
     mode = true
     event.params[1].split("").each do |c|
@@ -242,6 +244,7 @@ class Server
   when :'366' # end of /NAMES list
     @channels[event.params.first][:users].keys.each {|nick| check_ns_login nick} # check permissions of users
   when :'375' # START of MOTD
+    # capture and extract the list of possible modes on this network
     hsh = Scarlet.base_mode_list.dup
     prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
     supmodes = @extensions[:prefix].match(/\((\w+)\)(.+)/)[1,2]

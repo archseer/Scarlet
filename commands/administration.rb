@@ -66,7 +66,7 @@ end
 # restart - Restarts the bot.
 Scarlet.hear /restart/i, :dev do
   reply 'Restarting myself...'
-  server.send_cmd :quit, :quit => $config.irc_bot.quit
+  server.send_cmd :quit, :quit => Scarlet.config.quit
   EM.add_timer(1) { server.unbind }
 end
 

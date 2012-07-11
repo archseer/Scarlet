@@ -34,24 +34,25 @@ Modules.load_models base_path
 Modules.load_libs base_path
 
 module Scarlet
-  @config = {}
   @@servers = {}
   class << self
-    attr_accessor :config
+    attr_accessor :config, :root
 
     def loaded
-      $config[:irc_bot] = YAML.load_file("#{File.expand_path File.dirname(__FILE__)}/config.yml").symbolize_keys!
+      Scarlet.root = File.expand_path File.dirname(__FILE__)
+      Scarlet.config = YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys!
       # create servers
-      $config.irc_bot.servers.each do |name, cfg|
+      Scarlet.config.servers.each do |name, cfg|
         @@servers[name] = Server.new cfg
       end
       # for now for safety delete the servers list after it gets loaded
-      $config.irc_bot.delete :servers
+      Scarlet.config.delete :servers
       # connect servers
       @@servers.values.each do |server|
         server.connection = EventMachine::connect(server.config.address, server.config.port, Connection, server)
       end
       puts 'Scarlet process has started.'.green
+      Scarlet.load_commands
     end
 
     def unload
@@ -62,8 +63,8 @@ module Scarlet
       end
     end
 
-    def load_commands root
-        Dir["#{root}/commands/**/*.rb"].each {|path| load path }
+    def load_commands # load custom commands
+        Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Scarlet::Command.parse_help path}
     end
 
     # DSL delegator to Command. (Scarlet.hear is more expressive than Command.hear)
@@ -72,10 +73,3 @@ module Scarlet
     end
   end
 end
-
-# load custom commands - TODO: move it inside def load_commands 
-# (which is unused at the moment) and execute it inside def loaded.
-Dir["#{base_path}/commands/**/*.rb"].each {|path| 
-  load path 
-  Scarlet::Command.parse_help path
-}

@@ -7,7 +7,7 @@ class Scarlet::Connection < EM::Connection
 
   def post_init
     send_data "NICK #{@server.current_nick}"
-    send_data "USER #{$config.irc_bot.host} #{@server.current_nick} #{@server.current_nick} :#{$config.irc_bot.name}"
+    send_data "USER #{Scarlet.config.host} #{@server.current_nick} #{@server.current_nick} :#{Scarlet.config.name}"
     reset_check_connection_timer
   rescue => e
     p e
