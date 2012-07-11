@@ -6,13 +6,24 @@
 require 'mustache'
 
 class Hash # instead of hash[:key][:key], hash.key.key
-  def method_missing(method, *params)
-    # if it ends with = it's a setter, so set the value - SLOPPY CODE, CLEAN!
-    return self[method.to_s.chomp('=').to_sym] = params[0] if method.to_s.end_with? '='
+  def method_missing(method, *args)
+    method_name = method.to_s
+    unless respond_to? method_name
+      if method_name.ends_with? '?'
+        # if it ends with ? it's an existance check
+        method_name.slice!(-1)
+        key = keys.detect {|k| k.to_s == method_name }
+        return !!self[key]
+      elsif method_name.ends_with? '='
+        # if it ends with = it's a setter, so set the value
+        method_name.slice!(-1)
+        key = keys.detect {|k| k.to_s == method_name }
+        return self[key] = args.first
+      end
+    end
     # if it contains that key, return the value
-    return self[method.to_s] if self.keys.collect {|key| key}.include?(method.to_s)
-    return self[method.to_sym] if self.keys.collect {|key| key}.include?(method.to_sym)
-    #return nil # if it doesn't exist, return nil. Do not error
+    key = keys.detect {|k| k.to_s == method_name }
+    return self[key] if key
     super
   end
 end
