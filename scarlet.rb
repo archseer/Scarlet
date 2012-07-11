@@ -51,8 +51,8 @@ module Scarlet
       @@servers.values.each do |server|
         server.connection = EventMachine::connect(server.config.address, server.config.port, Connection, server)
       end
-      puts 'Scarlet process has started.'.green
       Scarlet.load_commands
+      puts 'Scarlet process has started.'.green
     end
 
     def unload

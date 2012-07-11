@@ -16,8 +16,8 @@ module Scarlet
     end
 
     def close_log name
-      log name.to_sym, "**** Logging ended at #{Time.now.std_format}\n"
-      @logs[name.to_sym].close
+      log name.to_sym, "**** Logging ended at #{Time.now.std_format}\n\n"
+      @logs[name.to_sym].flush and @logs[name.to_sym].close
     end
 
     def close_all
