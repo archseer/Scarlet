@@ -58,7 +58,6 @@ module Scarlet
     def unload
       @@servers.values.each do |server|
         server.disconnect
-        server.log.close_all
         server.scheduler.remove_all
       end
     end

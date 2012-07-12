@@ -12,7 +12,7 @@ module Scarlet
   def self.base_mode_list; @base_mode_list; end
 class Server
   include ::OutputHelper
-  attr_accessor :scheduler, :log, :reconnect, :banned
+  attr_accessor :scheduler, :reconnect, :banned
   attr_accessor :connection, :current_nick, :config, :ircd
   attr_reader :channels, :extensions, :control_char
   attr_reader :base_mode_list, :mode_list
@@ -22,8 +22,6 @@ class Server
     @config[:control_char] ||= Scarlet.config.control_char
 
     @path = File.dirname(__FILE__)
-    @log = Log.new
-    @log.start_log :connection
 
     @scheduler = Scheduler.new
     @irc_commands = YAML.load_file("#{@path}/../commands.yml").symbolize_keys!
@@ -80,6 +78,7 @@ class Server
     event = IRC::Event.new(:localhost, parsed_line[:prefix],
                       parsed_line[:command].downcase.to_sym,
                       parsed_line[:target], parsed_line[:params])
+    Log.write(event)
     handle_event event
   end
  #---handle_event--------------------------------------------
@@ -99,7 +98,7 @@ class Server
       return
     end
 
-    print_chat event.sender.nick, event.params.first, false, event.channel
+    print_chat event.sender.nick, event.params.first, false
     # simple channel symlink. added: now it doesn't relay any bot commands (!)
     if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != @config.control_char
       @channels.keys.reject{|key| key == event.channel}.each {|chan|
@@ -134,22 +133,20 @@ class Server
     end
   when :join
     if @current_nick != event.sender.nick
-      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow, event.channel
+      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow
       check_ns_login event.sender.nick
     else
-      @log.start_log event.channel
       @channels[event.channel] = {users: {}, flags: []}
       send_cmd :mode, :mode => event.channel
-      print_console "Joined channel #{event.channel}.", :light_yellow, event.channel
+      print_console "Joined channel #{event.channel}.", :light_yellow
     end
     @channels[event.channel][:users][event.sender.nick] = {}
   when :part
     if event.sender.nick == @current_nick
       print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta, event.channel
       @channels.delete event.channel # remove chan if bot parted
-      @log.close_log event.channel
     else
-      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta, event.channel
+      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
       @channels[event.channel][:users].delete event.sender.nick
     end
   when :quit
@@ -170,7 +167,7 @@ class Server
     print_console messg, :light_red, event.target
     # we process this the same way as a part.
     if event.params.first == @current_nick
-      @channels.delete event.channel and @log.close_log event.channel # if scarlet was kicked, delete that chan's array.
+      @channels.delete event.channel # if scarlet was kicked, delete that chan's array.
     else
       @channels[event.target][:users].delete event.params.first # remove the kicked user from channels[#channel] array 
     end
@@ -256,7 +253,7 @@ class Server
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
-  when /(372|26[56]|25[01245])/ # ignore MOTD and some statuses
+  when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
   when /4\d\d/ # Error message range
     print_console event.params.join(" "), :light_red
     msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true
@@ -272,14 +269,22 @@ class Server
 
   def msg target, message, silent=false
     send_data "PRIVMSG #{target} :#{message}"
-    log_name = target[0] == '#' ? target : :connection
-    print_chat @current_nick, message, silent, log_name unless silent
+    write_log :privmsg, message, target
+    print_chat @current_nick, message, silent unless silent
   end
 
   def notice target, message, silent=false
     send_data "NOTICE #{target} :#{message}"
-    log_name = target[0] == '#' ? target : :connection
-    print_console ">#{target}< #{message}", :light_cyan, log_name unless silent
+    write_log :notice, message, target
+    print_console ">#{target}< #{message}", :light_cyan unless silent
+  end
+
+  def write_log command, message, target
+    unless target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
+      log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
+      log.channel = target if target.starts_with? "#"
+      log.save!
+    end
   end
 
   def check_ns_login nick
