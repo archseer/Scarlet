@@ -5,7 +5,7 @@ Scarlet.hear /seen (?<nick>\S+)/ do
     next
   end
 
-  message = "#{log.nick} was last seen #{log.created_at.ago_in_words} ago"
+  message = "#{log.nick} was last seen #{log.created_at.ago_in_words}"
   case log.command.downcase.to_sym
     when :privmsg
       message << " in #{log.target}" unless log.target.downcase == channel
