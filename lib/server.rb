@@ -207,7 +207,7 @@ class Server
       puts "ERROR: #{event.params.join(" ")}".red
     end
   when :"001"
-    msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password
+    msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password? # login only if a password was supplied
   when :"004"
     @ircd = event.params[1] # grab the name of the ircd that the server is using
   when :"005" # PROTOCTL NAMESX reply with a list of options
