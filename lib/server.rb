@@ -15,6 +15,7 @@ class Server
   attr_accessor :scheduler, :log, :reconnect, :banned
   attr_accessor :connection, :current_nick, :config, :ircd
   attr_reader :channels, :extensions, :control_char
+  attr_reader :base_mode_list, :mode_list
   def initialize config  # irc could/should have own handlers.
     @config = config
     @current_nick = config.nick #|| @current_nick
@@ -34,7 +35,7 @@ class Server
 
     @mode_list = {} # Temp
   end
-  attr_reader :base_mode_list, :mode_list
+
   def disconnect
     send_cmd :quit, :quit => Scarlet.config.quit
     @reconnect = false
@@ -207,7 +208,7 @@ class Server
       puts "ERROR: #{event.params.join(" ")}".red
     end
   when :"001"
-    msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password
+    msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password? # login only if a password was supplied
   when :"004"
     @ircd = event.params[1] # grab the name of the ircd that the server is using
   when :"005" # PROTOCTL NAMESX reply with a list of options
@@ -255,7 +256,7 @@ class Server
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
-  when /(372|26[56]|25[1245])/ # ignore MOTD and some statuses
+  when /(372|26[56]|25[01245])/ # ignore MOTD and some statuses
   when /4\d\d/ # Error message range
     print_console event.params.join(" "), :light_red
     msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true

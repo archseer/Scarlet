@@ -29,7 +29,7 @@ Scarlet.hear /register/i do
   end
 end
 
-# // settings - Change your account settings with the bot
+# // settings: Change your account settings with the bot
 # // notify_login 
 # // timezone
 # // 
@@ -47,7 +47,7 @@ Scarlet.hear /set(?: my)? timezone (.+)/i do
     notice sender.nick, "You cannot access account settings, are you logged in?"
   end
 end
-# notify login <toggle|on|off> - Should you be notified when you auto-login?
+# notify login <toggle|on|off> - Should you be notified when you login?
 Scarlet.hear /notify(?: me)? login (toggle|on|off)/i do
   n = Scarlet::Nick.where(:nick => sender.nick).first
   if n 

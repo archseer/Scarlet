@@ -3,8 +3,8 @@ module Scarlet
   class Log
 
     def initialize
-      pth = "#{File.dirname __FILE__}/../logs"
-      Dir.mkdir pth unless File.exist? pth
+      path = "#{File.dirname __FILE__}/../logs"
+      Dir.mkdir pth unless File.exist? path
       @logs = {}
     end
 
