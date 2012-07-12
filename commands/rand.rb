@@ -1,7 +1,4 @@
-﻿#=========================================#
-# // Random
-#=========================================#
-module Scarlet
+﻿module Scarlet
   def self.klik
     @klik ||= [Time.now,Time.now]
     @klik[0] = Time.now - @klik[1]

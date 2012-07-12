@@ -1,5 +1,5 @@
-require 'taglib'
-
+begin
+require 'taglib' 
 Scarlet.hear (/download soundcloud favourites/), :owner do
   http = EventMachine::HttpRequest.new('http://api.soundcloud.com/resolve.json').get :query => {
     'url' => "http://soundcloud.com/speed-4/favorites", 'client_id' => 'YOUR_CLIENT_ID', 'limit' => '200'}, :redirects => 1
@@ -44,4 +44,7 @@ Scarlet.hear (/download soundcloud favourites/), :owner do
       }
     }
   }
+end
+rescue 
+  puts 'Soundcloud Download - Not Loaded'
 end
