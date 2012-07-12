@@ -1,3 +1,4 @@
+begin # // 
 base_path = File.expand_path File.dirname(__FILE__)
 load base_path + '/../../../../cardinal/cardinal.rb'
 $bird = Cardinal.new
@@ -50,4 +51,7 @@ Scarlet.hear (/play favourites/), :owner do
   else
     reply "Cardinal is not running at the moment."
   end
+end
+rescue Exception
+  puts 'Cardianl - Not Loaded'
 end

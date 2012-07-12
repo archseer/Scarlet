@@ -45,6 +45,6 @@ Scarlet.hear (/download soundcloud favourites/), :owner do
     }
   }
 end
-rescue 
+rescue Exception
   puts 'Soundcloud Download - Not Loaded'
 end
