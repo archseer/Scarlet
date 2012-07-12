@@ -1,14 +1,5 @@
 require 'set'
 
-class Object
-  def nil_zero?
-    self.nil? || self == 0
-  end
-  def to_bool
-    !!self
-  end
-end
-
 class Array
   def subtract_once *values
     values = Set.new values
@@ -79,12 +70,13 @@ class Hash
   def symbolize_values!
     self.replace symbolize_values
   end
+  
   def get_values *args
     args.collect{|sym|self[sym]}
   end
 
   def replace_key *args,&block
-    dup.replace_key! *args,&block
+    dup.replace_key! *args, &block
   end
   def replace_key! hash={}
     k,v = [nil]*2
@@ -96,6 +88,7 @@ class Hash
     end
     self
   end
+
   def remap &block
     dup.remap! &block
   end
@@ -106,24 +99,5 @@ class Hash
       key,value = yield key,value; self[key] = value
     end
     self
-  end
-end
-
-class File
-  def tail n
-    buffer = 1024
-    idx = (size - buffer).abs
-    chunks = []
-    lines = 0
-
-    begin
-      seek(idx)
-      chunk = read(buffer)
-      lines += chunk.count("\n")
-      chunks.unshift chunk
-      idx -= buffer
-    end while lines < n && pos != 0
-
-    chunks.join.lines.reverse_each.take(n).reverse.join
   end
 end
