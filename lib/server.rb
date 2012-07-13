@@ -54,8 +54,8 @@ class Server
     if data =~ /(PRIVMSG|NOTICE)\s(\S+)\s(.+)/i
       stack = []
       command, trg, text = $1, $2, $3
-      #data.split(/.{1,459}/)
-      text.character_wrap(459).each do |s| stack << '%s %s %s' % [command,trg,s] end
+      length = 510 - command.length - trg.length - 2 # // 2 whitespace
+      text.character_wrap(length).each do |s| stack << '%s %s %s' % [command,trg,s] end
     else
       stack = [data]
     end

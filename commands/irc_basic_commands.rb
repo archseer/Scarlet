@@ -1,6 +1,7 @@
 # part <#channel> - ask bot to leave #channel
-Scarlet.hear /(?:leave|part)\s(\#\S+)(?:\s(.+))?/i, :dev do
-  send_data "PART #{params[1]} #{params[2]}"
+Scarlet.hear /(?:leave|part)(?:\s(\#\S+)(?:\s(.+))?)?/i, :dev do
+  chan, reason = params[1]||channel, params[2]
+  send_data "PART #{chan} #{reason}"
 end
 # join <#channel>[,<#channel>,<#channel>] - ask bot to join #channel or channels
 Scarlet.hear /join\s(.+)/i do
