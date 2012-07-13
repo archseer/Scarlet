@@ -63,7 +63,7 @@ module Scarlet
     end
 
     def load_commands # load custom commands
-        Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Scarlet::Command.parse_help path}
+      Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Scarlet::Command.parse_help path}
     end
 
     # DSL delegator to Command. (Scarlet.hear is more expressive than Command.hear)

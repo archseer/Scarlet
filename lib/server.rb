@@ -14,17 +14,14 @@ class Server
   include ::OutputHelper
   attr_accessor :scheduler, :reconnect, :banned
   attr_accessor :connection, :current_nick, :config, :ircd
-  attr_reader :channels, :extensions, :control_char
+  attr_reader :channels, :extensions
   attr_reader :base_mode_list, :mode_list
   def initialize config  # irc could/should have own handlers.
     @config = config
-    @current_nick = config.nick #|| @current_nick
+    @current_nick = config.nick
     @config[:control_char] ||= Scarlet.config.control_char
-
-    @path = File.dirname(__FILE__)
-
     @scheduler = Scheduler.new
-    @irc_commands = YAML.load_file("#{@path}/../commands.yml").symbolize_keys!
+    @irc_commands = YAML.load_file("#{Scarlet.root}/commands.yml").symbolize_keys!
     @channels = {}    # holds data about the users on channel
     @banned = []      # who's banned here?
     @modes = []       # bot account's modes (ix,..)
@@ -143,7 +140,7 @@ class Server
     @channels[event.channel][:users][event.sender.nick] = {}
   when :part
     if event.sender.nick == @current_nick
-      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta, event.channel
+      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
       @channels.delete event.channel # remove chan if bot parted
     else
       print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
@@ -280,11 +277,10 @@ class Server
   end
 
   def write_log command, message, target
-    unless target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
-      log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
-      log.channel = target if target.starts_with? "#"
-      log.save!
-    end
+    return unless target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
+    log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
+    log.channel = target if target.starts_with? "#"
+    log.save!
   end
 
   def check_ns_login nick
