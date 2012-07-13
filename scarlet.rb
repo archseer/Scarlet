@@ -58,13 +58,12 @@ module Scarlet
     def unload
       @@servers.values.each do |server|
         server.disconnect
-        server.log.close_all
         server.scheduler.remove_all
       end
     end
 
     def load_commands # load custom commands
-        Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Scarlet::Command.parse_help path}
+      Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Scarlet::Command.parse_help path}
     end
 
     # DSL delegator to Command. (Scarlet.hear is more expressive than Command.hear)

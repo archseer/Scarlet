@@ -47,14 +47,3 @@ Scarlet.hear /set(?: my)? timezone (.+)/i do
     notice sender.nick, "You cannot access account settings, are you logged in?"
   end
 end
-# notify login <toggle|on|off> - Should you be notified when you login?
-Scarlet.hear /notify(?: me)? login (toggle|on|off)/i do
-  n = Scarlet::Nick.where(:nick => sender.nick).first
-  if n 
-    opt = params[1].str2bool(!!n.settings[:notify_login])
-    n.settings[:notify_login] = opt
-    notice sender.nick, "You will #{opt ? "" : "NOT "}be notified on bot login"
-  else
-    notice sender.nick, "You cannot access account settings, are you logged in?"
-  end
-end
