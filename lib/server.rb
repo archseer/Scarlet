@@ -201,6 +201,7 @@ class Server
   when :"004"
     @ircd = event.params[1] # grab the name of the ircd that the server is using
   when :"005" # PROTOCTL NAMESX reply with a list of options
+    event.params.pop # remove last item (:are supported by this server)
     event.params.each do |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
         param = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] # convert digit only to digits
@@ -211,6 +212,8 @@ class Server
     end
   when /00\d/ # Login procedure
     print_console event.params.first, :light_green if Scarlet.config.display_logon
+  when :'315' # End of /WHO list
+
   when :'324' # Chan mode
     mode = true
     event.params[1].split("").each do |c|
