@@ -231,8 +231,36 @@ class Server
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each {|nick| nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick }
+  when :'354' # WHOX response
+    # There's many different outputs, depending on flags. Right now, we'll just
+    # parse those which include 42 (our login checks)
+
+    if event.params.first == '42'
+      # 0 - 42, 1 - channel, 2 - nick, 3 - account name (0 if none)
+      if event.params[3] != '0'
+        @channels[event.params[1]][:users][event.params[2]][:ns_login] = true
+        @channels[event.params[1]][:users][event.params[2]][:account_name] = event.params[3]
+      end
+    else
+      print_console "WHOX TODO -- params: #{event.params.inspect};", :yellow
+    end
+    
   when :'366' # end of /NAMES list
-    @channels[event.params.first][:users].keys.each {|nick| check_ns_login nick} # check permissions of users
+    # After we got our nick list, we want to check their NickServ login stat. 
+    # event.params.first <== channel
+
+    # if WHOX is enabled, we can use the a flag to get user's account names
+    # if the user has an account name, he is logged in. If he does not have
+    # an account name, he is logged out. This is the prefered way to check
+    # logins on bot join, as it only needs one message.
+    #
+    # WHOX - http://hg.quakenet.org/snircd/file/37c9c7460603/doc/readme.who
+
+    if @extensions[:whox]
+      send_data "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
+    else
+      @channels[event.params.first][:users].keys.each {|nick| check_ns_login nick}
+    end
   when :'375' # START of MOTD
     # capture and extract the list of possible modes on this network
     hsh = Scarlet.base_mode_list.dup
