@@ -6,8 +6,9 @@ class Scarlet::Connection < EM::Connection
   end
 
   def post_init
+    send_data "CAP LS" # CAP extension http://ircv3.atheme.org/ (freenode)
     send_data "NICK #{@server.current_nick}"
-    send_data "USER #{Scarlet.config.host} #{@server.current_nick} #{@server.current_nick} :#{Scarlet.config.name}"
+    send_data "USER #{Scarlet.config.host} * * :#{Scarlet.config.name}"
     reset_check_connection_timer
   rescue => e
     p e

@@ -2,11 +2,7 @@ module Scarlet
   module User
     class << self
       def ns_login? chan_list, nick
-        ns_login = false
-        chan_list.each {|key, val| 
-          ns_login = true if val[:users][nick] && val[:users][nick][:ns_login]
-        } #it will get set to true if at least one chan detects login. hax
-        return ns_login
+        chan_list.any? {|(key,val)| (n = val[:users][nick]) and n[:ns_login] }
       end
 
       def ns_logout chan_list, nick

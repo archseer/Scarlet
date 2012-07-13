@@ -14,7 +14,7 @@ class Server
   include ::OutputHelper
   attr_accessor :scheduler, :reconnect, :banned
   attr_accessor :connection, :current_nick, :config, :ircd
-  attr_reader :channels, :extensions, :cap_extensions
+  attr_reader :channels, :extensions, :cap_extensions, :handshake
   attr_reader :base_mode_list, :mode_list
   def initialize config  # irc could/should have own handlers.
     @config = config
@@ -25,7 +25,9 @@ class Server
     @channels = {}    # holds data about the users on channel
     @banned = []      # who's banned here?
     @modes = []       # bot account's modes (ix,..)
-    @extensions = {}  # what the server-side supports
+    @extensions = {}  # what the server-side supports (PROTOCTL)
+    @cap_extensions = {} # CAPability extensions (CAP REQ)
+    @handshake        # set to true after we connect (001)
     @reconnect = true
 
     @mode_list = {} # Temp
@@ -118,15 +120,34 @@ class Server
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack, ignore notices from Global (wallops?)
     end
   when :join
+    # :nick!user@host JOIN :#channelname - normal
+    # :nick!user@host JOIN #channelname accountname :Real Name - extended-join
+
     if @current_nick != event.sender.nick
       print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow
-      check_ns_login event.sender.nick
+      if !event.params.empty? && @cap_extensions["extended-join"]
+        # extended-join is enabled, which means that join returns two extra params, 
+        # NickServ account name and real name. This means, we don't need to query 
+        # NickServ about the user's login status.
+        @channels[event.channel][:users][event.sender.nick] ||= {}
+        @channels[event.channel][:users][event.sender.nick][:ns_login] = true
+        @channels[event.channel][:users][event.sender.nick][:account_name] = event.params[0]
+      else
+        # No luck, we need to manually query for a login check.
+        # a) if WHOX is available, query with WHOX.
+        # b) if still no luck, query NickServ.
+        if @cap_extensions[:whox]
+          send_data "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
+        else
+          check_ns_login event.sender.nick
+        end
+      end
     else
       @channels[event.channel] = {users: {}, flags: []}
       send_cmd :mode, :mode => event.channel
       print_console "Joined channel #{event.channel}.", :light_yellow
     end
-    @channels[event.channel][:users][event.sender.nick] = {}
+    @channels[event.channel][:users][event.sender.nick] ||= {}
   when :part
     if event.sender.nick == @current_nick
       print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
@@ -191,12 +212,42 @@ class Server
       puts "ERROR: #{event.params.join(" ")}".red
     end
   when :cap
-    # msg "#ikt", event.params.join(" ")
-    @cap_extensions ||= {}
-    event.params[1].split(" ").each {|capab| @cap_extensions[capab] = false}
-    send_data "CAP END" if event.params[0] == "LS"
+
+    # This will need quite some correcting, but it should work.
+
+    case event.params[0]
+    when 'LS'
+      event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
+      # Handshake not yet complete. That means, request extensions!
+      if not @handshake
+        %w[account-notify extended-join].each do |extension| 
+          @cap_extensions[extension] = :processing
+          send_data "CAP REQ :#{extension}"
+        end
+      end
+    when 'ACK'
+      event.params[1].split(" ").each {|extension| @cap_extensions[extension] = true; puts "#{extension} ENABLED."}
+    when 'NAK'
+      event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
+    end
+    
+    # if the command isn't LS (the first LS sent in the handshake)
+    # and no command still needs processing
+    send_data "CAP END" if event.params[0] != "LS" && !@handshake && !@cap_extensions.get_values.include?(:processing)
+  when :account
+    # This is a capability extension for tracking user NickServ logins and logouts
+    # event.target is the accountname, * if there is none. This must get executed
+    # either way, because either the user logged in, or he logged out. (a change)
+
+    @channels.each {|key, channel| 
+      if channel[:users][event.sender.nick]
+        channel[:users][event.sender.nick][:ns_login] = event.target != "*" ? true : false
+        channel[:users][event.sender.nick][:account_name] = event.target != "*" ? event.target : nil
+      end 
+    }
+
   when :"001"
-    send_data "CAP LS" # CAP extension http://ircv3.atheme.org/ (freenode)
+    @handshake = true
     msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password? # login only if a password was supplied
   when :"004"
     @ircd = event.params[1] # grab the name of the ircd that the server is using
@@ -277,10 +328,14 @@ class Server
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
   when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
+  when /451/ # You have not registered
+    # Something was sent before the USER NICK PASS handshake completed.
+    # This is quite useful but we need to ignore it as otherwise ircd's 
+    # like ircd-seven (synIRC) cries if we use CAP.
   when /4\d\d/ # Error message range
     return if event.params.join(" ") =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
     print_console event.params.join(" "), :light_red
-    msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true
+    msg @channels.keys.join(","), "ERROR: #{event.params.join(" ")}".irc_color(4,0), true
   else # unknown message, print it out as a TODO
     print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect};
     target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
