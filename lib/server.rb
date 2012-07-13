@@ -277,7 +277,7 @@ class Server
   end
 
   def write_log command, message, target
-    return unless target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
+    return if target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
     log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
     log.channel = target if target.starts_with? "#"
     log.save!
