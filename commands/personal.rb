@@ -2,7 +2,7 @@
 Scarlet.hear /login/i do
   if !Scarlet::Nick.where(:nick => sender.nick).empty?
     if !Scarlet::User.ns_login? server.channels, sender.nick
-      server.check_nick_login sender.nick
+      server.check_ns_login sender.nick
     else
       notice sender.nick, "#{sender.nick}, you are already logged in!"
     end
@@ -34,7 +34,7 @@ end
 # // timezone
 # // 
 # set timezone <timezone> - self-explanatory; used with !time command
-Scarlet.hear /set(?: my)? timezone (.+)/i do
+Scarlet.hear /set(?:\smy)?\stimezone\s(.+)/i do
   n = Scarlet::Nick.where(:nick => sender.nick).first
   if n
     if TZInfo::Timezone.all_identifiers.include? params[1]

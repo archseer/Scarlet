@@ -12,7 +12,7 @@ Scarlet.hear /klik/i, :registered do
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
 # time - Prints the current owners time
-Scarlet.hear /time(?: (\S+))?/i, :registered do
+Scarlet.hear /time(?:\s(\S+))?/i, :registered do
   unless params[1]
     reply Time.now.to_s
   else
@@ -30,9 +30,8 @@ Scarlet.hear /time(?: (\S+))?/i, :registered do
     end
   end
 end
-
 # update <name>? - Just to nag the crap out of Speed
-Scarlet.hear /update(?: (\S+))?/i, :registered do
+Scarlet.hear /update(?:\s(\S+))?/i, :registered do
   notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
   notice sender.nick, "Notice sent."
 end
