@@ -14,7 +14,7 @@ class Server
   include ::OutputHelper
   attr_accessor :scheduler, :reconnect, :banned
   attr_accessor :connection, :current_nick, :config, :ircd
-  attr_reader :channels, :extensions
+  attr_reader :channels, :extensions, :cap_extensions
   attr_reader :base_mode_list, :mode_list
   def initialize config  # irc could/should have own handlers.
     @config = config
@@ -197,7 +197,13 @@ class Server
     else
       puts "ERROR: #{event.params.join(" ")}".red
     end
+  when :cap
+    # msg "#ikt", event.params.join(" ")
+    @cap_extensions ||= {}
+    event.params[1].split(" ").each {|capab| @cap_extensions[capab] = false}
+    send_data "CAP END" if event.params[0] == "LS"
   when :"001"
+    send_data "CAP LS" # CAP extension http://ircv3.atheme.org/ (freenode)
     msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password? # login only if a password was supplied
   when :"004"
     @ircd = event.params[1] # grab the name of the ircd that the server is using
@@ -248,6 +254,7 @@ class Server
     send_cmd :join, :channel => @config.channel
   when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
   when /4\d\d/ # Error message range
+    return if event.params.join(" ") =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
     print_console event.params.join(" "), :light_red
     msg @config.channel, "ERROR: #{event.params.join(" ")}".irc_color(4,0), true
   else # unknown message, print it out as a TODO
