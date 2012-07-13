@@ -91,7 +91,7 @@ class Server
       puts "[ CTCP PING from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
       return
     elsif event.params.first =~ /\001VERSION\001/
-      puts "[ CTCP VERSION from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v0.8\001"
+      puts "[ CTCP VERSION from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
       return
     end
 
@@ -106,7 +106,7 @@ class Server
     event.params.first.match(/(http:\/\/[^ ]*)/) {|url|
       begin
         EM::HttpRequest.new(url).get(:redirects => 1).callback {|http|
-          http.response.match(/<title>(.*)<\/title>/) {|title|
+          http.response.match(/<title>(.*)<\/title>/) {|title| 
             msg event.return_path, "Title: #{title[1]}" #(domain)
           }
         }
@@ -119,11 +119,7 @@ class Server
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
-      if ns_params[:digit] == "3" && !User.ns_login?(@channels, ns_params[:nick])
-        User.ns_login @channels, ns_params[:nick]
-        nik = Nick.where(:nick => ns_params[:nick]).first
-        notice ns_params[:nick], "#{ns_params[:nick]}, you are now logged in with #{@current_nick}." if nik && nik.settings[:notify_login] && !Scarlet.config.testing
-      end
+        User.ns_login @channels, ns_params[:nick] if ns_params[:digit] == "3" && !User.ns_login?(@channels, ns_params[:nick])
       end
     else # not from NickServ -- normal notice
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack, ignore notices from Global (wallops?)

@@ -24,6 +24,7 @@ class Scarlet::Log
 
   scope :in_channel, lambda { where(:channel.ne => "") } # ne -> not equals
   scope :nick, lambda {|nick| where(:nick => nick) }
+  scope :channel, lambda {|channel| where(:channel => channel) }
   scope :join, lambda { where(:command => 'JOIN') }
   scope :privmsg, lambda { where(:command => 'PRIVMSG') }
   scope :created_at, lambda {|created_at| where(:created_at => created_at) }
