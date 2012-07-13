@@ -51,19 +51,11 @@ class Server
   end
 
   def send_data data
-    connection.send_data data
-    return nil # // Lazy to comment out the code
-    # TODO: cleanup this mess
-    stack = []
-    case data
-    when /PRIVMSG\s(\S+)\s(.+)/i
-      trg,text=$1,$2
-      data.split(/.{1,459}/).each do |s| stack << 'PRIVMSG %s %s' % [trg,s] end
-      #text.character_wrap(459).each do |s| stack << 'PRIVMSG %s %s' % [trg,s] end
-    when /NOTICE\s(\S+)\s(.+)/i
-      trg,text=$1,$2
-      data.split(/.{1,459}/).each do |s| stack << 'NOTICE %s %s' % [trg,s] end
-      #text.character_wrap(459).each do |s| stack << 'NOTICE %s %s' % [trg,s] end
+    if data =~ /(PRIVMSG|NOTICE)\s(\S+)\s(.+)/i
+      stack = []
+      command, trg, text = $1, $2, $3
+      #data.split(/.{1,459}/)
+      text.character_wrap(459).each do |s| stack << '%s %s %s' % [command,trg,s] end
     else
       stack = [data]
     end
