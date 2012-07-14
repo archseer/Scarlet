@@ -366,8 +366,23 @@ class Server
   end
 
   def check_ns_login nick
-    msg "NickServ", "ACC #{nick}", true if @ircd =~ /ircd-seven/i # freenode
-    msg "NickServ", "STATUS #{nick}", true if @ircd =~ /unreal/i
+    # According to the docs, those servers that use STATUS may query up to
+    # 16 nicknames at once. if we pass an Array do:
+    #   a) on STATUS send groups of up to 16 nicknames
+    #   b) on ACC, we have no such luck, send each message separately.
+
+    if nick.is_a? Array
+      if @ircd =~ /unreal/i
+        nick.each_slice(16) {|group| msg "NickServ", "STATUS #{group.join(' ')}", true}
+      else
+        nick.each {|nickname| msg "NickServ", "ACC #{nick}", true}
+      end 
+    else # one nick was given, send the message
+      msg "NickServ", "ACC #{nick}", true if @ircd =~ /ircd-seven/i # freenode
+      msg "NickServ", "STATUS #{nick}", true if @ircd =~ /unreal/i
+    end
+
+
   end
 end
 end
