@@ -42,7 +42,11 @@ class Server
   def unbind
     @channels = {}
     @modes = []
+    @mode_list = []
     @extensions = {}
+    @cap_extensions = {}
+    @handshake = nil
+    @vHost = nil
 
     reconnect = lambda {
       puts "Connection to server lost. Reconnecting...".light_red
