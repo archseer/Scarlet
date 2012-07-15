@@ -319,7 +319,7 @@ class Server
     if @extensions[:whox]
       send_data "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
     else
-      @channels[event.params.first][:users].keys.each {|nick| check_ns_login nick}
+     check_ns_login @channels[event.params.first][:users].keys
     end
   when :'375' # START of MOTD
     # capture and extract the list of possible modes on this network
