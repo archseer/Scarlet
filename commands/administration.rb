@@ -74,7 +74,8 @@ end
 # op <nick> - Give Operator Status to <nick>
 # hop <nick> - Give Half-Op Status to <nick>
 # voice <nick> - Give Voice Status to <nick>
-#//ban <str> - Bans <str>
+#//ban <str> 
+#// - Bans <str>
 # kick <nick> - Kicks <nick>
 #flags = {"q"=>:owner,"a"=>:admin,"o"=>:operator,"h"=>:halfop,"v"=>:voice,"r"=> :registered}
 [["admin",[:+,:admin]],["deadmin",[:-,:admin]],
@@ -86,7 +87,7 @@ end
     op,md = str[1]
     modes_hsh = server.mode_list[md]
     unless modes_hsh
-      notice sender.nick, "Unsupported mode: #{md}"
+      notice sender.nick, "The network does not support this mode: #{md}"
     else
       mode = op.to_s + modes_hsh[:prefix].to_s
       server.send_data "mode %s #{mode} %s" % [channel,params[1]]

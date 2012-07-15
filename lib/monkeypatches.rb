@@ -7,10 +7,24 @@ class Array
   end
 end
 
+class Set
+  def subtract_once *values
+    values.each do |v| self.delete(v) end
+  end
+end
+
 class Time
   def std_format
     self.strftime("%c")
   end
+end
+
+class Symbol
+
+  def downcase
+    to_s.downcase.to_sym
+  end
+
 end
 
 class String

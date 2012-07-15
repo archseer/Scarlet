@@ -1,16 +1,17 @@
 module Scarlet
   module User
     class << self
-      def ns_login? chan_list, nick
-        chan_list.any? {|(key,val)| (n = val[:users][nick]) and n[:ns_login] }
+      def ns_login? server, nick
+        user = server.users[nick]
+        user ? user[:ns_login] : false
       end
 
-      def ns_logout chan_list, nick
-        chan_list.each {|key, val| val[:users][nick][:ns_login] = false if val[:users][nick]}
+      def ns_logout server, nick
+        server.users[nick][:ns_login] = false if server.has_user?(nick)
       end
 
-      def ns_login chan_list, nick
-        chan_list.each {|key, val| val[:users][nick][:ns_login] = true if val[:users][nick]}
+      def ns_login server, nick
+        server.users[nick][:ns_login] = true if server.has_user?(nick)
       end
     end
   end

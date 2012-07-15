@@ -4,11 +4,15 @@ Scarlet.hear /(?:leave|part)(?:\s(\#\S+)(?:\s(.+))?)?/i, :dev do
   send_data "PART #{chan} #{reason}"
 end
 # join <#channel>[,<#channel>,<#channel>] - ask bot to join #channel or channels
-Scarlet.hear /join\s(.+)/i do
+Scarlet.hear /join\s(.+)/i, :dev do
   params[1].gsub(' ','').split(',').each do |channel_name|
     channel_name = ?# + channel_name unless channel_name.start_with? ?#
     send_data "JOIN #{channel_name}"
   end
+end
+# quit - 
+Scarlet.hear /quit/i, :dev do 
+  send_data "QUIT"
 end
 # send <string> - send data to the server
 #Scarlet.hear /send\s(.+)/i, :dev do
@@ -29,4 +33,8 @@ Scarlet.hear /cycle(?:\s(\S+))?/i, :dev do
   else
     server.channels.keys.each do |n| send_data "CYCLE #{n}" end
   end
+end
+
+Scarlet.hear /boom/i, :any do 
+  1 + something_that_doesnt_exist
 end
