@@ -101,7 +101,7 @@ class Server
   end
   add_evhandle :quit do |event|
     print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
-    remove_user(nick2account_name(event.sender.nick))
+    remove_user(event.sender.nick)
   end
   add_evhandle :nick do |event|
     rename_user(event.sender.nick, event.target)

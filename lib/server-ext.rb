@@ -4,7 +4,6 @@ module Scarlet
     def mk_user_hash nick
       {
         nick:         nick,
-        account_name: '',
         ns_login:     false,
         channels:     HashDowncased[],
         flags:        []
@@ -17,9 +16,6 @@ module Scarlet
         user_flags: HashDowncased[],
         flags: []
       }
-    end
-    def nick2account_name nick
-      nick
     end
     def rename_user old_name,new_name
       return if old_name == new_name
