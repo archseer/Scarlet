@@ -3,7 +3,7 @@ class IRC
     attr_accessor :nick, :username, :host, :user
 
     def initialize(string)
-      if string =~ /^([^!]+)!([^@]+)@(.+)$/
+      if string =~ /^([^!]+)!~?([^@]+)@(.+)$/ # It appears that some networks use a !~ instead of !.
         @nick, @username, @host = $1, $2, $3
         @server = false
       else
