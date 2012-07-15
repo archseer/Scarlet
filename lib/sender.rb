@@ -3,7 +3,8 @@ class IRC
     attr_accessor :nick, :username, :host, :user
 
     def initialize(string)
-      if string =~ /^([^!]+)!~?([^@]+)@(.+)$/ # It appears that some networks use a !~ instead of !.
+      # username prefixes - In most daemons ~ is prefixed to a non-identd username, n= and i= are rare.
+      if string =~ /^([^!]+)!~?([^@]+)@(.+)$/
         @nick, @username, @host = $1, $2, $3
         @server = false
       else
