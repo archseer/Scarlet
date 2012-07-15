@@ -12,8 +12,7 @@ module Scarlet
   def self.base_mode_list; @base_mode_list; end
 class Server
   include ::OutputHelper
-  attr_accessor :scheduler, :reconnect, :banned
-  attr_accessor :connection, :config
+  attr_accessor :scheduler, :reconnect, :banned, :connection, :config
   attr_reader :channels, :extensions, :cap_extensions, :handshake, :current_nick, :ircd
   attr_reader :base_mode_list, :mode_list, :vHost
   def initialize config  # irc could/should have own handlers.
@@ -29,7 +28,7 @@ class Server
     @cap_extensions = {} # CAPability extensions (CAP REQ)
     @handshake        # set to true after we connect (001)
     @reconnect = true
-    @vHost = nil
+    @vHost = nil      # vHost/cloak
 
     @mode_list = {} # Temp
   end
@@ -334,21 +333,21 @@ class Server
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
   when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
-  when :'396' # RPL_HOSTHIDDEN - on UnrealIRCd
+  when :'396' # RPL_HOSTHIDDEN - on some ircd's
     # Reply to a user when user mode +x (host masking) was set successfully
     @vHost = event.params.first
     print_console event.params.join(' '), :light_magenta
   when /451/ # You have not registered
     # Something was sent before the USER NICK PASS handshake completed.
     # This is quite useful but we need to ignore it as otherwise ircd's 
-    # like ircd-seven (synIRC) cries if we use CAP.
+    # like UnrealIRCd (synIRC) cries if we use CAP.
   when /4\d\d/ # Error message range
     return if event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
     print_console event.params.join(' '), :light_red
     msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0), true
   else # unknown message, print it out as a TODO
     print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect};
-    target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
+     target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
   end
  end
   #----------------------------------------------------------
