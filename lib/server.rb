@@ -13,9 +13,9 @@ module Scarlet
 class Server
   include ::OutputHelper
   attr_accessor :scheduler, :reconnect, :banned
-  attr_accessor :connection, :current_nick, :config, :ircd
-  attr_reader :channels, :extensions, :cap_extensions, :handshake
-  attr_reader :base_mode_list, :mode_list
+  attr_accessor :connection, :config
+  attr_reader :channels, :extensions, :cap_extensions, :handshake, :current_nick, :ircd
+  attr_reader :base_mode_list, :mode_list, :vHost
   def initialize config  # irc could/should have own handlers.
     @config = config
     @current_nick = config.nick
@@ -29,6 +29,7 @@ class Server
     @cap_extensions = {} # CAPability extensions (CAP REQ)
     @handshake        # set to true after we connect (001)
     @reconnect = true
+    @vHost = nil
 
     @mode_list = {} # Temp
   end
@@ -116,7 +117,12 @@ class Server
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
         User.ns_login @channels, ns_params[:nick] if ns_params[:digit] == "3" && !User.ns_login?(@channels, ns_params[:nick])
       end
-    else # not from NickServ -- normal notice
+    elsif event.sender.nick == "HostServ"
+      event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) {|host| 
+        @vHost = host[1]
+        print_console "#{@vHost} is now your hidden host (set by services.)", :light_magenta
+      }
+    else # not from NickServ or HostServ -- normal notice
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack, ignore notices from Global (wallops?)
     end
   when :join
@@ -209,7 +215,7 @@ class Server
     if event.target.start_with? "Closing Link"
       puts "Disconnection from #{@config.address} successful.".blue
     else
-      puts "ERROR: #{event.params.join(" ")}".red
+      puts "ERROR: #{event.params.join(' ')}".red
     end
   when :cap
 
@@ -328,14 +334,18 @@ class Server
   when :'376' # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
   when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
+  when :'396' # RPL_HOSTHIDDEN - on UnrealIRCd
+    # Reply to a user when user mode +x (host masking) was set successfully
+    @vHost = event.params.first
+    print_console event.params.join(' '), :light_magenta
   when /451/ # You have not registered
     # Something was sent before the USER NICK PASS handshake completed.
     # This is quite useful but we need to ignore it as otherwise ircd's 
     # like ircd-seven (synIRC) cries if we use CAP.
   when /4\d\d/ # Error message range
-    return if event.params.join(" ") =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
-    print_console event.params.join(" "), :light_red
-    msg @channels.keys.join(","), "ERROR: #{event.params.join(" ")}".irc_color(4,0), true
+    return if event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
+    print_console event.params.join(' '), :light_red
+    msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0), true
   else # unknown message, print it out as a TODO
     print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect};
     target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
