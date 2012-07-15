@@ -2,9 +2,8 @@ module Scarlet
 
 class Server
   @@event_handles = {}
-  @@null_handle = proc { nil }
   def self.add_evhandle command,&func
-    @@event_handles[command] = func || @@null_handle
+    @@event_handles[command] = func || proc { nil }
   end
   add_evhandle :ping do |event|
     puts("[ Server ping ]") if Scarlet.config.display_ping
