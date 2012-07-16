@@ -19,14 +19,6 @@ class Time
   end
 end
 
-class Symbol
-
-  def downcase
-    to_s.downcase.to_sym
-  end
-
-end
-
 class String
   def word_wrap line_width = 65
     text = self
