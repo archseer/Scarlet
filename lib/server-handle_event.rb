@@ -133,36 +133,21 @@ class Server
       #mode = true
       event.params.compact!
       if event.params.count > 1 # user list - USER modes
-        #flags = mode_list.remap { |k,v| [v[:prefix],v[:name].to_sym] }
-        #operator_count = 0
         nicks = event.params[1..-1]
         nicks.each do |nick|
           if nick.start_with?(?#) # // Channel
             chan = has_channel?(nick)
-            next unless chan
             obj_flags = chan[:flags]
             Scarlet::Parser.parse_modes ev_params, obj_flags 
           else # // User
             user = has_user?(nick)
-            next unless user
             chan = has_channel?(event.channel)
             obj_flags = chan[:user_flags][nick] 
             Scarlet::Parser.parse_modes ev_params, obj_flags
           end
           
         end
-        #ev_params.each_with_index do |flag, i|
-        #  mode = (flag=="+") ? true : (flag == "-" ? false : mode)
-        #  operator_count += 1 and next if flag == "+" or flag == "-" or flag == " "
-        #  nick = nicks[i-operator_count]
-        #  if nick[0] != "#"
-        #    @channels[event.channel][:users][nick][flags[flag]] = mode
-        #  else # this checks for cases like "MODE +v+n Speed #bugs", but there's an error with event.params not including #bugs TODO
-        #    mode ? @channels[event.channel][:flags] << c : @channels[event.channel][:flags].subtract_once(c)
-        #  end
-        #end
       else # CHAN modes
-        puts ">> Chan Mode Parse"
         Scarlet::Parser.parse_modes ev_params, @channels[event.channel][:flags]
       end
     end
