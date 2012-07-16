@@ -17,8 +17,8 @@ class Command
     def parse_help file
       File.readlines(file).each do |line|
         next unless line[0] == '#'
-        next if line.match 'encoding'
-        next unless line.match '-'
+        next if line.include? 'encoding'
+        next unless line.include? '-'
         @@help << line[2..line.length].strip
       end
     end
