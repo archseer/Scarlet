@@ -2,17 +2,17 @@ module Scarlet
 
 class Server
   @@event_handles = {}
-  def self.add_evhandle command,&func
+  def self.on command,&func
     @@event_handles[command] = func || proc { nil }
   end
-  add_evhandle :ping do |event|
+  on :ping do |event|
     puts("[ Server ping ]") if Scarlet.config.display_ping
     send_data "PONG :#{event.target}"
   end
-  add_evhandle :pong do |event|
+  on :pong do |event|
     puts "[ Ping reply from #{event.sender.host} ]"
   end
-  add_evhandle :privmsg do |event|
+  on :privmsg do |event|
     if event.params.first =~ /\001PING (.+)\001/
       puts "[ CTCP PING from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
     elsif event.params.first =~ /\001VERSION\001/
@@ -40,7 +40,7 @@ class Server
       Command.new(self, event.dup) if (event.params.first.split(' ')[0] =~ /^#{@current_nick}[:,]?\s*/i) || event.params[0].starts_with?(@config.control_char)
     end
   end
-  add_evhandle :notice do |event|
+  on :notice do |event|
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
@@ -55,7 +55,7 @@ class Server
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack, ignore notices from Global (wallops?)
     end
   end
-  add_evhandle :join do |event|
+  on :join do |event|
     # :nick!user@host JOIN :#channelname - normal
     # :nick!user@host JOIN #channelname accountname :Real Name - extended-join
 
@@ -89,7 +89,7 @@ class Server
     add_user(user_name)
     add_user_to_channel(user_name,event.channel)
   end
-  add_evhandle :part do |event|
+  on :part do |event|
     if event.sender.nick == @current_nick
       print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
       remove_channel(event.channel) # remove chan if bot parted
@@ -98,11 +98,11 @@ class Server
       remove_user_from_channel(event.sender.nick,event.channel)
     end
   end
-  add_evhandle :quit do |event|
+  on :quit do |event|
     print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
     remove_user(event.sender.nick)
   end
-  add_evhandle :nick do |event|
+  on :nick do |event|
     rename_user(event.sender.nick, event.target)
     if event.sender.nick == @current_nick
       @current_nick = event.target
@@ -111,7 +111,7 @@ class Server
       print_console "#{event.sender.nick} is now known as #{event.target}.", :light_yellow
     end
   end
-  add_evhandle :kick do |event|
+  on :kick do |event|
     messg  = "#{event.sender.nick} has kicked #{event.params.first} from #{event.target}"
     messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick # reason for kick, if given
     messg += "."
@@ -124,7 +124,7 @@ class Server
       remove_user_from_channel(event.params.first,event.target)
     end
   end
-  add_evhandle :mode do |event|
+  on :mode do |event|
     ev_params = event.params.first.split("")
     if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
       puts ">> Server Mode Parse"
@@ -167,17 +167,17 @@ class Server
       end
     end
   end
-  add_evhandle :topic do |event| # Channel topic was changed 
+  on :topic do |event| # Channel topic was changed 
     print_console "#{event.sender.nick} changed #{event.channel} topic to #{event.params.first}", :light_green
   end
-  add_evhandle :error do |event|
+  on :error do |event|
     if event.target.start_with? "Closing Link"
       puts "Disconnection from #{@config.address} successful.".blue
     else
       puts "ERROR: #{event.params.join(' ')}".red
     end
   end
-  add_evhandle :cap do |event|
+  on :cap do |event|
     # This will need quite some correcting, but it should work.
 
     case event.params[0]
@@ -201,7 +201,7 @@ class Server
     send_data "CAP END" if event.params[0] != "LS" && !@handshake && !@cap_extensions.get_values.include?(:processing)    
   end
 
-  add_evhandle :account do |event|
+  on :account do |event|
     # This is a capability extension for tracking user NickServ logins and logouts
     # event.target is the accountname, * if there is none. This must get executed
     # either way, because either the user logged in, or he logged out. (a change)
@@ -212,16 +212,16 @@ class Server
     end    
   end
 
-  add_evhandle :"001" do |event|
+  on :"001" do |event|
     @handshake = true
     msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password? # login only if a password was supplied
   end
 
-  add_evhandle :"004" do |event|
+  on :"004" do |event|
     @ircd = event.params[1] # grab the name of the ircd that the server is using
   end
 
-  add_evhandle :"005" do |event| # PROTOCTL NAMESX reply with a list of options
+  on :"005" do |event| # PROTOCTL NAMESX reply with a list of options
     event.params.pop # remove last item (:are supported by this server)
     event.params.each do |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
@@ -233,9 +233,9 @@ class Server
     end
   end
 
-  add_evhandle :'315' # End of /WHO list
+  on :'315' # End of /WHO list
 
-  add_evhandle :'324' do |event| # Chan mode
+  on :'324' do |event| # Chan mode
     mode = true
     event.params[1].split("").each do |c|
       mode = (c=="+") ? true : (c == "-" ? false : mode)
@@ -244,24 +244,24 @@ class Server
     end
   end
 
-  add_evhandle :'329' do |event| # Channel created at
+  on :'329' do |event| # Channel created at
     print_console "#{event.params[0]} created at #{Time.at(event.params[1].to_i).std_format}", :light_green
   end
 
-  add_evhandle :'332' do |event| # Channel topic
+  on :'332' do |event| # Channel topic
     message = "Topic for #{event.params.first} is: #{event.params[1]}"
     print_console message, :light_green
   end  
 
-  add_evhandle :'333' do |event| # Channel topic set by
+  on :'333' do |event| # Channel topic set by
     print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).std_format}", :light_green
   end
 
-  add_evhandle :'433' do |event| # Nickname exists
+  on :'433' do |event| # Nickname exists
     @current_nick += "Bot" and send_cmd :nick, :nick => @current_nick # dumb retry, append "Bot" to nick and resend NICK
   end
 
-  add_evhandle :'353' do |event| # NAMES list
+  on :'353' do |event| # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each do |nick| 
@@ -273,7 +273,7 @@ class Server
     end  
   end
 
-  add_evhandle :'354' do |event| # WHOX response
+  on :'354' do |event| # WHOX response
     # There's many different outputs, depending on flags. Right now, we'll just
     # parse those which include 42 (our login checks)
 
@@ -292,7 +292,7 @@ class Server
 
   end
 
-  add_evhandle :'366' do |event| # end of /NAMES list
+  on :'366' do |event| # end of /NAMES list
     # After we got our nick list, we want to check their NickServ login stat. 
     # event.params.first <== channel
 
@@ -310,7 +310,7 @@ class Server
     end
   end  
 
-  add_evhandle :'375' do |event| # START of MOTD
+  on :'375' do |event| # START of MOTD
     # capture and extract the list of possible modes on this network
     hsh = Scarlet.base_mode_list.dup
     prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
@@ -322,11 +322,11 @@ class Server
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   end  
 
-  add_evhandle :'376' do |event| # END of MOTD command. Join channel(s)!
+  on :'376' do |event| # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel
   end
 
-  add_evhandle :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's
+  on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's
     # Reply to a user when user mode +x (host masking) was set successfully
     @vHost = event.params.first
     print_console event.params.join(' '), :light_magenta  

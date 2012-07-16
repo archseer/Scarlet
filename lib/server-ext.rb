@@ -11,10 +11,10 @@ module Scarlet
     end
     def mk_channel_hash channel
       {
-        name: channel,
-        users: HashDowncased[],
+        name:       channel,
+        users:      HashDowncased[],
         user_flags: HashDowncased[],
-        flags: []
+        flags:      []
       }
     end
     def rename_user old_name,new_name
