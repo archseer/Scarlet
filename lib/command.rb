@@ -83,13 +83,16 @@ class Command
   end
 
   class Callback
+
+    attr_reader :event
+
     def initialize block
       @block = block
     end
 
-    def run event, matches
+    def run event, matches=nil
       @event = event
-      @event.params = matches
+      @event.params = matches if matches
       self.instance_eval &@block
     end
 
@@ -130,6 +133,7 @@ class Command
       else      ; nick
       end
     end
+
   end
 end
 end

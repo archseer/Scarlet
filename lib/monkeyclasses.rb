@@ -1,37 +1,29 @@
-class HashTConvert < Hash
+class HashDowncased < Hash
 
-  def try_convert obj
-    obj
+  def convert_key obj
+    obj.respond_to?(:downcase) ? obj.downcase : obj
   end
 
-  private :try_convert
+  private :convert_key
 
   def [] key 
-    super try_convert(key)
+    super convert_key(key)
   end
 
   def []= key, value 
-    super try_convert(key), value 
+    super convert_key(key), value 
   end
 
   def delete key 
-    super try_convert(key)
+    super convert_key(key)
   end
 
   def include? key 
-    super try_convert(key)
+    super convert_key(key)
   end
 
   def has_key? key
-    super try_convert(key)
-  end
-  
-end
-
-class HashDowncased < HashTConvert
-
-  def try_convert obj
-    obj.respond_to?(:downcase) ? obj.downcase : obj
+    super convert_key(key)
   end
 
 end
