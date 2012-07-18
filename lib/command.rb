@@ -83,9 +83,6 @@ class Command
   end
 
   class Callback
-
-    attr_reader :event
-
     def initialize block
       @block = block
     end
@@ -133,7 +130,6 @@ class Command
       else      ; nick
       end
     end
-
   end
 end
 end
