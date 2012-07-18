@@ -3,9 +3,9 @@ module Scarlet
 class Server
   @@event_handles = {}
   def self.on command,*args,&func
-    a = @@event_handles[command] ||= []
-    handle = func || proc { nil }
-    args.include?(:prepend) ? a.unshift(handle) : a.push(handle) 
+    handles = @@event_handles[command] ||= []
+    func = func || proc { nil }
+    args.include?(:prepend) ? handles.unshift(func) : handles.push(func) 
   end
 
   on :ping do |event|

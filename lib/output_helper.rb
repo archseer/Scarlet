@@ -1,5 +1,5 @@
 # for outputting and logging messages
-module Kernel
+module OutputHelper
 
   def print_chat nick, message, silent=false
     msg = Scarlet::Parser.parse_esc_codes message

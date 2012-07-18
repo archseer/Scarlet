@@ -90,9 +90,9 @@ class Command
       @block = block
     end
 
-    def run event, matches=nil
+    def run event, matches
       @event = event
-      @event.params = matches if matches
+      @event.params = matches
       self.instance_eval &@block
     end
 

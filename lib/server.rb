@@ -1,6 +1,6 @@
 load "modules/scarlet/lib/output_helper.rb"
 module Scarlet
-  # // All known modes
+  # All known modes
   @base_mode_list = {
     :owner      => {:name=>'owner'     ,:prefix=>'q',:symbol=>'~'},
     :admin      => {:name=>'admin'     ,:prefix=>'a',:symbol=>'&'},
@@ -13,7 +13,7 @@ module Scarlet
   def self.base_mode_list; @base_mode_list; end
 
   class Server
-    #include ::OutputHelper
+    include ::OutputHelper
     attr_accessor :scheduler, :reconnect, :banned, :connection, :config, :handshake
     attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :ircd
     attr_reader :base_mode_list, :mode_list, :vHost

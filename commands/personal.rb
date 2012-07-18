@@ -3,7 +3,6 @@ Scarlet.hear /login/i do
   if !Scarlet::Nick.where(:nick => sender.nick).empty?
     if !Scarlet::User.ns_login? server, sender.nick
       server.check_ns_login sender.nick
-      notice sender.nick, "#{sender.nick}, you are now logged in."
     else
       notice sender.nick, "#{sender.nick}, you are already logged in!"
     end

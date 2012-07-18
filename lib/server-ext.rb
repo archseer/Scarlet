@@ -4,6 +4,7 @@ module Scarlet
     def mk_user_hash nick
       {
         nick:         nick,
+        account_name: nil,
         ns_login:     false,
         channels:     HashDowncased[],
         flags:        []
