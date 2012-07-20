@@ -60,8 +60,8 @@ module Scarlet
       if data =~ /(PRIVMSG|NOTICE)\s(\S+)\s(.+)/i
         stack = []
         command, trg, text = $1, $2, $3
-        length = 510 - command.length - trg.length - 10 # // 2 whitespace
-        text.character_wrap(length).each do |s| stack << '%s %s %s' % [command,trg,s] end
+        length = 510 - command.length - trg.length - 2 - 128
+        text.character_wrap(length).split("\n").each do |s| stack << '%s %s %s' % [command,trg,s] end
       else
         stack = [data]
       end

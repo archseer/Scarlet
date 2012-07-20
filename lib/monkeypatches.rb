@@ -20,10 +20,12 @@ class Time
 end
 
 class String
-  def word_wrap line_width = 65
+  def word_wrap line_width = 80
     text = self
     return text if line_width <= 0
-    text.gsub(/\n/, ' ').gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1\n").strip.split("\n")
+    text.split("\n").collect do |line|
+      line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1\n").strip : line
+    end * "\n"
   end
   def character_wrap characters=459
     text = self
