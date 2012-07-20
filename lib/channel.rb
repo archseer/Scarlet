@@ -10,7 +10,7 @@ module Scarlet
     def mk_hash channel_name
       {
         name:       channel_name,
-        users:      Set[],#HashDowncased[],
+        users:      [],#Set[],#HashDowncased[],
         user_flags: HashDowncased[],
         flags:      []
       }
@@ -60,8 +60,8 @@ module Scarlet
       server  = get_server(server_name)
       user    = Scarlet::Users.add_user(server_name, user_name)
       channel = add_channel(server_name, channel_name) 
-      channel[:users] << user_name 
-      user[:channels] << channel_name 
+      channel[:users] << user_name unless channel[:users].include?(user_name)
+      user[:channels] << channel_name unless user[:channels].include?(channel_name)
     end
 
     end

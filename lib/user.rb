@@ -26,10 +26,8 @@ module Scarlet
     def mk_hash nick
       {
         nick:         nick,
-        account_name: nil,
         ns_login:     false,
-        channels:     Set[],#HashDowncased[],
-        flags:        []
+        channels:     []
       }
     end
 

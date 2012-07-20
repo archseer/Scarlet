@@ -47,6 +47,7 @@ Scarlet.hear /bot unban (.+)/i, :dev do
   }
   reply "#{server.current_nick} ban was revoked for #{list.join(", ")}."
 end
+
 # rename <nick> - Renames the bot to nick.
 Scarlet.hear /rename\s+(.+)/i, :dev do
   send_cmd :nick, :nick => params[1].strip
@@ -59,10 +60,12 @@ end
 Scarlet.hear /filter (.+)/i, :dev do
   Scarlet::Command.filter << params[1].strip
 end
+
 # unfilter <phrase> - Unbans a specific command phrase.
 Scarlet.hear /unfilter (.+)/i, :dev do
   Scarlet::Command.filter.delete params[1].strip
 end
+
 # restart - Restarts the bot.
 Scarlet.hear /restart/i, :dev do
   reply 'Restarting myself...'
@@ -94,14 +97,18 @@ end
     end
   end
 }
+
 #Scarlet.hear /kick (\S+(?:\s*,\s*\S+)*)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
 # kick <nick> <channel> : <reason>
+
 Scarlet.hear /kick\s(?<nick>\S+)(?<channel>\s\#\S+)?(?:\s\:\s(?<reason>.+))?/i, :dev do
   send_data "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
 end
+
 Scarlet.hear /kickban\s(\S+)/i do
   send_data "KICKBAN #{params[1]}"
 end
+
 Scarlet.hear /invite\s(\S+)(?:\s(\S+))?/i, :dev do
   send_data "INVITE #{params[1]}" + (params[2] ? " #{params[2]}" : "")
 end

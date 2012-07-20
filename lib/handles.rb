@@ -204,7 +204,7 @@ class Server
     # This is a capability extension for tracking user NickServ logins and logouts
     # event.target is the accountname, * if there is none. This must get executed
     # either way, because either the user logged in, or he logged out. (a change)
-    user = has_user?(event.sender.nick)
+    user = Users[self, event.sender.nick]
     if user
       user[:ns_login] = event.target != "*" ? true : false
       user[:account_name] = event.target != "*" ? event.target : nil
@@ -279,7 +279,7 @@ class Server
     if event.params.first == '42'
       # 0 - 42, 1 - channel, 2 - nick, 3 - account name (0 if none)
       if event.params[3] != '0'
-        user = has_user?(event.params[2])
+        user = Users[self, event.params[2]]
         if user
           user[:ns_login] = true
           user[:account_name] = event.params[3]
