@@ -61,7 +61,7 @@ module Scarlet
         stack = []
         command, trg, text = $1, $2, $3
         length = 510 - command.length - trg.length - 2 - 128
-        text.character_wrap(length).split("\n").each do |s| stack << '%s %s %s' % [command,trg,s] end
+        text.word_wrap(length).split("\n").each do |s| stack << '%s %s %s' % [command,trg,s] end
       else
         stack = [data]
       end
