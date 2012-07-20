@@ -5,7 +5,7 @@ module Scarlet
     # Hash<server_name, Hash<channel_name, channel_hash>>
     @@channels = HashDowncased[]
 
-    class << Channels
+    class << self
 
     def mk_hash channel_name
       {
