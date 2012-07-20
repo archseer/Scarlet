@@ -7,6 +7,10 @@ module Scarlet
   
     class << self
 
+    def clean server_name
+      @@users[server_name].clear
+    end
+
     def ns_login? server_name, nick
       server = get_server(server_name)
       user = server[nick]
