@@ -43,7 +43,11 @@ module Scarlet::Parser
       new_modes.each do |c|
         mode = (c=="+") ? true : (c == "-" ? false : mode)
         next if c == "+" or c == "-" or c == " "
-        mode ? mode_array << c : mode_array.subtract_once(c)
+        if mode
+          mode_array << c unless mode_array.include?(c)
+        else
+          mode_array.subtract_once(c)
+        end
       end
     end
     
