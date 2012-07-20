@@ -344,9 +344,10 @@ class Server
       # like UnrealIRCd (synIRC) cries if we use CAP.
       true
     when /4\d\d/ # Error message range
-      return if event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
-      print_console event.params.join(' '), :light_red
-      msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0), true
+      unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
+        print_console event.params.join(' '), :light_red
+        msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0), true
+      end
       true
     else
       false

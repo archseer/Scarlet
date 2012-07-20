@@ -7,6 +7,10 @@ module Scarlet
 
     class << self
 
+    def clean server_name
+      @@channels[server_name].clear
+    end
+
     def mk_hash channel_name
       {
         #name:       channel_name,
@@ -48,8 +52,8 @@ module Scarlet
     alias [] get
 
     def remove_channel server_name, channel_name
-      server = get_server(server_name)
-      channel = get_channel(channel_name)
+      server  = get_server(server_name)
+      channel = server[channel_name]
       return unless channel
       channel[:users].each do |user_name|
         remove_user_from_channel(server_name, user_name, channel_name)

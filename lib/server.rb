@@ -13,14 +13,25 @@ module Scarlet
   def self.base_mode_list; @base_mode_list; end
 
   class Server
+
     include ::OutputHelper
+
     attr_accessor :scheduler, :reconnect, :banned, :connection, :config, :handshake
     attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :ircd
     attr_reader :base_mode_list, :mode_list, :vHost
+
     def initialize config  # irc could/should have own handlers.
       @config         = config
-      @scheduler      = Scheduler.new
       @irc_commands   = YAML.load_file("#{Scarlet.root}/commands.yml").symbolize_keys!
+      init
+      # // Config
+      @current_nick   = @config.nick
+      @config[:control_char] ||= Scarlet.config.control_char
+      @config = @config.dup.freeze
+    end  
+
+    def init
+      @scheduler      = Scheduler.new
       @channels       = Scarlet::Channels.add_server(self.name) # holds data about the users on channel
       @users          = Scarlet::Users.add_server(self.name) # holds data on users (seen) on the server
       @banned         = []     # who's banned here?
@@ -31,9 +42,6 @@ module Scarlet
       @reconnect      = true   # reconnection flag
       @vHost          = nil    # vHost/cloak
       @mode_list      = {} # Temp
-      # // Config
-      @current_nick   = config.nick
-      @config[:control_char] ||= Scarlet.config.control_char
     end
 
     def name
@@ -47,15 +55,18 @@ module Scarlet
     end
 
     def unbind
-      @channels.clear
+      Channels.clean(self.name)
+      Users.clean(self.name)
       @modes.clear
       @extensions.clear
-      @users.clear
+      @banned.clear
+      @cap_extensions.clear
 
       reconnect = lambda {
         puts "Connection to server lost. Reconnecting...".light_red
         connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
         connection.post_init
+        init
       }
       EM.add_timer(3) { reconnect.call } if @reconnect
     end
@@ -64,7 +75,7 @@ module Scarlet
       if data =~ /(PRIVMSG|NOTICE)\s(\S+)\s(.+)/i
         stack = []
         command, trg, text = $1, $2, $3
-        length = 510 - command.length - trg.length - 2
+        length = 510 - command.length - trg.length - 2 - 120
         text.word_wrap(length).split("\n").each do |s| stack << '%s %s %s' % [command,trg,s] end
       else
         stack = [data]
