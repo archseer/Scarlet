@@ -43,6 +43,7 @@ module Scarlet
       Scarlet.config = YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys!
       # create servers
       Scarlet.config.servers.each do |name, cfg|
+        cfg[:server_name] = name
         @@servers[name] = Server.new cfg
       end
       # for now for safety delete the servers list after it gets loaded

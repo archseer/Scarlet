@@ -20,9 +20,11 @@ module Scarlet::Parser
       #{'~' => :owner, '&' => :admin, '@' => :operator, '%' => :halfop, '+'=> :voice}
       matdata = string.match /([\+%@&~]*)(\S+)/
       umodes, name = matdata[1].split(""), matdata[2]
-      modes.values.each{|v|settings[v]=false}
-      umodes.each {|k|settings[modes[k]]=true}
-      settings = settings.inject(Set.new) do |a,(k,v)| a << k if v ; a end
+      modes.values.each{ |v| settings[v] = false }
+      umodes.each { |k| settings[modes[k]] = true }
+      settings = settings.inject([]) do |a,(k,v)| 
+        a << k if v unless a.include?(k) ; a 
+      end
       return name, settings
     end
 

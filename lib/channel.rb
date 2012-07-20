@@ -9,8 +9,8 @@ module Scarlet
 
     def mk_hash channel_name
       {
-        name:       channel_name,
-        users:      [],#Set[],#HashDowncased[],
+        #name:       channel_name,
+        users:      [],
         user_flags: HashDowncased[],
         flags:      []
       }
@@ -26,6 +26,16 @@ module Scarlet
       server[channel_name]
     end
 
+    def get *args
+      if args.size == 1
+        get_server *args
+      elsif args.size == 2
+        get_channel *args
+      else
+        nil
+      end
+    end
+
     def add_server server_name
       @@channels[server_name] ||= HashDowncased[]
     end
@@ -35,7 +45,7 @@ module Scarlet
       server[channel_name] ||= mk_hash(channel_name)
     end
 
-    alias [] get_channel
+    alias [] get
 
     def remove_channel server_name, channel_name
       server = get_server(server_name)
@@ -54,6 +64,7 @@ module Scarlet
       return unless user and channel
       channel[:users].delete(user_name)
       user[:channels].delete(channel_name)
+      Scarlet::Users.remove_user(server_name, user_name) if user[:channels].empty?
     end
 
     def add_user_to_channel server_name, user_name, channel_name

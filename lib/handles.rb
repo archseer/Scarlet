@@ -50,7 +50,7 @@ class Server
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
-        Users.ns_login self, ns_params[:nick] if ns_params[:digit] == "3" && !Users.ns_login?(self, ns_params[:nick])
+        Users.ns_login self.name, ns_params[:nick] if ns_params[:digit] == "3" && !Users.ns_login?(self.name, ns_params[:nick])
       end
     elsif event.sender.nick == "HostServ"
       event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) {|host| 
@@ -73,8 +73,8 @@ class Server
         # NickServ account name and real name. This means, we don't need to query 
         # NickServ about the user's login status.
         user_name = event.sender.nick
-        user = Users.add_user(self, user_name)
-        Channels.add_user_to_channel(self, user_name, event.channel)
+        user = Users.add_user(self.name, user_name)
+        Channels.add_user_to_channel(self.name, user_name, event.channel)
         user[:ns_login] = true
         user[:account_name] = event.params[0]
       else
@@ -88,32 +88,32 @@ class Server
         end
       end
     else
-      Channels.add_channel(self, event.channel)
+      Channels.add_channel(self.name, event.channel)
       send_cmd :mode, :mode => event.channel
       print_console "Joined channel #{event.channel}.", :light_yellow
     end
     user_name = event.sender.nick
-    Users.add_user(self, user_name)
-    Channels.add_user_to_channel(self, user_name, event.channel)
+    Users.add_user(self.name, user_name)
+    Channels.add_user_to_channel(self.name, user_name, event.channel)
   end
 
   on :part do |event|
     if event.sender.nick == @current_nick
       print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
-      Channels.remove_channel(self, event.channel) # remove chan if bot parted
+      Channels.remove_channel(self.name, event.channel) # remove chan if bot parted
     else
       print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
-      Channels.remove_user_from_channel(self, event.sender.nick,event.channel)
+      Channels.remove_user_from_channel(self.name, event.sender.nick,event.channel)
     end
   end
 
   on :quit do |event|
     print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
-    Users.remove_user(self, event.sender.nick)
+    Users.remove_user(self.name, event.sender.nick)
   end
 
   on :nick do |event|
-    Users.rename_user(self, event.sender.nick, event.target)
+    Users.rename_user(self.name, event.sender.nick, event.target)
     if event.sender.nick == @current_nick
       @current_nick = event.target
       print_console "You are now known as #{event.target}.", :light_yellow
@@ -126,13 +126,13 @@ class Server
     messg  = "#{event.sender.nick} has kicked #{event.params.first} from #{event.target}"
     messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick # reason for kick, if given
     messg += "."
-    print_console messg, :light_red, event.target
+    print_console messg, :light_red
     # we process this the same way as a part.
     if event.params.first == @current_nick
-      Channels.remove_channel(self, event.channel) # if scarlet was kicked, delete that chan's array.
+      Channels.remove_channel(self.name, event.channel) # if scarlet was kicked, delete that chan's array.
     else
       # remove the kicked user from channels[#channel] array 
-      Channels.remove_user_from_channel(self, event.params.first, event.target)
+      Channels.remove_user_from_channel(self.name, event.params.first, event.target)
     end
   end
 
@@ -147,12 +147,12 @@ class Server
         nicks = event.params[1..-1]
         nicks.each do |nick|
           if nick.start_with?(?#) # // Channel
-            chan = Channels[self, nick]
+            chan = Channels[self.name, nick]
             obj_flags = chan[:flags]
             Parser.parse_modes ev_params, obj_flags 
           else # // User
-            user = Users[self, nick]
-            chan = Channels[self, event.channel]
+            user = Users[self.name, nick]
+            chan = Channels[self.name, event.channel]
             obj_flags = chan[:user_flags][nick] 
             Parser.parse_modes ev_params, obj_flags
           end
@@ -204,7 +204,7 @@ class Server
     # This is a capability extension for tracking user NickServ logins and logouts
     # event.target is the accountname, * if there is none. This must get executed
     # either way, because either the user logged in, or he logged out. (a change)
-    user = Users[self, event.sender.nick]
+    user = Users[self.name, event.sender.nick]
     if user
       user[:ns_login] = event.target != "*" ? true : false
       user[:account_name] = event.target != "*" ? event.target : nil
@@ -265,8 +265,8 @@ class Server
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each do |nick| 
       user_name, flags = Parser.parse_names_list(self, nick)
-      Channels.add_user_to_channel(self, user_name,event.params[1])
-      channel = Channels[self, event.params[1]]
+      Channels.add_user_to_channel(self.name, user_name,event.params[1])
+      channel = Channels[self.name, event.params[1]]
       channel[:user_flags][user_name] = flags
       #nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick 
     end  
@@ -279,7 +279,7 @@ class Server
     if event.params.first == '42'
       # 0 - 42, 1 - channel, 2 - nick, 3 - account name (0 if none)
       if event.params[3] != '0'
-        user = Users[self, event.params[2]]
+        user = Users[self.name, event.params[2]]
         if user
           user[:ns_login] = true
           user[:account_name] = event.params[3]
@@ -335,16 +335,21 @@ class Server
     case event.command    
     when /00[0236789]/ # Login procedure
       print_console event.params.first, :light_green if Scarlet.config.display_logon
+      true
     when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
-      
+      true
     when /451/ # You have not registered
       # Something was sent before the USER NICK PASS handshake completed.
       # This is quite useful but we need to ignore it as otherwise ircd's 
       # like UnrealIRCd (synIRC) cries if we use CAP.
+      true
     when /4\d\d/ # Error message range
       return if event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
       print_console event.params.join(' '), :light_red
       msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0), true
+      true
+    else
+      false
     end  
   end
 
@@ -355,8 +360,9 @@ class Server
 
   #---handle_event--------------------------------------------
   def handle_event event
-    @@event_handles[:all].each { |func| instance_exec(event.dup, &func) } # Execute before every other handle
+    r = @@event_handles[:all].each { |func| instance_exec(event.dup, &func) } # Execute before every other handle
     key = @@event_handles.has_key?(event.command) ? event.command : :todo
+    return if r and key == :todo
     @@event_handles[key].each { |func| instance_exec(event.dup, &func) }
   end
 

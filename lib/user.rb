@@ -53,6 +53,16 @@ module Scarlet
       server[user_name]
     end
 
+    def get *args
+      if args.size == 1
+        get_server *args
+      elsif args.size == 2
+        get_user *args
+      else
+        nil
+      end
+    end
+
     def add_server server_name
       @@users[server_name] ||= HashDowncased[]
     end
@@ -62,11 +72,11 @@ module Scarlet
       server[user_name] ||= mk_hash(user_name)
     end
 
-    alias [] get_user
+    alias [] get
 
     def remove_user server_name, user_name
       server = get_server(server_name)
-      user   = get_user(user_name)
+      user   = server[user_name]
       return unless user
       user[:channels].each do |channel_name|
         Scarlet::Channels.remove_user_from_channel(user_name, channel_name)

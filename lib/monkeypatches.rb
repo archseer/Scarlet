@@ -20,6 +20,7 @@ class Time
 end
 
 class String
+
   def word_wrap line_width = 80
     text = self
     return text if line_width <= 0
@@ -27,6 +28,7 @@ class String
       line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1\n").strip : line
     end * "\n"
   end
+
   def align width = 70, orientation = :left, padding=2
     text = self
     text.strip!
@@ -49,6 +51,7 @@ class String
   def irc_color fg, bg
     "\x03#{"%02d" % fg},#{"%02d" % bg}#{self}\x03"
   end
+
   def str2bool bool=false
     case self.upcase
     when "TOGGLE", "SWITCH" ; !bool
@@ -57,6 +60,7 @@ class String
     else                    ; bool
     end
   end
+  
 end
 
 class Hash
