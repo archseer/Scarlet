@@ -105,7 +105,7 @@ Scarlet.hear /kick\s(?<nick>\S+)(?<channel>\s\#\S+)?(?:\s\:\s(?<reason>.+))?/i, 
   send_data "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
 end
 
-Scarlet.hear /kickban\s(\S+)/i. :dev do
+Scarlet.hear /kickban\s(\S+)/i, :dev do
   send_data "KICKBAN #{params[1]}"
 end
 
