@@ -66,7 +66,7 @@ class Command
       return false
     end
     return true if @@clearance[privilege] == 0 # if it doesn't need clearance (:any)
-    if User.ns_login? event.server.channels, event.sender.nick # check login
+    if Users.ns_login? event.server.name, event.sender.nick # check login
       nick = Nick.where(:nick => event.sender.nick)
       if nick.count == 0
         event.server.msg event.return_path, "Registration not found, please register."
@@ -130,6 +130,7 @@ class Command
       else      ; nick
       end
     end
+    
   end
 end
 end

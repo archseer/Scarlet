@@ -1,5 +1,5 @@
 # add todo <message> - Logs a message on the TODO tracker.
-Scarlet.hear /add todo (.+)/i do
+Scarlet.hear /add todo (.+)/i, :dev do
   Scarlet::Todo.new(:msg => params[1], :by => sender.nick).save!
   reply "TODO was added."
 end

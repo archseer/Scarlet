@@ -6,11 +6,13 @@
     @klik[0]
   end
 end
+
 # klik - Is a one click stopwatch
 Scarlet.hear /klik/i, :registered do
   n = Scarlet.klik.round(2)
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
+
 # time - Prints the current owners time
 Scarlet.hear /time(?:\s(\S+))?/i, :registered do
   unless params[1]
@@ -30,8 +32,9 @@ Scarlet.hear /time(?:\s(\S+))?/i, :registered do
     end
   end
 end
+
 # update <name>? - Just to nag the crap out of Speed
-Scarlet.hear /update(?:\s(\S+))?/i, :registered do
+Scarlet.hear /update(?:\s(\S+))?/i, :dev do
   notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
   notice sender.nick, "Notice sent."
 end

@@ -7,6 +7,12 @@ class Array
   end
 end
 
+class Set
+  def subtract_once *values
+    values.each do |v| self.delete(v) end
+  end
+end
+
 class Time
   def std_format
     self.strftime("%c")
@@ -14,23 +20,15 @@ class Time
 end
 
 class String
-  def word_wrap line_width = 65
+
+  def word_wrap line_width = 80
     text = self
     return text if line_width <= 0
-    text.gsub(/\n/, ' ').gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1\n").strip.split("\n")
+    text.split("\n").collect do |line|
+      line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1\n").strip : line
+    end * "\n"
   end
-  def character_wrap characters=459
-    text = self
-    return text if characters <= 0
-    white_space = " "
-    result,r = [],""
-    text.split(' ').each do |word|
-      (result << r;r = "") if r.size + word.size > characters
-      r << word+white_space
-    end
-    result << r unless r.empty?
-    result
-  end
+
   def align width = 70, orientation = :left, padding=2
     text = self
     text.strip!
@@ -53,6 +51,7 @@ class String
   def irc_color fg, bg
     "\x03#{"%02d" % fg},#{"%02d" % bg}#{self}\x03"
   end
+
   def str2bool bool=false
     case self.upcase
     when "TOGGLE", "SWITCH" ; !bool
@@ -61,6 +60,7 @@ class String
     else                    ; bool
     end
   end
+  
 end
 
 class Hash

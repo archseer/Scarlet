@@ -1,5 +1,6 @@
 # for outputting and logging messages
 module OutputHelper
+
   def print_chat nick, message, silent=false
     msg = Scarlet::Parser.parse_esc_codes message
     time = "[#{Time.now.strftime("%H:%M")}]"
@@ -16,4 +17,5 @@ module OutputHelper
     msg = "#{time} #{msg}"
     puts color ? msg.colorize(color) : msg
   end
+
 end

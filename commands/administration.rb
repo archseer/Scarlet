@@ -47,6 +47,7 @@ Scarlet.hear /bot unban (.+)/i, :dev do
   }
   reply "#{server.current_nick} ban was revoked for #{list.join(", ")}."
 end
+
 # rename <nick> - Renames the bot to nick.
 Scarlet.hear /rename\s+(.+)/i, :dev do
   send_cmd :nick, :nick => params[1].strip
@@ -59,10 +60,12 @@ end
 Scarlet.hear /filter (.+)/i, :dev do
   Scarlet::Command.filter << params[1].strip
 end
+
 # unfilter <phrase> - Unbans a specific command phrase.
 Scarlet.hear /unfilter (.+)/i, :dev do
   Scarlet::Command.filter.delete params[1].strip
 end
+
 # restart - Restarts the bot.
 Scarlet.hear /restart/i, :dev do
   reply 'Restarting myself...'
@@ -74,7 +77,8 @@ end
 # op <nick> - Give Operator Status to <nick>
 # hop <nick> - Give Half-Op Status to <nick>
 # voice <nick> - Give Voice Status to <nick>
-#//ban <str> - Bans <str>
+#//ban <str> 
+#// - Bans <str>
 # kick <nick> - Kicks <nick>
 #flags = {"q"=>:owner,"a"=>:admin,"o"=>:operator,"h"=>:halfop,"v"=>:voice,"r"=> :registered}
 [["admin",[:+,:admin]],["deadmin",[:-,:admin]],
@@ -86,21 +90,25 @@ end
     op,md = str[1]
     modes_hsh = server.mode_list[md]
     unless modes_hsh
-      notice sender.nick, "Unsupported mode: #{md}"
+      notice sender.nick, "The network does not support this mode: #{md}"
     else
       mode = op.to_s + modes_hsh[:prefix].to_s
       server.send_data "mode %s #{mode} %s" % [channel,params[1]]
     end
   end
 }
+
 #Scarlet.hear /kick (\S+(?:\s*,\s*\S+)*)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
 # kick <nick> <channel> : <reason>
+
 Scarlet.hear /kick\s(?<nick>\S+)(?<channel>\s\#\S+)?(?:\s\:\s(?<reason>.+))?/i, :dev do
   send_data "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
 end
-Scarlet.hear /kickban\s(\S+)/i do
+
+Scarlet.hear /kickban\s(\S+)/i, :dev do
   send_data "KICKBAN #{params[1]}"
 end
+
 Scarlet.hear /invite\s(\S+)(?:\s(\S+))?/i, :dev do
   send_data "INVITE #{params[1]}" + (params[2] ? " #{params[2]}" : "")
 end
