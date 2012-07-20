@@ -1,8 +1,9 @@
 # login - Logs the user into his bot account.
 Scarlet.hear /login/i do
   if !Scarlet::Nick.where(:nick => sender.nick).empty?
-    if !Scarlet::User.ns_login? server, sender.nick
+    if !Scarlet::Users.ns_login? server, sender.nick
       server.check_ns_login sender.nick
+      notice sender.nick, "#{sender.nick}, you have been logged in successfuly."
     else
       notice sender.nick, "#{sender.nick}, you are already logged in!"
     end
@@ -13,8 +14,8 @@ end
 
 # logout - Logs the user out from his bot account.
 Scarlet.hear /logout/i do
-  if Scarlet::User.ns_login? server, sender.nick
-    Scarlet::User.ns_logout server, sender.nick
+  if Scarlet::Users.ns_login? server, sender.nick
+    Scarlet::Users.ns_logout server, sender.nick
     notice sender.nick, "#{sender.nick}, you are now logged out."
   end
 end

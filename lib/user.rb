@@ -1,22 +1,26 @@
+class HashDowncased < Hash ; end # // Stub
 module Scarlet
 
-  module User
-    @@users = {}
-  end
+  module Users
+    # Hash<server_name, Hash<user_name, user_hash>>
+    @@users = HashDowncased[]
+  
+    class << self
 
-  class << User  
-
-    def ns_login? server, nick
-      user = server.users[nick]
+    def ns_login? server_name, nick
+      server = get_server(server_name)
+      user = server[nick]
       user ? user[:ns_login] : false
     end
 
-    def ns_logout server, nick
-      server.users[nick][:ns_login] = false if server.has_user?(nick)
+    def ns_logout server_name, nick
+      server = get_server(server_name)
+      server[nick][:ns_login] = false if server[nick]
     end
 
-    def ns_login server, nick
-      server.users[nick][:ns_login] = true if server.has_user?(nick)
+    def ns_login server_name, nick
+      server = get_server(server_name)
+      server[nick][:ns_login] = true if server[nick]
     end
 
     def mk_hash nick
@@ -29,49 +33,50 @@ module Scarlet
       }
     end
 
-    def rename_user old_name,new_name
+    def rename_user server_name, old_name, new_name
       return if old_name == new_name
-      user = has_user?(old_name)
+      user = self[server_name, old_name]
       return unless user
       map = {old_name => new_name}
-      user[:channels].each_value do |channel_hash|
-        channel_hash[:users].replace_key!(map)
+      user[:channels].each do |channel_name|
+        channel_hash = Scarlet::Channels[server_name, channel_name]
+        channel_hash[:users].map! do |s| s == old_name ? new_name : s end
       end
-      @users.replace_key!(map)
+      get_server(server_name).replace_key!(map)
     end
 
-    def has_user? user_name
-      @users[user_name]
+    def get_server server_name
+      @@users[server_name]
     end
 
-    def add_user user_name
-      @users[user_name] ||= mk_user_hash(user_name)
+    def get_user server_name, user_name
+      server = get_server(server_name)
+      return nil unless server
+      server[user_name]
     end
 
-    def remove_user user_name
-      user = has_user?(user_name)
+    def add_server server_name
+      @@users[server_name] ||= HashDowncased[]
+    end
+
+    def add_user server_name, user_name
+      server = get_server(server_name)
+      server[user_name] ||= mk_hash(user_name)
+    end
+
+    alias [] get_user
+
+    def remove_user server_name, user_name
+      server = get_server(server_name)
+      user   = get_user(user_name)
       return unless user
-      user[:channels].each_key do |channel_name|
-        remove_user_from_channel(user_name, channel_name)
+      user[:channels].each do |channel_name|
+        Scarlet::Channels.remove_user_from_channel(user_name, channel_name)
       end
-      @users.delete(user_name)
+      server.delete(user_name)
     end
 
-    def remove_user_from_channel user_name,channel_name
-      user    = has_user?(user_name)
-      channel = has_channel?(channel_name)
-      return unless user and channel
-      channel[:users].delete(user_name)
-      user[:channels].delete(channel_name)
-    end
-
-    def add_user_to_channel user_name,channel_name
-      user    = add_user(user_name) 
-      channel = add_channel(channel_name) 
-      channel[:users] << user_name #[user_name] = user#_name 
-      user[:channels] << channel_name #[channel_name] = channel#_name
-    end
-
+    end # // << self
   end
 
 end

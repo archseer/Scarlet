@@ -21,8 +21,8 @@ module Scarlet
       @config         = config
       @scheduler      = Scheduler.new
       @irc_commands   = YAML.load_file("#{Scarlet.root}/commands.yml").symbolize_keys!
-      @channels       = HashDowncased[] # holds data about the users on channel
-      @users          = HashDowncased[] # holds data on users (seen) on the server
+      @channels       = Scarlet::Channels.add_server(self) # holds data about the users on channel
+      @users          = Scarlet::Users.add_server(self) # holds data on users (seen) on the server
       @banned         = []     # who's banned here?
       @modes          = []     # bot account's modes (ix,..)
       @extensions     = {}     # what the server-side supports (PROTOCTL)

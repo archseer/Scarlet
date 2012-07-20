@@ -50,7 +50,7 @@ class Server
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
-        User.ns_login self, ns_params[:nick] if ns_params[:digit] == "3" && !User.ns_login?(self, ns_params[:nick])
+        Users.ns_login self, ns_params[:nick] if ns_params[:digit] == "3" && !Users.ns_login?(self, ns_params[:nick])
       end
     elsif event.sender.nick == "HostServ"
       event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) {|host| 
@@ -73,8 +73,8 @@ class Server
         # NickServ account name and real name. This means, we don't need to query 
         # NickServ about the user's login status.
         user_name = event.sender.nick
-        user = add_user(user_name)
-        add_user_to_channel(user_name,event.channel)
+        user = Users.add_user(self, user_name)
+        Channels.add_user_to_channel(self, user_name, event.channel)
         user[:ns_login] = true
         user[:account_name] = event.params[0]
       else
@@ -88,32 +88,32 @@ class Server
         end
       end
     else
-      add_channel(event.channel)
+      Channels.add_channel(self, event.channel)
       send_cmd :mode, :mode => event.channel
       print_console "Joined channel #{event.channel}.", :light_yellow
     end
     user_name = event.sender.nick
-    add_user(user_name)
-    add_user_to_channel(user_name,event.channel)
+    Users.add_user(self, user_name)
+    Channels.add_user_to_channel(self, user_name, event.channel)
   end
 
   on :part do |event|
     if event.sender.nick == @current_nick
       print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
-      remove_channel(event.channel) # remove chan if bot parted
+      Channels.remove_channel(self, event.channel) # remove chan if bot parted
     else
       print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
-      remove_user_from_channel(event.sender.nick,event.channel)
+      Channels.remove_user_from_channel(self, event.sender.nick,event.channel)
     end
   end
 
   on :quit do |event|
     print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
-    remove_user(event.sender.nick)
+    Users.remove_user(self, event.sender.nick)
   end
 
   on :nick do |event|
-    rename_user(event.sender.nick, event.target)
+    Users.rename_user(self, event.sender.nick, event.target)
     if event.sender.nick == @current_nick
       @current_nick = event.target
       print_console "You are now known as #{event.target}.", :light_yellow
@@ -129,18 +129,17 @@ class Server
     print_console messg, :light_red, event.target
     # we process this the same way as a part.
     if event.params.first == @current_nick
-      remove_channel(event.channel) # if scarlet was kicked, delete that chan's array.
+      Channels.remove_channel(self, event.channel) # if scarlet was kicked, delete that chan's array.
     else
       # remove the kicked user from channels[#channel] array 
-      remove_user_from_channel(event.params.first,event.target)
+      Channels.remove_user_from_channel(self, event.params.first, event.target)
     end
   end
 
   on :mode do |event|
     ev_params = event.params.first.split("")
     if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
-      puts ">> Server Mode Parse"
-      Scarlet::Parser.parse_modes ev_params, @modes
+      Parser.parse_modes ev_params, @modes
     else # USER/CHAN modes
       #mode = true
       event.params.compact!
@@ -148,19 +147,19 @@ class Server
         nicks = event.params[1..-1]
         nicks.each do |nick|
           if nick.start_with?(?#) # // Channel
-            chan = has_channel?(nick)
+            chan = Channels[self, nick]
             obj_flags = chan[:flags]
-            Scarlet::Parser.parse_modes ev_params, obj_flags 
+            Parser.parse_modes ev_params, obj_flags 
           else # // User
-            user = has_user?(nick)
-            chan = has_channel?(event.channel)
+            user = Users[self, nick]
+            chan = Channels[self, event.channel]
             obj_flags = chan[:user_flags][nick] 
-            Scarlet::Parser.parse_modes ev_params, obj_flags
+            Parser.parse_modes ev_params, obj_flags
           end
           
         end
       else # CHAN modes
-        Scarlet::Parser.parse_modes ev_params, @channels[event.channel][:flags]
+        Parser.parse_modes ev_params, @channels[event.channel][:flags]
       end
     end
   end
@@ -266,8 +265,8 @@ class Server
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each do |nick| 
       user_name, flags = Parser.parse_names_list(self, nick)
-      add_user_to_channel(user_name,event.params[1])
-      channel = has_channel?(event.params[1])
+      Channels.add_user_to_channel(self, user_name,event.params[1])
+      channel = Channels[self, event.params[1]]
       channel[:user_flags][user_name] = flags
       #nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick 
     end  
@@ -306,18 +305,18 @@ class Server
     if @extensions[:whox]
       send_data "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
     else
-     check_ns_login @channels[event.params.first][:users].keys
+      check_ns_login @channels[event.params.first][:users]
     end
   end  
 
   on :'375' do |event| # START of MOTD
     # capture and extract the list of possible modes on this network
     hsh = Scarlet.base_mode_list.dup
-    prefix2key = hsh.remap{|k,v|[v[:prefix],k]}
-    supmodes = @extensions[:prefix].match(/\((\w+)\)(.+)/)[1,2]
+    prefix2key = hsh.remap{ |k,v| [v[:prefix], k] }
+    supmodes = @extensions[:prefix].match(/\((\w+)\)(.+)/)[1, 2]
     #supmodes[0],supmodes[1] # // :prefix(s), :symbol(s)
     supped = prefix2key.keys & supmodes[0].split("")
-    @mode_list = Hash[supped.collect {|prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
+    @mode_list = Hash[supped.collect { |prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
     # this is immediately after 005 messages usually so set up extended NAMES command
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   end  
