@@ -36,26 +36,27 @@ class Command
 
   def initialize server, event
     event.server = server
-    if event.params[0].split(' ')[0] =~ /#{server.current_nick}[:,]?\s*/i
-      event.params[0] = event.params[0].split(' ').drop(1).join(' ')
-    elsif event.params[0].starts_with? server.config.control_char
-      event.params[0].slice!(0)
+    if event.params.first =~ /^#{server.current_nick}[:,]?\s*/i
+      event.params.first = event.params[0].split[1..-1].join(' ')
+    elsif event.params.first.starts_with? server.config.control_char
+      event.params.first.slice!(0)
     end
 
-    if !@@filter.empty? and !event.params[0].start_with?("unfilter") and word = compile_filter.match(event.params[0])
+    if word = check_filters(event.params.first)
       event.server.msg event.return_path, "Cannot execute because \"#{word}\" is blocked."
       return
     end
 
     @@listens.keys.each {|key|
-      if matches = key.match(event.params.first)
+      key.match(event.params.first) {|matches|
         @@listens[key][:callback].run event.dup, matches if check_access(event, @@listens[key][:clearance])
-      end
+      }
     }
   end
 
-  def compile_filter
-    Regexp.new "(#{@@filter.join("|")})"
+  def check_filters params
+    return false if @@filter.empty? or params.start_with?("unfilter")
+    return Regexp.new("(#{@@filter.join("|")})").match(params)
   end
 
   def check_access event, privilege
