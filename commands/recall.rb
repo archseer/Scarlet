@@ -7,7 +7,11 @@ Scarlet.hear /recall(?:\s(\d+))?/ do
     # if we want to get the last n, we need to reverse order, then limit then reverse again
     logs.pop # remove the newest message, which is the user saying '!recall'
     logs.each do |log|
-      notice sender.nick, "<#{log.nick}> #{log.message}"
+      if message = log.message.match(/\u0001ACTION (.+)\u0001/)
+        notice sender.nick, "* #{log.nick} #{message[1]}", true
+      else
+        notice sender.nick, "<#{log.nick}> #{log.message}", true
+      end
     end
   else
     reply "You cannot use recall outside a channel!"
