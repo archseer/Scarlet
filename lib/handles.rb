@@ -57,7 +57,7 @@ class Server
         @vHost = host[1]
         print_console "#{@vHost} is now your hidden host (set by services.)", :light_magenta
       }
-    elsif event.sender.nick != "Global" 
+    elsif event.sender.nick == "Global" 
       # ignore notices from Global (wallops?)
     else # not from NickServ or HostServ -- normal notice
       print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan 
