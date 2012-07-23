@@ -49,7 +49,7 @@ class Server
   on :notice do |event|
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
-      if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || ns_params = event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
+      if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
         Users.ns_login self.name, ns_params[:nick] if ns_params[:digit] == "3" && !Users.ns_login?(self.name, ns_params[:nick])
       end
     elsif event.sender.nick == "HostServ"
@@ -57,8 +57,10 @@ class Server
         @vHost = host[1]
         print_console "#{@vHost} is now your hidden host (set by services.)", :light_magenta
       }
+    elsif event.sender.nick != "Global" 
+      # ignore notices from Global (wallops?)
     else # not from NickServ or HostServ -- normal notice
-      print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan if event.sender.nick != "Global" # hack, ignore notices from Global (wallops?)
+      print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan 
     end
   end
 
@@ -99,17 +101,17 @@ class Server
 
   on :part do |event|
     if event.sender.nick == @current_nick
-      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
       Channels.remove_channel(self.name, event.channel) # remove chan if bot parted
+      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
     else
-      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
       Channels.remove_user_from_channel(self.name, event.sender.nick,event.channel)
+      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
     end
   end
 
   on :quit do |event|
-    print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
     Users.remove_user(self.name, event.sender.nick)
+    print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
   end
 
   on :nick do |event|
@@ -256,8 +258,9 @@ class Server
     print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).std_format}", :light_green
   end
 
-  on :'433' do |event| # Nickname exists
-    @current_nick += "Bot" and send_cmd :nick, :nick => @current_nick # dumb retry, append "Bot" to nick and resend NICK
+  on :'433' do |event| # Nickname is already in use
+    # dumb retry, append "Bot" to nick and resend NICK
+    @current_nick += "Bot" and send_cmd :nick, :nick => @current_nick
   end
 
   on :'353' do |event| # NAMES list
@@ -338,7 +341,7 @@ class Server
       true
     when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
       true
-    when /451/ # You have not registered
+    when /451/ # ERROR: You have not registered
       # Something was sent before the USER NICK PASS handshake completed.
       # This is quite useful but we need to ignore it as otherwise ircd's 
       # like UnrealIRCd (synIRC) cries if we use CAP.

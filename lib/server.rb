@@ -19,7 +19,7 @@ module Scarlet
     attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :ircd
     attr_reader :base_mode_list, :mode_list, :vHost
 
-    def initialize config  # irc could/should have own handlers.
+    def initialize config
       @config         = config
       @irc_commands   = YAML.load_file("#{Scarlet.root}/commands.yml").symbolize_keys!
       init
@@ -31,8 +31,8 @@ module Scarlet
 
     def init
       @scheduler      = Scheduler.new
-      @channels       = Scarlet::Channels.add_server(self.name) # holds data about the users on channel
-      @users          = Scarlet::Users.add_server(self.name) # holds data on users (seen) on the server
+      @channels       = Channels.add_server(self.name) # holds data about the users on channel
+      @users          = Users.add_server(self.name) # holds data on users (seen) on the server
       @banned         = []     # who's banned here?
       @modes          = []     # bot account's modes (ix,..)
       @extensions     = {}     # what the server-side supports (PROTOCTL)
