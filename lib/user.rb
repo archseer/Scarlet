@@ -39,12 +39,11 @@ module Scarlet
       return if old_name == new_name
       user = self[server_name, old_name]
       return unless user
-      map = {old_name => new_name}
       user[:channels].each do |channel_name|
         channel_hash = Scarlet::Channels[server_name, channel_name]
         channel_hash[:users].map! do |s| s == old_name ? new_name : s end
       end
-      get_server(server_name).replace_key!(map)
+      get_server(server_name).replace_key!(old_name => new_name)
     end
 
     def get_server server_name
