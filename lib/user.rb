@@ -83,7 +83,7 @@ module Scarlet
       user   = server[user_name]
       return unless user
       user[:channels].each do |channel_name|
-        Scarlet::Channels.remove_user_from_channel(user_name, channel_name)
+        Scarlet::Channels.remove_user_from_channel(server_name, user_name, channel_name)
       end
       server.delete(user_name)
     end
