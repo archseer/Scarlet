@@ -155,7 +155,7 @@ class Server
           else # // User
             user = Users[self.name, nick]
             chan = Channels[self.name, event.channel]
-            obj_flags = chan[:user_flags][nick] 
+            obj_flags = chan[:user_flags][nick] ||= []
             Parser.parse_modes ev_params, obj_flags
           end
           
