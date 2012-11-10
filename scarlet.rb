@@ -1,32 +1,8 @@
 # Scarlet - an IRC bot which is slowly becoming an automated assistant framework
 # Goal: Make it adapter based and not limited to a protocol.
 #----------------------------------------------------------------
-# uses mustache for templating and active_support
 # errors - light_red, info - light_blue, success - light_green
 require 'mustache'
-
-class Hash # instead of hash[:key][:key], hash.key.key
-  def method_missing(method, *args)
-    method_name = method.to_s
-    unless respond_to? method_name
-      if method_name.ends_with? '?'
-        # if it ends with ? it's an existance check
-        method_name.slice!(-1)
-        key = keys.detect {|k| k.to_s == method_name }
-        return !!self[key]
-      elsif method_name.ends_with? '='
-        # if it ends with = it's a setter, so set the value
-        method_name.slice!(-1)
-        key = keys.detect {|k| k.to_s == method_name }
-        return self[key] = args.first
-      end
-    end
-    # if it contains that key, return the value
-    key = keys.detect {|k| k.to_s == method_name }
-    return self[key] if key
-    super
-  end
-end
 
 module Scarlet; end # Stub class so we can safely load in files
 base_path = File.expand_path File.dirname(__FILE__)
@@ -46,7 +22,7 @@ module Scarlet
         cfg[:server_name] = name
         @@servers[name] = Server.new cfg
       end
-      # for now for safety delete the servers list after it gets loaded
+      # for safety delete the servers list after it gets loaded
       Scarlet.config.delete :servers
       # connect servers
       @@servers.values.each do |server|
