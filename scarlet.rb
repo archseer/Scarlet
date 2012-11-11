@@ -23,7 +23,6 @@ module Scarlet
         server.connection = EventMachine::connect(server.config.address, server.config.port, Connection, server)
       end
       Scarlet.load_commands
-      puts 'Scarlet process has started.'.green
     end
 
     def shutdown

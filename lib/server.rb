@@ -1,4 +1,4 @@
-load "lib/output_helper.rb" #modules/scarlet
+load "lib/output_helper.rb"
 module Scarlet
   # All known modes
   @base_mode_list = {
@@ -132,6 +132,6 @@ module Scarlet
         msg "NickServ", "STATUS #{nick}", true if @ircd =~ /unreal/i
       end
     end
-    
+
   end
 end

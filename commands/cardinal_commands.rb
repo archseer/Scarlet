@@ -53,5 +53,5 @@ Scarlet.hear (/play favourites/), :owner do
   end
 end
 rescue Exception
-  puts 'Cardianl - Not Loaded'
+  puts 'Cardinal - Not Loaded'
 end
