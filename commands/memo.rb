@@ -3,6 +3,7 @@
 #=========================================#
 # // Created by IceDragon (IceDragon200)
 #=========================================#
+=begin
 module IrcBot
   module IcyCommands
     # // Memo :3
@@ -88,3 +89,4 @@ module IrcBot
     end
   end
 end
+=end
