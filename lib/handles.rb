@@ -45,7 +45,7 @@ class Server
       # if we detect a command sequence, we remove the prefix, we execute it.
       # it is prefixed with @config.control_char or by mentioning the bot's current nickname
       if event.params.first =~ /^#{@current_nick}[:,]?\s*/i
-        event.params.first = event.params[0].split[1..-1].join(' ')
+        event.params[0] = event.params[0].split[1..-1].join(' ')
         Command.new(self, event.dup)
       elsif event.params.first.starts_with? @config.control_char
         event.params.first.slice!(0)
