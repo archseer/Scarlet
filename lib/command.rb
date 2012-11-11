@@ -36,22 +36,17 @@ class Command
 
   def initialize server, event
     event.server = server
-    if event.params.first =~ /^#{server.current_nick}[:,]?\s*/i
-      event.params.first = event.params[0].split[1..-1].join(' ')
-    elsif event.params.first.starts_with? server.config.control_char
-      event.params.first.slice!(0)
-    end
 
     if word = check_filters(event.params.first)
       event.server.msg event.return_path, "Cannot execute because \"#{word}\" is blocked."
       return
     end
 
-    @@listens.keys.each {|key|
+    @@listens.keys.each |key| do
       key.match(event.params.first) {|matches|
         @@listens[key][:callback].run event.dup, matches if check_access(event, @@listens[key][:clearance])
       }
-    }
+    end
   end
 
   def check_filters params
