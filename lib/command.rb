@@ -42,7 +42,7 @@ class Command
       return
     end
 
-    @@listens.keys.each |key| do
+    @@listens.keys.each do |key|
       key.match(event.params.first) {|matches|
         @@listens[key][:callback].run event.dup, matches if check_access(event, @@listens[key][:clearance])
       }
