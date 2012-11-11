@@ -9,21 +9,19 @@ module Scarlet
     :voice      => {:name=>'voice'     ,:prefix=>'v',:symbol=>'+'},
     :registered => {:name=>'registered',:prefix=>'r',:symbol=>'' }
   }
-  
   def self.base_mode_list; @base_mode_list; end
+
   class Server
 
     include ::OutputHelper
 
     attr_accessor :scheduler, :reconnect, :banned, :connection, :config, :handshake
-    attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :ircd
-    attr_reader :base_mode_list, :mode_list, :vHost
+    attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :mode_list, :vHost
 
     def initialize config
       @config         = config
       @irc_commands   = YAML.load_file("#{Scarlet.root}/commands.yml").symbolize_keys!
       init_vars
-      # // Config
       @current_nick   = @config.nick
       @config[:control_char] ||= Scarlet.config.control_char
       @config = @config.dup.freeze
@@ -86,7 +84,7 @@ module Scarlet
 
     def receive_line line
       parsed_line = IRC::Parser.parse line
-      event = IRC::Event.new(:localhost, parsed_line[:prefix],
+      event = Event.new(:localhost, parsed_line[:prefix],
                         parsed_line[:command].downcase.to_sym,
                         parsed_line[:target], parsed_line[:params])
       Log.write(event)
@@ -133,7 +131,7 @@ module Scarlet
         msg "NickServ", "ACC #{nick}", true if @ircd =~ /ircd-seven/i # freenode
         msg "NickServ", "STATUS #{nick}", true if @ircd =~ /unreal/i
       end
-
     end
+    
   end
 end

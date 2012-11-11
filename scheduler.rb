@@ -5,7 +5,7 @@
 # module that needs it.
 # => Usage
 # Create an instance of scheduler (scheduler = Scheduler.new)
-# Create an access method for it. 
+# Create an access method for it.
 # Use as usual (http://rufus.rubyforge.org/rufus-scheduler/)
 # Call scheduler.remove_all when unloading the module
 #================================================

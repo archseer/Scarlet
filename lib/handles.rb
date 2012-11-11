@@ -1,5 +1,4 @@
 module Scarlet
-
 class Server
   @@event_handles = {}
   def self.on command,*args,&func
@@ -378,5 +377,5 @@ class Server
     @@event_handles[key].each { |func| instance_exec(event.dup, &func) }
   end
 
-end # // Server Class
-end # // Scarlet (Module)
+end
+end

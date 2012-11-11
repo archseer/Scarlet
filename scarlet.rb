@@ -1,9 +1,3 @@
-# Scarlet - an IRC bot which is slowly becoming an automated assistant framework
-# Goal: Make it adapter based and not limited to a protocol.
-#----------------------------------------------------------------
-# errors - light_red, info - light_blue, success - light_green
-require 'mustache'
-
 module Scarlet; end # Stub class so we can safely load in files
 base_path = File.expand_path File.dirname(__FILE__)
 Modules.load_models base_path
@@ -14,7 +8,7 @@ module Scarlet
   class << self
     attr_accessor :config, :root
 
-    def loaded
+    def start!
       Scarlet.root = File.expand_path File.dirname(__FILE__)
       Scarlet.config = YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys!
       # create servers
@@ -32,7 +26,7 @@ module Scarlet
       puts 'Scarlet process has started.'.green
     end
 
-    def unload
+    def shutdown
       @@servers.values.each do |server|
         server.disconnect
         server.scheduler.remove_all
