@@ -33,8 +33,7 @@ class IRC
         end
       end
 
-      target = params[0]
-      params.slice! 0
+      target = params.slice!(0)
       
       {:prefix => prefix, :command => command, :target => target, :params => params}
     end
