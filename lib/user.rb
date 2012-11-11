@@ -1,9 +1,8 @@
-class HashDowncased < Hash ; end # // Stub
 module Scarlet
-
+  
   module Users
     # Hash<server_name, Hash<user_name, user_hash>>
-    @@users = HashDowncased[]
+    @@users = {}
   
     class << self
 
@@ -67,7 +66,7 @@ module Scarlet
     end
 
     def add_server server_name
-      @@users[server_name] ||= HashDowncased[]
+      @@users[server_name] ||= {}
     end
 
     def add_user server_name, user_name

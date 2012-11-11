@@ -6,7 +6,7 @@ It is designed with multi-channel and multi-server support and offers [a very si
 
 ## Usage
 
-In order to use Scarlet, you must first create a `config.yml` file. Here is an example file:
+In order to use Scarlet, you must first create a `config.yml` file. Here is an example of such file:
 
     host: GLaDOS
     name: Scarlet
@@ -15,6 +15,7 @@ In order to use Scarlet, you must first create a `config.yml` file. Here is an e
     display_ping: FALSE
     display_logon: FALSE
     relay: FALSE
+    debug: FALSE
 
     servers: {
       server1: {
@@ -33,4 +34,4 @@ In order to use Scarlet, you must first create a `config.yml` file. Here is an e
       },
     }
 
-Various IRC networks can be defined in the servers hash. Control character can be overriden per-server. If a password is defined, Scarlet will try to login to that server, otherwise if there is no key, it will just skip login.
+Various IRC networks can be defined in the `servers` hash. Control character can be overriden per-server. If a password is defined, Scarlet will try to login to that server, otherwise if there is no key, it will just skip login. Debug tells Scarlet whether to log all messages to console or only errors and more important messages. 

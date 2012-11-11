@@ -1,4 +1,3 @@
-load "lib/output_helper.rb"
 module Scarlet
   # All known modes
   @base_mode_list = {
@@ -12,9 +11,6 @@ module Scarlet
   def self.base_mode_list; @base_mode_list; end
 
   class Server
-
-    include ::OutputHelper
-
     attr_accessor :scheduler, :reconnect, :banned, :connection, :config, :handshake
     attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :mode_list, :vHost
 
@@ -61,7 +57,7 @@ module Scarlet
       reset_vars
 
       reconnect = lambda {
-        puts "Connection to server lost. Reconnecting...".light_red
+        print_error "Connection to server lost. Reconnecting...".light_red
         connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
         connection.post_init
         init_vars
@@ -113,6 +109,31 @@ module Scarlet
       log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
       log.channel = target if target.starts_with? "#"
       log.save!
+    end
+
+    def print_chat nick, message, silent=false
+      return unless Scarlet.config.debug
+      msg = Scarlet::Parser.parse_esc_codes message
+      time = "[#{Time.now.strftime("%H:%M")}]"
+      if msg =~ /\x01ACTION\s(.+)\x01/ #detect '/me'
+        puts "#{time} * #{nick} #{$1}".light_blue if !silent
+      else
+        puts "#{time.light_white} <#{nick.light_red}> #{msg}" if !silent
+      end
+    end
+
+    def print_console message, color=nil
+      return unless Scarlet.config.debug
+      msg = Scarlet::Parser.parse_esc_codes message
+      time = "[#{Time.now.strftime("%H:%M")}]"
+      msg = "#{time} #{msg}"
+      puts color ? msg.colorize(color) : msg
+    end
+
+    def print_error message
+      msg = Scarlet::Parser.parse_esc_codes message
+      msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
+      puts msg.colorize(:light_red)
     end
 
     def check_ns_login nick

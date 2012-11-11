@@ -181,7 +181,7 @@ class Server
     if event.target.start_with? "Closing Link"
       puts "Disconnection from #{@config.address} successful.".blue
     else
-      puts "ERROR: #{event.params.join(' ')}".red
+      print_error "ERROR: #{event.params.join(' ')}"
     end
   end
 
@@ -199,7 +199,7 @@ class Server
         end
       end
     when 'ACK'
-      event.params[1].split(" ").each {|extension| @cap_extensions[extension] = true; puts "#{extension} ENABLED."}
+      event.params[1].split(" ").each {|extension| @cap_extensions[extension] = true }
     when 'NAK'
       event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
     end
@@ -355,7 +355,7 @@ class Server
       true
     when /4\d\d/ # Error message range
       unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
-        print_console event.params.join(' '), :light_red
+        print_error event.params.join(' ')
         msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0), true
       end
       true
