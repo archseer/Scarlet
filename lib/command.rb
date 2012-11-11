@@ -55,19 +55,18 @@ class Command
   end
 
   def check_access event, privilege
-    nck = Scarlet::Nick.where(:nick=>event.sender.nick).first
-    ban = (Scarlet::Ban.where(:nick=>nck.nick) or [nil]).first if nck
+    nick = Scarlet::Nick.where(:nick => event.sender.nick).first
+    ban = (Scarlet::Ban.where(:nick=>nick.nick) or [nil]).first if nick
     if ban and ban.level > 0 and ban.servers.include?(event.server.config.address)
       event.server.msg event.return_path, "#{event.sender.nick} is banned and cannot use any commands."
       return false
     end
     return true if @@clearance[privilege] == 0 # if it doesn't need clearance (:any)
     if Users.ns_login? event.server.name, event.sender.nick # check login
-      nick = Nick.where(:nick => event.sender.nick)
-      if nick.count == 0
+      if !nick
         event.server.msg event.return_path, "Registration not found, please register."
         return false
-      elsif nick.first.privileges < @@clearance[privilege]
+      elsif nick.privileges < @@clearance[privilege]
         event.server.msg event.return_path, "Your security clearance does not grant access."
         return false
       end
