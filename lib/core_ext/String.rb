@@ -8,22 +8,19 @@ class String
   end
 
   def align width = 70, orientation = :left, padding=2
-    text = self
-    text.strip!
-    l = text.length
-    if l < width
-      margin = width-(l+padding*2) > 0 ? width-(l+padding*2) : 0
+    text = self.strip
+    if text.length < width
+      margin = width-(text.length+padding*2) > 0 ? width-(text.length+padding*2) : 0
       if orientation == :right
-        text = (" " * padding) + (" " * margin) + text + (" " * padding)
+        return " " * (padding + margin) + text + (" " * padding)
       elsif orientation == :left
-        text = (" " * padding) + text  + (" " * margin) + (" " * padding)
+        return (" " * padding) + text  + " " * (margin + padding)
       elsif orientation == :center
         left_margin = (width - l)/2
         right_margin = width - l - left_margin
-        text = (" " * left_margin) + text + (" " * right_margin)
+        return (" " * left_margin) + text + (" " * right_margin)
       end
     end
-    text
   end
 
   def irc_color fg, bg
