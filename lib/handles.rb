@@ -9,7 +9,7 @@ class Server
   end
 
   on :ping do |event|
-    puts("[ Server ping ]") if Scarlet.config.display_ping
+    puts "[ Server ping ]" if Scarlet.config.display_ping
     send_data "PONG :#{event.target}"
   end
 

@@ -1,4 +1,4 @@
-load "modules/scarlet/lib/output_helper.rb"
+load "lib/output_helper.rb" #modules/scarlet
 module Scarlet
   # All known modes
   @base_mode_list = {
