@@ -1,22 +1,3 @@
-=begin
-<Defusal> if you need timers, use the EM-based core of Rufus-Sheduler, its great
-<Defusal> i wrapped it for my modules, so each module has its own timers which are all destroyed on unload
-<Defusal> http://pastie.org/3305750
-<Defusal> so in unload, i do: mod.scheduler.remove_all if mod.respond_to? :scheduler
-<Defusal> and well, i load my modules very differently, but basically
-<Defusal> base.instance_variable_set :@scheduler, Scheduler.new
-<Defusal> and then i make a attr_reader for it on both the class and instance level
------
-<Defusal> you create a new instance per module
-<Defusal> and then use the methods to add and remove timers
-<Defusal> method_missing delegates everything that is not defined in the file to the Rufus::Scheduler instance
-<Defusal> its a proxy class
-<Defusal> it tracks scheduled items per instance you create, so that you can remove them all when unloading a module
-<Speeda>  scheduler = Scheduler.new
-<Speeda>  scheduler.at ...
-<Defusal> then you call scheduler.remove_all when unloading the module
-<Defusal> and all its timers will be destroyed
-=end
 #=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 # scheduler.rb - Rufus scheduler proxy
 #------------------------------------------------
