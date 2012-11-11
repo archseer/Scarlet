@@ -22,25 +22,29 @@ module Scarlet
     def initialize config
       @config         = config
       @irc_commands   = YAML.load_file("#{Scarlet.root}/commands.yml").symbolize_keys!
-      init
+      init_vars
       # // Config
       @current_nick   = @config.nick
       @config[:control_char] ||= Scarlet.config.control_char
       @config = @config.dup.freeze
     end  
 
-    def init
+    def init_vars
       @scheduler      = Scheduler.new
       @channels       = Channels.add_server(self.name) # holds data about the users on channel
-      @users          = Users.add_server(self.name) # holds data on users (seen) on the server
+      @users          = Users.add_server(self.name) # holds data on users (seen) on the server      
+      @reconnect      = true   # reconnection flag
+      @mode_list      = {} # Temp
+      reset_vars
+    end
+
+    def reset_vars
       @banned         = []     # who's banned here?
       @modes          = []     # bot account's modes (ix,..)
       @extensions     = {}     # what the server-side supports (PROTOCTL)
       @cap_extensions = {}     # CAPability extensions (CAP REQ)
       @handshake      = false  # set to true after we connect (001)
-      @reconnect      = true   # reconnection flag
       @vHost          = nil    # vHost/cloak
-      @mode_list      = {} # Temp
     end
 
     def name
@@ -56,19 +60,13 @@ module Scarlet
     def unbind
       Channels.clean(self.name)
       Users.clean(self.name)
-      @modes.clear
-      @extensions.clear
-      @cap_extensions.clear
-      @handshake = false
-      @vHost = nil
-      @banned.clear
-      @cap_extensions.clear
+      reset_vars
 
       reconnect = lambda {
         puts "Connection to server lost. Reconnecting...".light_red
         connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
         connection.post_init
-        init
+        init_vars
       }
       EM.add_timer(3) { reconnect.call } if @reconnect
     end
