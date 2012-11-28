@@ -6,7 +6,6 @@ require_relative 'scheduler'
 require_relative 'modules'
 require_relative 'scarlet'
 
-MongoMapper.connection = Mongo::Connection.new
 MongoMapper.database = 'scarlet'
 
 puts ">> Scarlet v1 (development)".light_green
