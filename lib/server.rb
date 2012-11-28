@@ -57,7 +57,7 @@ module Scarlet
       reset_vars
 
       reconnect = lambda {
-        print_error "Connection to server lost. Reconnecting...".light_red
+        print_error "Connection to server lost. Reconnecting..."
         connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
         connection.post_init
         init_vars
