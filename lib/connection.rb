@@ -30,13 +30,13 @@ class Scarlet::Connection < EM::Connection
 
   private
   def check_connection
-    puts "Sending PING to server to verify connection..."
+    #print "Sending PING to server to verify connection..."
     @server.send_cmd :ping, :target => @server.config.address
     @check_connection_timer = EM::Timer.new 30, method(:timeout)
   end
 
   def timeout
-    print_error "Timed out waiting for server, reconnecting...".light_red
+    print "Timed out waiting for server, reconnecting...".light_red
     @server.send_cmd :quit, :quit => "Ping timeout"
     close_connection_after_writing
   end
