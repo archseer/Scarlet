@@ -1,12 +1,4 @@
 class Hash
-  def symbolize_values
-    inject Hash.new do |hsh, (key, value)| hsh[key] = value.to_s.to_sym ; hsh ; end
-  end
-  
-  def symbolize_values!
-    self.replace symbolize_values
-  end
-
   def replace_key *args,&block
     dup.replace_key! *args, &block
   end
