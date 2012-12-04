@@ -12,19 +12,11 @@ module Scarlet::Parser
     end
 
     def parse_names_list mode_list, string # parses NAMES list
-      settings = {}
-      mlist = mode_list.dup
-      mlist.delete :registered
-      modes = mlist.remap{ |k,v| [v[:symbol], v[:prefix]] }
-      #{'~' => :owner, '&' => :admin, '@' => :operator, '%' => :halfop, '+'=> :voice}
-      matdata = string.match /([\+%@&~]*)(\S+)/
-      umodes, name = matdata[1].split(""), matdata[2]
-      modes.values.each{ |v| settings[v] = false }
-      umodes.each { |k| settings[modes[k]] = true }
-      settings = settings.inject([]) do |a,(k,v)| 
-        a << k if v unless a.include?(k) ; a 
-      end
-      return name, settings
+      modes = mode_list.except(:registered).remap{ |k,v| [v[:prefix], v[:symbol]] }
+      #{:owner => '~', :admin => '&', :operator => '@', :halfop => '%', :voice => '+'}
+      params = string.match /(?<prefix>[\+%@&~]*)(?<nick>\S+)/
+      modes.each {|key, val| modes[key] = params[:prefix].include?(val)}
+      return params[:nick], modes
     end
 
     def parse_esc_codes msg, remove=false # parses IRC escape codes into ANSI or removes them.

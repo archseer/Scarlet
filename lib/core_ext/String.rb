@@ -1,6 +1,6 @@
 class String
   def word_wrap line_width = 80
-    s.gsub(/(.{1,#{line_width}})(\s+|\Z)/, "\\1\n")
+    self.gsub(/(.{1,#{line_width}})(\s+|\Z)/, "\\1\n")
   end
 
   def irc_color fg, bg
