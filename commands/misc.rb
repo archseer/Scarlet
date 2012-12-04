@@ -6,17 +6,6 @@ Scarlet.hear (/give me (.+)/) do
   reply "\x01ACTION gives #{params[1]} to #{sender.nick}!\x01"
 end
 
-Scarlet.hear (/OMG/) do
-  table = ::Scarlet::InfoTable.new(50)
-  table.addHeader "┌─ TODO #1 ─┐"
-  table.addRow "┌───────── Sup! ────┐"
-  table.addRow "│ Date: sasda       │"
-  table.addRow "│ Added by: a       │"
-  table.addRow "│ Entry: qqqq       │"
-  table.addRow "└───────── Sup! ────┘"
-  table.compile.each {|line| reply line, true }
-end
-
 # show colors - Draws the entire IRC color pallete.
 Scarlet.hear (/show colors/), :dev do
   for i in 0..15
