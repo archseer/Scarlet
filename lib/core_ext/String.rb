@@ -12,13 +12,11 @@ class String
     if text.length < width
       margin = width-(text.length+padding*2) > 0 ? width-(text.length+padding*2) : 0
       if orientation == :right
-        return " " * (padding + margin) + text + (" " * padding)
+        return text.rjust(margin).center(padding)
       elsif orientation == :left
-        return (" " * padding) + text  + " " * (margin + padding)
+        return text.ljust(margin).center(padding)
       elsif orientation == :center
-        left_margin = (width - text.length)/2
-        right_margin = width - text.length - left_margin
-        return (" " * left_margin) + text + (" " * right_margin)
+        return text.center(width)
       end
     end
   end
