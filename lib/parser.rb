@@ -1,18 +1,8 @@
 module Scarlet::Parser
   class << self
 
-    def convert_prfx_to_sym mode_list, array
-      modes = mode_list.remap { |k,v| [v[:prefix],v[:name].to_sym] }
-      array.collect do |c| modes[c] || c end
-    end
-
-    def convert_to_mode_prefixes mode_list, hash
-      active_syms = hash.select { |(k,v)| v }.map(&:first)
-      active_syms.map { |s| mode_list[s][:prefix] }
-    end
-
     def parse_names_list mode_list, string # parses NAMES list
-      modes = mode_list.except(:registered).remap{ |k,v| [v[:prefix], v[:symbol]] }
+      modes = mode_list.except(:registered).remap { |k,v| [v[:prefix], v[:symbol]] }
       #{:owner => '~', :admin => '&', :operator => '@', :halfop => '%', :voice => '+'}
       params = string.match /(?<prefix>[\+%@&~]*)(?<nick>\S+)/
       modes.each {|key, val| modes[key] = params[:prefix].include?(val)}
