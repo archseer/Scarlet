@@ -15,16 +15,11 @@ class Hash
   end
 
   def remap &block
-    dup.remap! &block
+    Hash[*self.map(&block).flatten]
   end
 
-  def remap!
-    key,value = [nil]*2
-    hsh = self.each_pair.to_a; self.clear
-    hsh.each do |(key,value)|
-      key,value = yield key,value; self[key] = value
-    end
-    self
+  def remap! &block
+    self.replace remap(&block)
   end
 
   # instead of hash[:key][:key], hash.key.key
