@@ -12,3 +12,5 @@ gem 'colorize'
 gem 'time-lord' # pretty output of 'x time ago'
 gem "em-http-request", :git => 'git://github.com/igrigorik/em-http-request.git'
 gem 'mustache'
+
+gem 'text-table', :git => 'git://github.com/archSeer/text-table.git'
