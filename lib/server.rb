@@ -79,7 +79,7 @@ module Scarlet
     end
 
     def receive_line line
-      parsed_line = IRC::Parser.parse line
+      parsed_line = Parser.parse line
       event = Event.new(:localhost, parsed_line[:prefix],
                         parsed_line[:command].downcase.to_sym,
                         parsed_line[:target], parsed_line[:params])
