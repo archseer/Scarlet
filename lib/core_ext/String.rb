@@ -16,8 +16,8 @@ class String
       elsif orientation == :left
         return (" " * padding) + text  + " " * (margin + padding)
       elsif orientation == :center
-        left_margin = (width - l)/2
-        right_margin = width - l - left_margin
+        left_margin = (width - text.length)/2
+        right_margin = width - text.length - left_margin
         return (" " * left_margin) + text + (" " * right_margin)
       end
     end
