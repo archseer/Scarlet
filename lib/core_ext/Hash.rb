@@ -6,10 +6,6 @@ class Hash
   def symbolize_values!
     self.replace symbolize_values
   end
-  
-  def get_values *args
-    args.collect{|sym|self[sym]}
-  end
 
   def replace_key *args,&block
     dup.replace_key! *args, &block

@@ -206,7 +206,7 @@ class Server
     
     # if the command isn't LS (the first LS sent in the handshake)
     # and no command still needs processing
-    send_data "CAP END" if event.params[0] != "LS" && !@handshake && !@cap_extensions.get_values.include?(:processing)    
+    send_data "CAP END" if event.params[0] != "LS" && !@handshake && !@cap_extensions.values.include?(:processing)    
   end
 
   on :account do |event|
