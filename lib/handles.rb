@@ -4,7 +4,7 @@ class Server
   def self.on command,*args,&func
     handles = @@event_handles[command] ||= []
     func = func || proc { nil }
-    args.include?(:prepend) ? handles.unshift(func) : handles.push(func) 
+    args.include?(:prepend) ? handles.unshift(func) : handles.push(func)
   end
 
   on :ping do |event|
