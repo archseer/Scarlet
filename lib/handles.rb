@@ -274,11 +274,11 @@ class Server
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each do |nick| 
-      user_name, flags = Parser.parse_names_list(self, nick)
+      user_name, flags = Parser.parse_names_list(mode_list, nick)
       Channels.add_user_to_channel(self.name, user_name,event.params[1])
       channel = Channels[self.name, event.params[1]]
       channel[:user_flags][user_name] = flags
-      #nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list self, nick 
+      #nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list mode_list, nick 
     end  
   end
 

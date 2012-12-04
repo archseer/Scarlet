@@ -1,20 +1,19 @@
 module Scarlet::Parser
   class << self
 
-    def convert_prfx_to_sym server, array
-      modes = server.mode_list.remap { |k,v| [v[:prefix],v[:name].to_sym] }
+    def convert_prfx_to_sym mode_list, array
+      modes = mode_list.remap { |k,v| [v[:prefix],v[:name].to_sym] }
       array.collect do |c| modes[c] || c end
     end
 
-    def convert_to_mode_prefixes server, hash
-      active_syms = hash.select do |(k,v)| v end.map(&:first)
-      mlist = server.mode_list
-      active_syms.map do |s| mlist[s][:prefix] end
+    def convert_to_mode_prefixes mode_list, hash
+      active_syms = hash.select { |(k,v)| v }.map(&:first)
+      active_syms.map { |s| mode_list[s][:prefix] }
     end
 
-    def parse_names_list server, string # parses NAMES list
+    def parse_names_list mode_list, string # parses NAMES list
       settings = {}
-      mlist = server.mode_list.dup
+      mlist = mode_list.dup
       mlist.delete :registered
       modes = mlist.remap{ |k,v| [v[:symbol], v[:prefix]] }
       #{'~' => :owner, '&' => :admin, '@' => :operator, '%' => :halfop, '+'=> :voice}
