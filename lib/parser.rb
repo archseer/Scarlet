@@ -35,12 +35,13 @@ module Scarlet::Parser
     def parse_line line
       matches = line.match /^(:(?<prefix>\S+)\s+)?(?<command>\S+)\s+(?<params>.*)\s*/
       result = Hash[matches.names.map(&:to_sym).zip(matches.captures)]
-      params = result[:params].match(/(?<pieces>.+?)((?:^|\s):(?<rest>.+)\s*)?\z/) # params prefixed with : are separate.
+      params = result[:params].match(/\A(?::)?(?<pieces>.+?)((?:^|\s):(?<rest>.+)\s*)?\z/) # params prefixed with : are separate.
       
       result[:params] = params[:pieces].split
       result[:params] << params[:rest] if params[:rest]
       result[:params].delete("")
 
+      result[:prefix] ||= ""
       result[:target] = result[:params].slice!(0)
       return result
     end
