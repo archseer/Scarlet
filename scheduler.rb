@@ -38,10 +38,6 @@ class Scheduler
       end
     end
 
-    def unschedule_by_tag(tags)
-      find_by_tag(tags).each {|job| job.unschedule }
-    end
-
     def method_missing(name, *args, &block)
       #puts "[Scheduler] #{name}, #{args.join ', '}"
       if [:in, :at, :every, :cron].include? name
@@ -62,10 +58,6 @@ class Scheduler
     @@instances << self
     @queue = []
     @jobs = []
-  end
-
-  def unschedule_by_tag(tags)
-    self.class.unschedule_by_tag(tags)
   end
 
   def remove_all
