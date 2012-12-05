@@ -4,12 +4,12 @@ Scarlet.hear /bot ban ([0-3]) (.+)(?:\: (.+))?/i, :dev do
   nicks = params[2].split(" ").compact
   reason= params[3].to_s
   list = []
-  sender_nik = Scarlet::Nick.where(:nick=>sender.nick).first
+  sender_nik = Scarlet::Nick.first(:nick => sender.nick)
   nicks.each { |nick_str|
     #notice sender.nick, "%s is currently not present on this network"
-    Scarlet::Ban.new(:nick=>nick_str).save! if Scarlet::Ban.where(:nick=>nick_str).empty?
-    usr = Scarlet::Ban.where(:nick=>nick_str).first
-    nck = Scarlet::Nick.where(:nick=>nick_str).first
+    Scarlet::Ban.new(:nick => nick_str).save! if !Scarlet::Ban.first(:nick => nick_str)
+    usr = Scarlet::Ban.first(:nick => nick_str)
+    nck = Scarlet::Nick.first(:nick => nick_str)
     if usr && (nck ? nck.privileges : 0) < sender_nik.privileges
       usr.level = lvl
       usr.by = sender.nick
@@ -31,11 +31,11 @@ end
 # bot unban <user> - Unbans a user from using the bot.
 Scarlet.hear /bot unban (.+)/i, :dev do
   nicks = params[1].split " "
-  sender_nik = Scarlet::Nick.where(:nick=>sender.nick).first
+  sender_nik = Scarlet::Nick.first(:nick=>sender.nick)
   list = []
   nicks.each { |nick_str|
     next if sender_nik.nick.upcase == nick_str.upcase
-    ban = Scarlet::Ban.where(:nick=>nick_str).first
+    ban = Scarlet::Ban.first(:nick=>nick_str)
     if ban
       ban.level = 0
       ban.by = sender.nick

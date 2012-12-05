@@ -18,8 +18,8 @@ Scarlet.hear /time(?:\s(\S+))?/i, :registered do
   unless params[1]
     reply Time.now.to_s
   else
-    nck = params[1].gsub(/-me/i,sender.nick)
-    nick = Scarlet::Nick.where(:nick => nck).first
+    nck = params[1].gsub(/-me/i, sender.nick)
+    nick = Scarlet::Nick.first(:nick => nck)
     if nick
       zone_str = nick.settings[:timezone] 
       if zone_str

@@ -36,7 +36,7 @@ end
 # // 
 # set timezone <timezone> - self-explanatory; used with !time command
 Scarlet.hear /set(?:\smy)?\stimezone\s(.+)/i, :registered do
-  n = Scarlet::Nick.where(:nick => sender.nick).first
+  n = Scarlet::Nick.first(:nick => sender.nick)
   if n
     if TZInfo::Timezone.all_identifiers.include? params[1]
       n.settings[:timezone] = params[1]

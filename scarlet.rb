@@ -8,6 +8,7 @@ module Scarlet
   class << self
     attr_accessor :config, :root
 
+    # Starts up Scarlet, setting the basic variables and opening connections to servers.
     def start!
       Scarlet.root = File.expand_path File.dirname(__FILE__)
       Scarlet.config = YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys!
@@ -25,6 +26,7 @@ module Scarlet
       Scarlet.load_commands
     end
 
+    # Shuts down Scarlet. Disconnects from all servers and removes any scheduled tasks.
     def shutdown
       @@servers.values.each do |server|
         server.disconnect
@@ -32,7 +34,8 @@ module Scarlet
       end
     end
 
-    def load_commands # load custom commands
+    # Loads up commands from the /commands directory.
+    def load_commands
       Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Command.parse_help path}
     end
 

@@ -45,24 +45,24 @@ module IrcBot
       end
     end
     def self.memos(nick)
-      n = Nick.where(:nick=>nick).first
+      n = Nick.first(:nick=>nick)
       n ? n.memos : nil
     end
     def self.add_memo(sender,recipient,message)
-      n = Scarlet::Nick.where(:nick=>recipient).first
+      n = Scarlet::Nick.first(:nick=>recipient)
       return false unless(n)
       n.memos << Scarlet::Nick::Memo.new(:sender=>sender, :message=>message)
       !!n.save!
     end
     def self.remove_memo(nick,id)
-      n = Scarlet::Nick.where(:nick=>recipient).first
+      n = Scarlet::Nick.first(:nick=>recipient)
       return 0 unless(n)
       m = n.memos.delete_at(id)
       n.save!
       m ? 1 : 2
     end
     def self.clear_memos(recipient)
-      n = Scarlet::Nick.where(:nick=>recipient.upcase).first
+      n = Scarlet::Nick.first(:nick=>recipient.upcase)
       return false unless(n)
       n.memos.clear
       !!n.save!
