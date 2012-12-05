@@ -8,19 +8,21 @@ class Server
   end
 
   on :ping do |event|
-    puts "[ Server ping ]" if Scarlet.config.display_ping
+    print_console "[ Server ping ]" if Scarlet.config.display_ping
     send_data "PONG :#{event.target}"
   end
 
   on :pong do |event|
-    puts "[ Ping reply from #{event.sender.host} ]"
+    print_console "[ Ping reply from #{event.sender.host} ]" if Scarlet.config.display_ping
   end
 
   on :privmsg do |event|
     if event.params.first =~ /\001PING (.+)\001/
-      puts "[ CTCP PING from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
+      puts "[ CTCP PING from #{event.sender.nick} ]" 
+      send_data "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
     elsif event.params.first =~ /\001VERSION\001/
-      puts "[ CTCP VERSION from #{event.sender.nick} ]" and send_data "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
+      puts "[ CTCP VERSION from #{event.sender.nick} ]" 
+      send_data "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
     else
       print_chat event.sender.nick, event.params.first
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
@@ -150,22 +152,12 @@ class Server
     if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
       Parser.parse_modes ev_params, @modes
     else # USER/CHAN modes
-      #mode = true
       event.params.compact!
       if event.params.count > 1 # user list - USER modes
-        nicks = event.params[1..-1]
-        nicks.each do |nick|
-          if nick.start_with?(?#) # // Channel
-            chan = Channels[self.name, nick]
-            obj_flags = chan[:flags]
-            Parser.parse_modes ev_params, obj_flags 
-          else # // User
-            user = Users[self.name, nick]
-            chan = Channels[self.name, event.channel]
-            obj_flags = chan[:user_flags][nick] ||= []
-            Parser.parse_modes ev_params, obj_flags
-          end
-          
+        event.params[1..-1].each do |nick|
+          chan = Channels[self.name, event.channel]
+          obj_flags = chan[:user_flags][nick]
+          Parser.parse_user_modes ev_params, obj_flags, mode_list          
         end
       else # CHAN modes
         Parser.parse_modes ev_params, @channels[event.channel][:flags]
@@ -244,12 +236,7 @@ class Server
   on :'315' # End of /WHO list
 
   on :'324' do |event| # Chan mode
-    mode = true
-    event.params[1].split("").each do |c|
-      mode = (c=="+") ? true : (c == "-" ? false : mode)
-      next if c == "+" or c == "-" or c == " "
-      mode ? @channels[event.params.first][:flags] << c : modes.subtract_once(c)
-    end
+    Parser.parse_modes event.params[1].split(''), Channels[self.name, event.params.first][:flags]
   end
 
   on :'329' do |event| # Channel created at
@@ -278,7 +265,6 @@ class Server
       Channels.add_user_to_channel(self.name, user_name,event.params[1])
       channel = Channels[self.name, event.params[1]]
       channel[:user_flags][user_name] = flags
-      #nick, @channels[event.params[1]][:users][nick] = Parser.parse_names_list mode_list, nick 
     end  
   end
 

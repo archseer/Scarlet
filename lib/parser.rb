@@ -2,7 +2,7 @@ module Scarlet::Parser
   class << self
 
     def parse_names_list mode_list, string # parses NAMES list
-      modes = mode_list.except(:registered).remap { |k,v| [v[:prefix], v[:symbol]] }
+      modes = mode_list.except(:registered).remap { |k,v| [k, v[:symbol]] }
       #{:owner => '~', :admin => '&', :operator => '@', :halfop => '%', :voice => '+'}
       params = string.match /(?<prefix>[\+%@&~]*)(?<nick>\S+)/
       modes.each {|key, val| modes[key] = params[:prefix].include?(val)}
@@ -20,14 +20,30 @@ module Scarlet::Parser
     end
 
     # // Using a C styled approach (Pointer mode_array),
-    def parse_modes new_modes, mode_array, mode=true
+    def parse_modes new_modes, mode_array
+      mode = true
       new_modes.each do |c|
         mode = (c=="+") ? true : (c == "-" ? false : mode)
-        next if c == "+" or c == "-" or c == " "
+        next if "+- ".include?(c)
         if mode
           mode_array << c unless mode_array.include?(c)
         else
           mode_array.subtract_once(c)
+        end
+      end
+    end
+
+    def parse_user_modes new_modes, mode_hash, mode_map
+      mode = true
+      map = mode_map.remap { |k,v| [v[:prefix], k] }
+      new_modes.each do |c|
+        mode = (c=="+") ? true : (c == "-" ? false : mode)
+        next if "+- ".include?(c)
+        next unless map[c] # tempfix: skip any unknown modes (that probably belong to chan)
+        if mode
+          mode_hash[map[c]] = true
+        else
+          mode_hash[map[c]] = false
         end
       end
     end

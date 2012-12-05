@@ -15,7 +15,7 @@ module Scarlet
       {
         #name:       channel_name,
         users:      [],
-        user_flags: HashDowncased[],
+        user_flags: {},
         flags:      []
       }
     end
