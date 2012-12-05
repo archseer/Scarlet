@@ -2,7 +2,6 @@
 # port of Defusal's system
 class Scarlet::Log
   include MongoMapper::Document
-
   key :nick,     String
   key :channel,  String
   key :command,  String

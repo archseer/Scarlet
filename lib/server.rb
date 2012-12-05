@@ -25,8 +25,8 @@ module Scarlet
 
     def init_vars
       @scheduler      = Scheduler.new
-      @channels       = Channels.add_server(self.name) # holds data about the users on channel
-      @users          = Users.add_server(self.name) # holds data on users (seen) on the server      
+      @channels       = Channels.add_server(self.name) # users on channel
+      @users          = Users.add_server(self.name)    # users (seen) on the server      
       @reconnect      = true   # reconnection flag
       @mode_list      = {} # Temp
       reset_vars

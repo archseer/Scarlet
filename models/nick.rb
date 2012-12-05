@@ -1,11 +1,11 @@
 class Scarlet::Nick
   include MongoMapper::Document
   validates_presence_of :nick
-  key :nick,            String
-  key :aliases,         Array
-  key :privileges,      Integer, :default => 1
-  key :win_points,      Integer, :default => 0
-  key :settings,        Hash
+  key :nick,       String
+  key :aliases,    Array
+  key :privileges, Integer, :default => 1
+  key :win_points, Integer, :default => 0
+  key :settings,   Hash
   timestamps!
   many :memos
 end

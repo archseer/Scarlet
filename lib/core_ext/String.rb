@@ -1,4 +1,5 @@
 class String
+  # Word wraps the string to the specified length.
   def word_wrap line_width = 80
     self.gsub(/(.{1,#{line_width}})(\s+|\Z)/, "\\1\n")
   end
