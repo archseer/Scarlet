@@ -43,7 +43,7 @@ Scarlet.hear /list issues/i do
     issues = Scarlet::Issue.sort(:created_at.desc).limit(10).all
     table = Text::Table.new
     issues.each_with_index { |t,i|
-      table.rows << [c-i, t.by, t.created_at.std_format]
+      table.rows << [c-i, t.by, t.created_at.strftime("%B %d %Y, %H:%M")]
     }
     table.head = [{:value => 'Latest entries', :colspan => 3, :align => :center}]
     table.to_s.split("\n").each {|line| reply line, true }

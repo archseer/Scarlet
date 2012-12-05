@@ -253,7 +253,7 @@ class Server
   end
 
   on :'329' do |event| # Channel created at
-    print_console "#{event.params[0]} created at #{Time.at(event.params[1].to_i).std_format}", :light_green
+    print_console "#{event.params[0]} created at #{Time.at(event.params[1].to_i).strftime("%c")}", :light_green
   end
 
   on :'332' do |event| # Channel topic
@@ -262,7 +262,7 @@ class Server
   end  
 
   on :'333' do |event| # Channel topic set by
-    print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).std_format}", :light_green
+    print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).strftime("%c")}", :light_green
   end
 
   on :'433' do |event| # Nickname is already in use
