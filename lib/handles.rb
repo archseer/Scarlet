@@ -157,7 +157,7 @@ class Server
         event.params[1..-1].each do |nick|
           chan = Channels[self.name, event.channel]
           obj_flags = chan[:user_flags][nick]
-          Parser.parse_user_modes ev_params, obj_flags, mode_list          
+          @parser.parse_user_modes ev_params, obj_flags       
         end
       else # CHAN modes
         Parser.parse_modes ev_params, @channels[event.channel][:flags]
@@ -261,7 +261,7 @@ class Server
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each do |nick| 
-      user_name, flags = Parser.parse_names_list(mode_list, nick)
+      user_name, flags = @parser.parse_names_list(nick)
       Channels.add_user_to_channel(self.name, user_name,event.params[1])
       channel = Channels[self.name, event.params[1]]
       channel[:user_flags][user_name] = flags
@@ -306,13 +306,8 @@ class Server
   end  
 
   on :'375' do |event| # START of MOTD
-    # capture and extract the list of possible modes on this network
-    hsh = Scarlet.base_mode_list.dup
-    prefix2key = hsh.remap{ |k,v| [v[:prefix], k] }
-    supmodes = @extensions[:prefix].match(/\((\w+)\)(.+)/)[1, 2]
-    #supmodes[0],supmodes[1] # // :prefix(s), :symbol(s)
-    supped = prefix2key.keys & supmodes[0].split("")
-    @mode_list = Hash[supped.collect { |prfx| [prefix2key[prfx], hsh[prefix2key[prfx]]] }]
+    # create a new parser that uses the list of possible modes on this network. 
+    @parser = Parser.new(@extensions[:prefix])
     # this is immediately after 005 messages usually so set up extended NAMES command
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
   end  

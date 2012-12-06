@@ -1,14 +1,4 @@
 module Scarlet
-  # All known modes
-  @base_mode_list = {
-    :owner      => {:name=>'owner'     ,:prefix=>'q',:symbol=>'~'},
-    :admin      => {:name=>'admin'     ,:prefix=>'a',:symbol=>'&'},
-    :op         => {:name=>'operator'  ,:prefix=>'o',:symbol=>'@'},
-    :hop        => {:name=>'halfop'    ,:prefix=>'h',:symbol=>'%'},
-    :voice      => {:name=>'voice'     ,:prefix=>'v',:symbol=>'+'},
-    :registered => {:name=>'registered',:prefix=>'r',:symbol=>'' }
-  }
-  def self.base_mode_list; @base_mode_list; end
 
   class Server
     attr_accessor :scheduler, :reconnect, :banned, :connection, :config, :handshake
@@ -28,7 +18,6 @@ module Scarlet
       @channels       = Channels.add_server(self.name) # users on channel
       @users          = Users.add_server(self.name)    # users (seen) on the server      
       @reconnect      = true   # reconnection flag
-      @mode_list      = {} # Temp
       reset_vars
     end
 
@@ -80,13 +69,6 @@ module Scarlet
 
     def receive_line line
       parsed_line = Parser.parse_line line
-
-      if parsed_line != Parser.parse_line2(line)
-        p parsed_line
-        p Parser.parse_line2 line
-        p line
-      end
-
       event = Event.new(:localhost, parsed_line[:prefix],
                         parsed_line[:command].downcase.to_sym,
                         parsed_line[:target], parsed_line[:params])
