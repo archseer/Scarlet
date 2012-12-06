@@ -80,6 +80,13 @@ module Scarlet
 
     def receive_line line
       parsed_line = Parser.parse_line line
+
+      if parsed_line != Parser.parse_line2(line)
+        p parsed_line
+        p Parser.parse_line2 line
+        p line
+      end
+
       event = Event.new(:localhost, parsed_line[:prefix],
                         parsed_line[:command].downcase.to_sym,
                         parsed_line[:target], parsed_line[:params])

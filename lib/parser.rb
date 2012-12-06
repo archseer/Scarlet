@@ -40,11 +40,7 @@ module Scarlet::Parser
         mode = (c=="+") ? true : (c == "-" ? false : mode)
         next if "+- ".include?(c)
         next unless map[c] # tempfix: skip any unknown modes (that probably belong to chan)
-        if mode
-          mode_hash[map[c]] = true
-        else
-          mode_hash[map[c]] = false
-        end
+        mode_hash[map[c]] = mode # mode is either true (add) or false (remove)
       end
     end
     
@@ -61,5 +57,64 @@ module Scarlet::Parser
       result[:target] = result[:params].slice!(0)
       return result
     end
+
+    def parse_line2 line
+      matches = line.match /^(:(?<prefix>\S+)\s)?(?<command>\S+)(\s(?!:)(?<args>.+?))?(\s:(?<trail>.+))?$/
+      result = Hash[matches.names.map(&:to_sym).zip(matches.captures)]
+      result[:params] = []
+      result[:params].push(*result.delete(:args).split) if result[:args]
+      result[:params] << result.delete(:trail) if result[:trail]
+      result[:prefix] ||= ""
+      result[:target] = result[:params].slice!(0)
+      return result
+    end
   end
+end
+
+
+class Scarlet::Parser2
+  @@base_mode_list = {
+    :owner      => {:name=>'owner'     ,:prefix=>'q',:symbol=>'~'},
+    :admin      => {:name=>'admin'     ,:prefix=>'a',:symbol=>'&'},
+    :op         => {:name=>'operator'  ,:prefix=>'o',:symbol=>'@'},
+    :hop        => {:name=>'halfop'    ,:prefix=>'h',:symbol=>'%'},
+    :voice      => {:name=>'voice'     ,:prefix=>'v',:symbol=>'+'},
+    :registered => {:name=>'registered',:prefix=>'r',:symbol=>'' }
+  }
+
+  def initialize prefix_list
+    # map @mode_list to the list of modes available on the network.
+
+    name_lookup = @@base_mode_list.remap{ |k,v| [v[:prefix], k] }
+    #prefix_list.match(/\((?<prefix>\w+)\)(?<symbol>.+)/) {|matches|
+    #  Hash[matches[:prefix].split("").zip(matches[:symbol].split(""))]
+    #}
+    # TODO: use the symbol that's in the prefix_list for the prefix's symbol.
+
+    parsed = prefix_list.match(/\((?<prefix>\w+)\)(?<symbol>.+)/)
+
+    prefixes = parsed[:prefix].split("").each_with_object([]) {|prefix, array| array << name_lookup[prefix] }
+
+    @mode_list = @@base_mode_list.slice(*prefixes)
+  end
+
+  def parse_names_list string # parses NAMES list
+    modes = @mode_list.except(:registered).remap { |k,v| [k, v[:symbol]] }
+    #{:owner => '~', :admin => '&', :operator => '@', :halfop => '%', :voice => '+'}
+    params = string.match /(?<prefix>[\+%@&~]*)(?<nick>\S+)/
+    modes.each {|key, val| modes[key] = params[:prefix].include?(val)}
+    return params[:nick], modes
+  end
+
+  def parse_user_modes new_modes, mode_hash
+    mode = true
+    map = @mode_list.remap { |k,v| [v[:prefix], k] }
+    new_modes.each do |c|
+      mode = (c=="+") ? true : (c == "-" ? false : mode)
+      next if "+- ".include?(c)
+      next unless map[c] # tempfix: skip any unknown modes (that probably belong to chan)
+      mode_hash[map[c]] = mode # mode is either true (add) or false (remove)
+    end
+  end
+
 end

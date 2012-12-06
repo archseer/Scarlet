@@ -79,7 +79,7 @@ class Server
 
     if @current_nick != event.sender.nick
       print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow
-      if !event.params.empty? && @cap_extensions["extended-join"]
+      if !event.params.empty? && @cap_extensions['extended-join']
         # extended-join is enabled, which means that join returns two extra params, 
         # NickServ account name and real name. This means, we don't need to query 
         # NickServ about the user's login status.

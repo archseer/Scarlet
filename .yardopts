@@ -1,3 +1,4 @@
+--main README.md
 models/
 lib/
 commands/
@@ -5,3 +6,5 @@ core.rb
 modules.rb
 scarlet.rb
 scheduler.rb
+-
+docs/*.md
