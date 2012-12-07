@@ -35,7 +35,7 @@ module Scarlet
     end
 
     def disconnect
-      send_cmd :quit, :quit => Scarlet.config.quit
+      send "QUIT :#{Scarlet.config.quit}"
       @reconnect = false
       connection.close_connection(true)
     end
@@ -77,10 +77,6 @@ module Scarlet
     end
 
     #----------------------------------------------------------
-    def send_cmd cmd, hash
-      send Mustache.render(@irc_commands[cmd], hash)
-    end
-
     def msg target, message
       send "PRIVMSG #{target} :#{message}"
       write_log :privmsg, message, target
@@ -89,6 +85,10 @@ module Scarlet
     def notice target, message
       send "NOTICE #{target} :#{message}"
       write_log :notice, message, target
+    end
+
+    def join *channels
+      send "JOIN #{channels.join(',')}"
     end
 
     def write_log command, message, target
@@ -119,13 +119,13 @@ module Scarlet
 
       if nick.is_a? Array
         if @ircd =~ /unreal/i
-          nick.each_slice(16) {|group| msg "NickServ", "STATUS #{group.join(' ')}", true}
+          nick.each_slice(16) {|group| msg "NickServ", "STATUS #{group.join(' ')}"}
         else
-          nick.each {|nickname| msg "NickServ", "ACC #{nick}", true}
+          nick.each {|nickname| msg "NickServ", "ACC #{nick}"}
         end 
       else # one nick was given, send the message
-        msg "NickServ", "ACC #{nick}", true if @ircd =~ /ircd-seven/i # freenode
-        msg "NickServ", "STATUS #{nick}", true if @ircd =~ /unreal/i
+        msg "NickServ", "ACC #{nick}" if @ircd =~ /ircd-seven/i # freenode
+        msg "NickServ", "STATUS #{nick}" if @ircd =~ /unreal/i
       end
     end
 

@@ -93,7 +93,7 @@ class Server
       end
     else
       Channels.add_channel(self.name, event.channel)
-      send_cmd :mode, :mode => event.channel
+      send "MODE #{event.channel}"
       print_console "Joined channel #{event.channel}.", :light_yellow
     end
     user_name = event.sender.nick
@@ -233,7 +233,7 @@ class Server
 
   on :'433' do |event| # Nickname is already in use
     # dumb retry, append "Bot" to nick and resend NICK
-    @current_nick += "Bot" and send_cmd :nick, :nick => @current_nick
+    @current_nick += "Bot" and send "NICK #{@current_nick}"
   end
 
   on :'353' do |event| # NAMES list
@@ -291,7 +291,7 @@ class Server
   end
 
   on :'376' do |event| # END of MOTD command. Join channel(s)!
-    send_cmd :join, :channel => @config.channel
+    join @config.channels
   end
 
   on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set

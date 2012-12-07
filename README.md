@@ -13,7 +13,6 @@ In order to use Scarlet, you must first create a `config.yml` file. Here is an e
     quit: Thank you for participating in this Aperture Science computer-aided enrichment activity.
     control_char: "!"
     display_ping: FALSE
-    display_logon: FALSE
     relay: FALSE
     debug: FALSE
 
@@ -21,14 +20,14 @@ In order to use Scarlet, you must first create a `config.yml` file. Here is an e
       server1: {
         address: 'test.irc.net',
         port: 6667,
-        channel: '#scarlet,#bot',
+        channels: ['#scarlet', '#bot'],
         nick: "Scarlet",
         password: "password"
       },
       server2: {
         address: 'myirc.irc.net',
         port: 6667,
-        channel: '#irc',
+        channel: ['#irc'],
         control_char: "!",
         nick: 'Scarletto',
       },
