@@ -54,7 +54,7 @@ module Scarlet
       EM.add_timer(3) { reconnect.call } if @reconnect
     end
 
-    def send_data data
+    def send data
       if data =~ /(PRIVMSG|NOTICE)\s(\S+)\s(.+)/i
         stack = []
         command, trg, text = $1, $2, $3
@@ -78,16 +78,16 @@ module Scarlet
 
     #----------------------------------------------------------
     def send_cmd cmd, hash
-      send_data Mustache.render(@irc_commands[cmd], hash)
+      send Mustache.render(@irc_commands[cmd], hash)
     end
 
     def msg target, message, silent=false
-      send_data "PRIVMSG #{target} :#{message}"
+      send "PRIVMSG #{target} :#{message}"
       write_log :privmsg, message, target
     end
 
     def notice target, message, silent=false
-      send_data "NOTICE #{target} :#{message}"
+      send "NOTICE #{target} :#{message}"
       write_log :notice, message, target
     end
 

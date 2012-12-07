@@ -86,7 +86,7 @@ class Command
       self.instance_eval &@block
     end
 
-    delegate :msg, :notice, :send_data, :send_cmd, :to => '@event.server'
+    delegate :msg, :notice, :send, :send_cmd, :to => '@event.server'
 
     def reply message, silent=false
       msg return_path, message, silent

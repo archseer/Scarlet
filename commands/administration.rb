@@ -93,7 +93,7 @@ end
       notice sender.nick, "The network does not support this mode: #{md}"
     else
       mode = op.to_s + modes_hsh[:prefix].to_s
-      server.send_data "mode %s #{mode} %s" % [channel,params[1]]
+      server.send "mode %s #{mode} %s" % [channel,params[1]]
     end
   end
 }
@@ -102,13 +102,13 @@ end
 # kick <nick> <channel> : <reason>
 
 Scarlet.hear /kick\s(?<nick>\S+)(?<channel>\s\#\S+)?(?:\s\:\s(?<reason>.+))?/i, :dev do
-  send_data "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
+  send "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
 end
 
 Scarlet.hear /kickban\s(\S+)/i, :dev do
-  send_data "KICKBAN #{params[1]}"
+  send "KICKBAN #{params[1]}"
 end
 
 Scarlet.hear /invite\s(\S+)(?:\s(\S+))?/i, :dev do
-  send_data "INVITE #{params[1]}" + (params[2] ? " #{params[2]}" : "")
+  send "INVITE #{params[1]}" + (params[2] ? " #{params[2]}" : "")
 end

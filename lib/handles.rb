@@ -8,7 +8,7 @@ class Server
   end
 
   on :ping do |event|
-    send_data "PONG :#{event.target}"
+    send "PONG :#{event.target}"
   end
 
   on :pong do |event|
@@ -18,10 +18,10 @@ class Server
   on :privmsg do |event|
     if event.params.first =~ /\001PING (.+)\001/
       puts "[ CTCP PING from #{event.sender.nick} ]" 
-      send_data "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
+      send "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
     elsif event.params.first =~ /\001VERSION\001/
       puts "[ CTCP VERSION from #{event.sender.nick} ]" 
-      send_data "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
+      send "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
     else
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
       if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != @config.control_char
@@ -86,7 +86,7 @@ class Server
         # a) if WHOX is available, query with WHOX.
         # b) if still no luck, query NickServ.
         if @cap_extensions[:whox]
-          send_data "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
+          send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
         else
           check_ns_login event.sender.nick
         end
@@ -175,7 +175,7 @@ class Server
       if not @handshake
         %w[account-notify extended-join].each do |extension| 
           @cap_extensions[extension] = :processing
-          send_data "CAP REQ :#{extension}"
+          send "CAP REQ :#{extension}"
         end
       end
     when 'ACK'
@@ -186,7 +186,7 @@ class Server
     
     # if the command isn't LS (the first LS sent in the handshake)
     # and no command still needs processing
-    send_data "CAP END" if event.params[0] != "LS" && !@handshake && !@cap_extensions.values.include?(:processing)    
+    send "CAP END" if event.params[0] != "LS" && !@handshake && !@cap_extensions.values.include?(:processing)    
   end
 
   on :account do |event|
@@ -277,7 +277,7 @@ class Server
     # WHOX - http://hg.quakenet.org/snircd/file/37c9c7460603/doc/readme.who
 
     if @extensions[:whox]
-      send_data "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
+      send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
     else
       check_ns_login @channels[event.params.first][:users]
     end
@@ -287,7 +287,7 @@ class Server
     # create a new parser that uses the list of possible modes on this network. 
     @parser = Parser.new(@extensions[:prefix])
     # this is immediately after 005 messages usually so set up extended NAMES command
-    send_data "PROTOCTL NAMESX" if @extensions[:namesx]
+    send "PROTOCTL NAMESX" if @extensions[:namesx]
   end
 
   on :'376' do |event| # END of MOTD command. Join channel(s)!
