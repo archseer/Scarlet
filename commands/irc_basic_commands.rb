@@ -37,6 +37,6 @@ Scarlet.hear /cycle(?:\s(\S+))?/i, :dev do
   if params[1]
     send "CYCLE #{params[1]}"
   else
-    server.channels.keys.each do |n| send "CYCLE #{n}" end
+    server.channels.keys.each { |n| send "CYCLE #{n}" }
   end
 end
