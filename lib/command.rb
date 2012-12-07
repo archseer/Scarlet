@@ -90,7 +90,7 @@ class Command
 
     # DSL delegator, no need to use @event to access it's methods
     def method_missing method, *args
-      return @event.send method, *args if @event.respond_to? method
+      return @event.__send__ method, *args if @event.respond_to? method
       super
     end
 
