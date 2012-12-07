@@ -81,12 +81,12 @@ module Scarlet
       send Mustache.render(@irc_commands[cmd], hash)
     end
 
-    def msg target, message, silent=false
+    def msg target, message
       send "PRIVMSG #{target} :#{message}"
       write_log :privmsg, message, target
     end
 
-    def notice target, message, silent=false
+    def notice target, message
       send "NOTICE #{target} :#{message}"
       write_log :notice, message, target
     end

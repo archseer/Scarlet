@@ -202,7 +202,7 @@ class Server
 
   on :'001' do |event|
     @handshake = true
-    msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password? # login only if a password was supplied
+    msg "NickServ", "IDENTIFY #{@config.password}" if @config.password? # login only if a password was supplied
   end
 
   on :'004' do |event|
@@ -294,8 +294,7 @@ class Server
     send_cmd :join, :channel => @config.channel
   end
 
-  on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's
-    # Reply to a user when user mode +x (host masking) was set successfully
+  on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
     @vHost = event.params.first
     print_console event.params.join(' '), :light_magenta  
   end

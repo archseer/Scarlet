@@ -86,7 +86,7 @@ class Command
       self.instance_eval &@block
     end
 
-    delegate :msg, :notice, :reply, :action, :send, :send_cmd, :to => :@event
+    delegate :msg, :notice, :reply, :action, :send, :send_cmd, to: :@event
 
     # DSL delegator, no need to use @event to access it's methods
     def method_missing method, *args

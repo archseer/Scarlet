@@ -8,9 +8,9 @@ Scarlet.hear /recall(?:\s(\d+))?/ do
     logs.pop # remove the newest message, which is the user saying '!recall'
     logs.each do |log|
       if message = log.message.match(/\u0001ACTION (.+)\u0001/)
-        notice sender.nick, "* #{log.nick} #{message[1]}", true
+        notice sender.nick, "* #{log.nick} #{message[1]}"
       else
-        notice sender.nick, "<#{log.nick}> #{log.message}", true
+        notice sender.nick, "<#{log.nick}> #{log.message}"
       end
     end
   else

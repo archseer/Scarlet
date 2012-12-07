@@ -28,10 +28,10 @@ Scarlet.hear /weather in (.+?)(?:\s*units\s*(.*))?\s*$/ do
         r << "winds from #{h["wind"]["direction"]} at #{h["wind"]["speed"].to_i} #{h["units"]["speed"]}."
         r << "#{h["atmosphere"]["humidity"]}% humidity, #{h["atmosphere"]["visibility"]} #{h["units"]["distance"]} visibility"
         r << "and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"].to_i} #{h["units"]["pressure"]}."
-        msg return_path, r.join(' ')
+        reply r.join(' ')
       }
     else
-      msg return_path, "There was a problem with the location..."
+      reply "There was a problem with the location..."
     end
   }
 end

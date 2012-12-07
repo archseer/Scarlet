@@ -16,12 +16,12 @@ class Scarlet::Event
 
   delegate :msg, :notice, :send, :send_cmd, to: :@server
 
-  def reply message, silent=false
-    msg return_path, message, silent
+  def reply message
+    msg return_path, message
   end
 
-  def action msg, silent=false
-    msg return_path, "\001ACTION #{msg}\001", silent
+  def action msg
+    msg return_path, "\001ACTION #{msg}\001"
   end
 
   class Sender
