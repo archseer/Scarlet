@@ -14,6 +14,16 @@ class Scarlet::Event
     @params = params
   end
 
+  delegate :msg, :notice, :send, :send_cmd, to: :@server
+
+  def reply message, silent=false
+    msg return_path, message, silent
+  end
+
+  def action msg, silent=false
+    msg return_path, "\001ACTION #{msg}\001", silent
+  end
+
   class Sender
     attr_accessor :nick, :username, :host, :user
 

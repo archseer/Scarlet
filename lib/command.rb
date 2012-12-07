@@ -36,7 +36,7 @@ class Command
 
   def initialize event
     if word = check_filters(event.params.first)
-      event.server.msg event.return_path, "Cannot execute because \"#{word}\" is blocked."
+      event.reply "Cannot execute because \"#{word}\" is blocked."
       return
     end
 
@@ -56,20 +56,20 @@ class Command
     nick = Scarlet::Nick.first(:nick => event.sender.nick)
     ban = Scarlet::Ban.first(:nick => nick.nick) if nick
     if ban and ban.level > 0 and ban.servers.include?(event.server.config.address)
-      event.server.msg event.return_path, "#{event.sender.nick} is banned and cannot use any commands."
+      event.reply "#{event.sender.nick} is banned and cannot use any commands."
       return false
     end
     return true if @@clearance[privilege] == 0 # if it doesn't need clearance (:any)
     if Users.ns_login? event.server.name, event.sender.nick # check login
       if !nick
-        event.server.msg event.return_path, "Registration not found, please register."
+        event.reply "Registration not found, please register."
         return false
       elsif nick.privileges < @@clearance[privilege]
-        event.server.msg event.return_path, "Your security clearance does not grant access."
+        event.reply "Your security clearance does not grant access."
         return false
       end
     else
-      event.server.msg event.return_path, "Test subject #{event.sender.nick} is not logged in with NickServ."
+      event.reply "Test subject #{event.sender.nick} is not logged in with NickServ."
       return false
     end
     return true
@@ -86,15 +86,7 @@ class Command
       self.instance_eval &@block
     end
 
-    delegate :msg, :notice, :send, :send_cmd, :to => '@event.server'
-
-    def reply message, silent=false
-      msg return_path, message, silent
-    end
-
-    def action msg, silent=false
-      msg return_path, "\001ACTION #{msg}\001", silent
-    end
+    delegate :msg, :notice, :reply, :action, :send, :send_cmd, :to => :@event
 
     # DSL delegator, no need to use @event to access it's methods
     def method_missing method, *args
