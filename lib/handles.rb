@@ -8,7 +8,6 @@ class Server
   end
 
   on :ping do |event|
-    print_console "[ Server ping ]" if Scarlet.config.display_ping
     send_data "PONG :#{event.target}"
   end
 
@@ -212,16 +211,16 @@ class Server
     end    
   end
 
-  on :"001" do |event|
+  on :'001' do |event|
     @handshake = true
     msg "NickServ", "IDENTIFY #{@config.password}", true if @config.password? # login only if a password was supplied
   end
 
-  on :"004" do |event|
+  on :'004' do |event|
     @ircd = event.params[1] # grab the name of the ircd that the server is using
   end
 
-  on :"005" do |event| # PROTOCTL NAMESX reply with a list of options
+  on :'005' do |event| # PROTOCTL NAMESX reply with a list of options
     event.params.pop # remove last item (:are supported by this server)
     event.params.each do |segment|
       if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
@@ -323,10 +322,7 @@ class Server
   end
 
   on :all do |event|
-    case event.command    
-    when /00[0236789]/ # Login procedure
-      print_console event.params.first, :light_green if Scarlet.config.display_logon
-      true
+    case event.command
     when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
       true
     when /451/ # ERROR: You have not registered
@@ -346,8 +342,8 @@ class Server
   end
 
   on :todo do |event|
-    print_console "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect};
-       target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};", :yellow
+    print "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect};
+       target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};".yellow
   end
 
   #---handle_event--------------------------------------------
