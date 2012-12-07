@@ -77,7 +77,6 @@ class Server
     # :nick!user@host JOIN #channelname accountname :Real Name - extended-join
 
     if @current_nick != event.sender.nick
-      print_console "#{event.sender.nick} (#{event.sender.username}@#{event.sender.host}) has joined channel #{event.channel}.", :light_yellow
       if !event.params.empty? && @cap_extensions['extended-join']
         # extended-join is enabled, which means that join returns two extra params, 
         # NickServ account name and real name. This means, we don't need to query 
@@ -110,16 +109,13 @@ class Server
   on :part do |event|
     if event.sender.nick == @current_nick
       Channels.remove_channel(self.name, event.channel) # remove chan if bot parted
-      print_console "Left channel #{event.channel} (#{event.params.first}).", :light_magenta
     else
       Channels.remove_user_from_channel(self.name, event.sender.nick,event.channel)
-      print_console "#{event.sender.nick} has left channel #{event.channel} (#{event.params.first}).", :light_magenta
     end
   end
 
   on :quit do |event|
     Users.remove_user(self.name, event.sender.nick)
-    print_console "#{event.sender.nick} has quit (#{event.target}).", :light_magenta
   end
 
   on :nick do |event|
@@ -127,8 +123,6 @@ class Server
     if event.sender.nick == @current_nick
       @current_nick = event.target
       print_console "You are now known as #{event.target}.", :light_yellow
-    else
-      print_console "#{event.sender.nick} is now known as #{event.target}.", :light_yellow
     end
   end
 
@@ -164,8 +158,8 @@ class Server
     end
   end
 
-  on :topic do |event| # Channel topic was changed 
-    print_console "#{event.sender.nick} changed #{event.channel} topic to #{event.params.first}", :light_green
+  on :topic do |event| # Channel topic was changed
+    Channels[self.name, event.channel][:topic] = event.params.first
   end
 
   on :error do |event|
@@ -238,17 +232,8 @@ class Server
     Parser.parse_modes event.params[1].split(''), Channels[self.name, event.params.first][:flags]
   end
 
-  on :'329' do |event| # Channel created at
-    print_console "#{event.params[0]} created at #{Time.at(event.params[1].to_i).strftime("%c")}", :light_green
-  end
-
   on :'332' do |event| # Channel topic
-    message = "Topic for #{event.params.first} is: #{event.params[1]}"
-    print_console message, :light_green
-  end  
-
-  on :'333' do |event| # Channel topic set by
-    print_console "Topic for #{event.params[0]} set by #{event.params[1]} at #{Time.at(event.params[2].to_i).strftime("%c")}", :light_green
+    Channels[self.name, event.params.first][:topic] = event.params[1]
   end
 
   on :'433' do |event| # Nickname is already in use
@@ -287,13 +272,12 @@ class Server
   end
 
   on :'366' do |event| # end of /NAMES list
-    # After we got our nick list, we want to check their NickServ login stat. 
+    # After we got our NAMES list, we want to check their NickServ login stat. 
     # event.params.first <== channel
 
     # if WHOX is enabled, we can use the a flag to get user's account names
-    # if the user has an account name, he is logged in. If he does not have
-    # an account name, he is logged out. This is the prefered way to check
-    # logins on bot join, as it only needs one message.
+    # if the user has an account name, he is logged in. This is the prefered
+    # way to check logins on bot join, as it only needs one message.
     #
     # WHOX - http://hg.quakenet.org/snircd/file/37c9c7460603/doc/readme.who
 
@@ -309,7 +293,7 @@ class Server
     @parser = Parser.new(@extensions[:prefix])
     # this is immediately after 005 messages usually so set up extended NAMES command
     send_data "PROTOCTL NAMESX" if @extensions[:namesx]
-  end  
+  end
 
   on :'376' do |event| # END of MOTD command. Join channel(s)!
     send_cmd :join, :channel => @config.channel

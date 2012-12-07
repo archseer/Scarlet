@@ -16,7 +16,8 @@ module Scarlet
         #name:       channel_name,
         users:      [],
         user_flags: {},
-        flags:      []
+        flags:      [],
+        topic:      "", 
       }
     end
 

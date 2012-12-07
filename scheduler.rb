@@ -22,32 +22,14 @@ end
 class Scheduler
   class << self
     @@instances = []
-    @@queue = []
 
     EM.next_tick do
       @@scheduler = Rufus::Scheduler::EmScheduler.start_new
-      @@queue.each do |name, args, block|
-        @@scheduler.send(name, *args, &block)
-        @@queue = []
-      end
       @@instances.each do |scheduler|
         scheduler.queue.each do |name, args, block|
           scheduler.jobs << @@scheduler.send(name, *args, &block)
         end
         scheduler.queue = []
-      end
-    end
-
-    def method_missing(name, *args, &block)
-      #puts "[Scheduler] #{name}, #{args.join ', '}"
-      if [:in, :at, :every, :cron].include? name
-        if defined? @@scheduler
-          @@scheduler.send(name, *args, &block)
-        else
-          @@queue << [name, args, block]
-        end
-      else
-        @@scheduler.send(name, *args, &block)
       end
     end
   end
