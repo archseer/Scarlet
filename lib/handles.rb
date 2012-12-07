@@ -23,7 +23,6 @@ class Server
       puts "[ CTCP VERSION from #{event.sender.nick} ]" 
       send_data "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
     else
-      print_chat event.sender.nick, event.params.first
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
       if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != @config.control_char
         @channels.keys.reject{|key| key == event.channel}.each {|chan|
@@ -65,10 +64,6 @@ class Server
         @vHost = host[1]
         print_console "#{@vHost} is now your hidden host (set by services.)", :light_magenta
       }
-    elsif event.sender.nick == "Global" 
-      # ignore notices from Global (wallops?)
-    else # not from NickServ or HostServ -- normal notice
-      print_console "-#{event.sender.nick}-: #{event.params.first}", :light_cyan 
     end
   end
 

@@ -84,13 +84,11 @@ module Scarlet
     def msg target, message, silent=false
       send_data "PRIVMSG #{target} :#{message}"
       write_log :privmsg, message, target
-      print_chat @current_nick, message, silent unless silent
     end
 
     def notice target, message, silent=false
       send_data "NOTICE #{target} :#{message}"
       write_log :notice, message, target
-      print_console ">#{target}< #{message}", :light_cyan unless silent
     end
 
     def write_log command, message, target
@@ -98,17 +96,6 @@ module Scarlet
       log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
       log.channel = target if target.starts_with? "#"
       log.save!
-    end
-
-    def print_chat nick, message, silent=false
-      return unless Scarlet.config.debug
-      msg = Scarlet::Parser.parse_esc_codes message
-      time = "[#{Time.now.strftime("%H:%M")}]"
-      if msg =~ /\x01ACTION\s(.+)\x01/ #detect '/me'
-        puts "#{time} * #{nick} #{$1}".light_blue if !silent
-      else
-        puts "#{time.light_white} <#{nick.light_red}> #{msg}" if !silent
-      end
     end
 
     def print_console message, color=nil
