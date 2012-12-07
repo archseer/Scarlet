@@ -46,10 +46,10 @@ class Server
       # it is prefixed with @config.control_char or by mentioning the bot's current nickname
       if event.params.first =~ /^#{@current_nick}[:,]?\s*/i
         event.params[0] = event.params[0].split[1..-1].join(' ')
-        Command.new(self, event.dup)
+        Command.new(event.dup)
       elsif event.params.first.starts_with? @config.control_char
         event.params.first.slice!(0)
-        Command.new(self, event.dup)
+        Command.new(event.dup)
       end
     end
   end

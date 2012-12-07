@@ -69,7 +69,7 @@ module Scarlet
 
     def receive_line line
       parsed_line = Parser.parse_line line
-      event = Event.new(:localhost, parsed_line[:prefix],
+      event = Event.new(self, parsed_line[:prefix],
                         parsed_line[:command].downcase.to_sym,
                         parsed_line[:target], parsed_line[:params])
       Log.write(event)

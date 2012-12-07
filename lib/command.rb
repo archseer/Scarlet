@@ -34,9 +34,7 @@ class Command
     end
   end
 
-  def initialize server, event
-    event.server = server
-
+  def initialize event
     if word = check_filters(event.params.first)
       event.server.msg event.return_path, "Cannot execute because \"#{word}\" is blocked."
       return
