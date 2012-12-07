@@ -88,28 +88,14 @@ class Command
       self.instance_eval &@block
     end
 
-    def msg target, message, silent=false
-      server.msg target, message, silent
-    end
-
-    def notice target, message, silent=false
-      server.notice target, message, silent
-    end
-
-    def send_data string
-      server.send_data string
-    end
+    delegate :msg, :notice, :send_data, :send_cmd, :to => '@event.server'
 
     def reply message, silent=false
-      server.msg return_path, message, silent
-    end
-
-    def send_cmd cmd, hash
-      server.send_cmd cmd, hash
+      msg return_path, message, silent
     end
 
     def action msg, silent=false
-      server.msg return_path, "\001ACTION #{msg}\001", silent
+      msg return_path, "\001ACTION #{msg}\001", silent
     end
 
     # DSL delegator, no need to use @event to access it's methods
