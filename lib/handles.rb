@@ -26,7 +26,7 @@ class Server
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
       if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != @config.control_char
         @channels.keys.reject{|key| key == event.channel}.each {|chan|
-          msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}", true
+          msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}"
         }
       end
       # check for http:// URL's and output their titles (TO IMPROVE! THESE INDENTS ARE ANNOYING!)
@@ -202,7 +202,7 @@ class Server
 
   on :'001' do |event|
     @handshake = true
-    msg "NickServ", "IDENTIFY #{@config.password}" if @config.password? # login only if a password was supplied
+    msg 'NickServ', "IDENTIFY #{@config.password}" if @config.password? # login only if a password was supplied
   end
 
   on :'004' do |event|
@@ -311,7 +311,7 @@ class Server
     when /4\d\d/ # Error message range
       unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
         print_error event.params.join(' ')
-        msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0), true
+        msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0)
       end
       true
     else

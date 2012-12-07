@@ -48,7 +48,7 @@ class Scarlet::Event
     end
 
     def to_s
-      @server ? @host : @nick + '!' + @username + '@' + @host
+      @server ? @host : "#{@nick}!#{@username}@#{@host}"
     end
 
     def empty?

@@ -3,7 +3,7 @@ module Scarlet
 
   module Channels
     # Hash<server_name, Hash<channel_name, channel_hash>>
-    @@channels = HashDowncased[]
+    @@channels = DowncasedHash[]
 
     class << self
 
@@ -42,7 +42,7 @@ module Scarlet
     end
 
     def add_server server_name
-      @@channels[server_name] ||= HashDowncased[]
+      @@channels[server_name] ||= DowncasedHash[]
     end
 
     def add_channel server_name, channel_name

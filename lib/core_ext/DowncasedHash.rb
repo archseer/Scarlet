@@ -1,4 +1,4 @@
-class HashDowncased < Hash
+class DowncasedHash < Hash
 
   def convert_key obj
     obj.respond_to?(:downcase) ? obj.downcase : obj

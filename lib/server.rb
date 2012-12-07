@@ -101,8 +101,7 @@ module Scarlet
     def print_console message, color=nil
       return unless Scarlet.config.debug
       msg = Scarlet::Parser.parse_esc_codes message
-      time = "[#{Time.now.strftime("%H:%M")}]"
-      msg = "#{time} #{msg}"
+      msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
       puts color ? msg.colorize(color) : msg
     end
 
