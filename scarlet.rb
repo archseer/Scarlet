@@ -40,8 +40,6 @@ module Scarlet
     end
 
     # DSL delegator to Command. (Scarlet.hear is more expressive than Command.hear)
-    def hear regex, clearance=nil, &block
-      Command.hear regex, clearance, &block
-    end
+    delegate :hear, to: 'Scarlet::Command'
   end
 end
