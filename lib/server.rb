@@ -1,8 +1,7 @@
 module Scarlet
-
   class Server
-    attr_accessor :scheduler, :banned, :connection, :config, :state
-    attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :mode_list, :vHost
+    attr_accessor :scheduler, :banned, :connection, :config
+    attr_reader :channels, :users, :state, :extensions, :cap_extensions, :current_nick, :vHost
 
     def initialize config
       @config         = config
@@ -66,7 +65,6 @@ module Scarlet
     end
 
     def receive_line line
-      p line
       parsed_line = Parser.parse_line line
       event = Event.new(self, parsed_line[:prefix],
                         parsed_line[:command].downcase.to_sym,
