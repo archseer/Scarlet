@@ -1,14 +1,15 @@
 module Scarlet
   class Server
-    attr_accessor :scheduler, :banned, :connection, :config
+    include ActiveSupport::Configurable
+    attr_accessor :scheduler, :banned, :connection
     attr_reader :channels, :users, :state, :extensions, :cap_extensions, :current_nick, :vHost
 
-    def initialize config
-      @config         = config
+    def initialize cfg
+      config.merge! cfg.symbolize_keys
       init_vars
-      @current_nick   = @config.nick
-      @config[:control_char] ||= Scarlet.config.control_char
-      @config.freeze
+      @current_nick = config.nick
+      config.control_char ||= Scarlet.config.control_char
+      config.freeze
     end  
 
     def init_vars
@@ -28,7 +29,7 @@ module Scarlet
     end
 
     def name
-      @config[:server_name]
+      config.server_name
     end
 
     def disconnect

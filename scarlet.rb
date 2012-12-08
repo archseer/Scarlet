@@ -4,14 +4,15 @@ Modules.load_models base_path
 Modules.load_libs base_path
 
 module Scarlet
+  include ActiveSupport::Configurable
   @@servers = {}
   class << self
-    attr_accessor :config, :root
+    attr_accessor :root
 
     # Starts up Scarlet, setting the basic variables and opening connections to servers.
     def start!
       Scarlet.root = File.expand_path File.dirname(__FILE__)
-      Scarlet.config = YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys!
+      Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
       # create servers
       Scarlet.config.servers.each do |name, cfg|
         cfg[:server_name] = name

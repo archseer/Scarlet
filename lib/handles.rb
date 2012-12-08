@@ -24,7 +24,7 @@ class Server
       send "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
     else
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
-      if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != @config.control_char
+      if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != config.control_char
         @channels.keys.reject{|key| key == event.channel}.each {|chan|
           msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}"
         }
@@ -42,11 +42,11 @@ class Server
       }
 
       # if we detect a command sequence, we remove the prefix, we execute it.
-      # it is prefixed with @config.control_char or by mentioning the bot's current nickname
+      # it is prefixed with config.control_char or by mentioning the bot's current nickname
       if event.params.first =~ /^#{@current_nick}[:,]?\s*/i
         event.params[0] = event.params[0].split[1..-1].join(' ')
         Command.new(event.dup)
-      elsif event.params.first.starts_with? @config.control_char
+      elsif event.params.first.starts_with? config.control_char
         event.params.first.slice!(0)
         Command.new(event.dup)
       end
@@ -159,7 +159,7 @@ class Server
 
   on :error do |event|
     if event.target.start_with? "Closing Link"
-      puts "Disconnection from #{@config.address} successful.".blue
+      puts "Disconnection from #{config.address} successful.".blue
     else
       print_error "ERROR: #{event.params.join(' ')}"
     end
@@ -202,7 +202,7 @@ class Server
 
   on :'001' do |event|
     @state = :connected
-    msg 'NickServ', "IDENTIFY #{@config.password}" if @config.password? # login only if a password was supplied
+    msg 'NickServ', "IDENTIFY #{config.password}" if config.password? # login only if a password was supplied
   end
 
   on :'004' do |event|
@@ -291,7 +291,7 @@ class Server
   end
 
   on :'376' do |event| # END of MOTD command. Join channel(s)!
-    join @config.channels
+    join config.channels
   end
 
   on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
