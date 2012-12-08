@@ -6,10 +6,12 @@ class Hash
   def replace_key! hash={}
     k,v = [nil]*2
     if block_given?
-      keyz = self.keys
-      keyz.each do |k| v = yield k ; self[v] = self.delete k end
+      self.keys.each { |k| 
+        v = yield k
+        self[v] = self.delete k 
+      }
     else
-      hash.each_pair do |k,v| self[v] = self.delete k end
+      hash.each_pair { |k,v| self[v] = self.delete k }
     end
     self
   end
