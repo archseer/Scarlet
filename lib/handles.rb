@@ -144,8 +144,8 @@ class Server
       if event.params.count > 1 # user list - USER modes
         event.params[1..-1].each do |nick|
           chan = Channels[self.name, event.channel]
-          obj_flags = chan[:user_flags][nick]
-          @parser.parse_user_modes ev_params, obj_flags       
+          chan[:user_flags][nick] ||= {}
+          @parser.parse_user_modes ev_params, chan[:user_flags][nick]       
         end
       else # CHAN modes
         Parser.parse_modes ev_params, @channels[event.channel][:flags]
@@ -172,7 +172,7 @@ class Server
     when 'LS'
       event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
       # Handshake not yet complete. That means, request extensions!
-      if not @handshake
+      if @state == :connecting
         %w[account-notify extended-join].each do |extension| 
           @cap_extensions[extension] = :processing
           send "CAP REQ :#{extension}"
@@ -186,7 +186,7 @@ class Server
     
     # if the command isn't LS (the first LS sent in the handshake)
     # and no command still needs processing
-    send "CAP END" if event.params[0] != "LS" && !@handshake && !@cap_extensions.values.include?(:processing)    
+    send "CAP END" if event.params[0] != "LS" && @state == :connecting && !@cap_extensions.values.include?(:processing)    
   end
 
   on :account do |event|
@@ -201,7 +201,7 @@ class Server
   end
 
   on :'001' do |event|
-    @handshake = true
+    @state = :connected
     msg 'NickServ', "IDENTIFY #{@config.password}" if @config.password? # login only if a password was supplied
   end
 

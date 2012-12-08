@@ -1,23 +1,22 @@
 module Scarlet
 
   class Server
-    attr_accessor :scheduler, :reconnect, :banned, :connection, :config, :handshake
+    attr_accessor :scheduler, :banned, :connection, :config, :state
     attr_reader :channels, :users, :extensions, :cap_extensions, :current_nick, :mode_list, :vHost
 
     def initialize config
       @config         = config
-      @irc_commands   = YAML.load_file("#{Scarlet.root}/commands.yml").symbolize_keys!
       init_vars
       @current_nick   = @config.nick
       @config[:control_char] ||= Scarlet.config.control_char
-      @config = @config.dup.freeze
+      @config.freeze
     end  
 
     def init_vars
       @scheduler      = Scheduler.new
       @channels       = Channels.add_server(self.name) # users on channel
-      @users          = Users.add_server(self.name)    # users (seen) on the server      
-      @reconnect      = true   # reconnection flag
+      @users          = Users.add_server(self.name)    # users (seen) on the server
+      @state          = :connecting
       reset_vars
     end
 
@@ -26,7 +25,6 @@ module Scarlet
       @modes          = []     # bot account's modes (ix,..)
       @extensions     = {}     # what the server-side supports (PROTOCTL)
       @cap_extensions = {}     # CAPability extensions (CAP REQ)
-      @handshake      = false  # set to true after we connect (001)
       @vHost          = nil    # vHost/cloak
     end
 
@@ -36,7 +34,7 @@ module Scarlet
 
     def disconnect
       send "QUIT :#{Scarlet.config.quit}"
-      @reconnect = false
+      @state = :disconnecting
       connection.close_connection(true)
     end
 
@@ -51,7 +49,7 @@ module Scarlet
         connection.post_init
         init_vars
       }
-      EM.add_timer(3) { reconnect.call } if @reconnect
+      EM.add_timer(3) { reconnect.call } if not @state == :disconnecting
     end
 
     def send data
@@ -68,6 +66,7 @@ module Scarlet
     end
 
     def receive_line line
+      p line
       parsed_line = Parser.parse_line line
       event = Event.new(self, parsed_line[:prefix],
                         parsed_line[:command].downcase.to_sym,

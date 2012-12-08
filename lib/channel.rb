@@ -11,9 +11,8 @@ module Scarlet
       @@channels[server_name].clear
     end
 
-    def mk_hash channel_name
+    def mk_hash
       {
-        #name:       channel_name,
         users:      [],
         user_flags: {},
         flags:      [],
@@ -47,7 +46,7 @@ module Scarlet
 
     def add_channel server_name, channel_name
       server = get_server(server_name)
-      server[channel_name] ||= mk_hash(channel_name)
+      server[channel_name] ||= mk_hash
     end
 
     alias [] get
