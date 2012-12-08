@@ -82,15 +82,4 @@ class Scarlet::Parser
     result[:target] = result[:params].slice!(0)
     return result
   end
-
-  def self.parse_line2 line
-    matches = line.match /^(:(?<prefix>\S+)\s)?(?<command>\S+)(\s(?!:)(?<args>.+?))?(\s:(?<trail>.+))?$/
-    result = Hash[matches.names.map(&:to_sym).zip(matches.captures)]
-    result[:params] = []
-    result[:params].push(*result.delete(:args).split) if result[:args]
-    result[:params] << result.delete(:trail) if result[:trail]
-    result[:prefix] ||= ""
-    result[:target] = result[:params].slice!(0)
-    return result
-  end
 end
