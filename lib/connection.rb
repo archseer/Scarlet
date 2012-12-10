@@ -37,7 +37,7 @@ class Scarlet::Connection < EM::Connection
 
   def timeout
     print "Timed out waiting for server, reconnecting...".light_red
-    send "QUIT :Ping timeout"
+    send_data "QUIT :Ping timeout"
     close_connection_after_writing
   end
 
