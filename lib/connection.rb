@@ -16,7 +16,7 @@ class Scarlet::Connection < EM::Connection
 
   def receive_line line
     reset_check_connection_timer
-    @server.receive_line(RUBY_VERSION < "1.9" ? line : line.force_encoding('utf-8'))
+    @server.receive_line(line.force_encoding('utf-8'))
   end
 
   def send_data data
