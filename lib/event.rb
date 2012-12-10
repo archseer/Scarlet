@@ -16,12 +16,14 @@ class Scarlet::Event
 
   delegate :msg, :notice, :send, :send_cmd, to: :@server
 
+  # Sends a reply back to where the event came from (a user or a channel).
   def reply message
     msg return_path, message
   end
 
+  # Sends a described action back to where the event came from.
   def action msg
-    msg return_path, "\001ACTION #{msg}\001"
+    reply "\001ACTION #{msg}\001"
   end
 
   class Sender
@@ -39,18 +41,22 @@ class Scarlet::Event
       @user = nil
     end
 
+    # Returns +true+ if sender is a server.
     def server?
       @server
     end
 
+    # Returns +true+ if sender is a user. Functionally equivalent to <tt>!server?</tt>.
     def user?
       !@server
     end
 
+    # Returns a hostmask.
     def to_s
       @server ? @host : "#{@nick}!#{@username}@#{@host}"
     end
 
+    # Returns +true+ if the sender exists.
     def empty?
       to_s.empty?
     end

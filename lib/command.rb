@@ -23,6 +23,8 @@ class Command
       end
     end
 
+    # Returns help matching the specified string. If no command is used, then
+    # returns the entire list of help.
     def get_help command=nil
       return @@help.sort unless command
       regex = Regexp.new command, Regexp::IGNORECASE
@@ -34,6 +36,7 @@ class Command
     end
   end
 
+  # Initialize is here abused to run a new instance of the Command. 
   def initialize event
     if word = check_filters(event.params.first)
       event.reply "Cannot execute because \"#{word}\" is blocked."
@@ -47,6 +50,8 @@ class Command
     end
   end
 
+  # Runs the command trough a filter to check whether any of the words
+  # it uses are disallowed.
   def check_filters params
     return false if @@filter.empty? or params.start_with?("unfilter")
     return Regexp.new("(#{@@filter.join("|")})").match(params)

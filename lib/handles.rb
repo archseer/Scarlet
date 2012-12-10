@@ -1,10 +1,11 @@
 module Scarlet
 class Server
-  @@event_handles = {}
+  @@event_listeners = {}
+  # Adds a new event listener, that is listening for +command+.
   def self.on command,*args,&func
-    handles = @@event_handles[command] ||= []
+    listeners = @@event_listeners[command] ||= []
     func = func || proc { nil }
-    args.include?(:prepend) ? handles.unshift(func) : handles.push(func)
+    args.include?(:prepend) ? listeners.unshift(func) : listeners.push(func)
   end
 
   on :ping do |event|
@@ -327,12 +328,14 @@ class Server
        target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};".yellow
   end
 
-  #---handle_event--------------------------------------------
+  # Passes the event on to any event listeners that are listening for this command.
+  # All events get passed to the +:all+ listener, and those without any listeners get
+  # passed to the +:todo+ listener, to alert us of any events we aren't yet processing.
   def handle_event event
-    r = @@event_handles[:all].each { |func| instance_exec(event.dup, &func) } # Execute before every other handle
-    key = @@event_handles.has_key?(event.command) ? event.command : :todo
+    r = @@event_listeners[:all].each { |func| instance_exec(event.dup, &func) } # Execute before every other handle
+    key = @@event_listeners.has_key?(event.command) ? event.command : :todo
     return if r and key == :todo
-    @@event_handles[key].each { |func| instance_exec(event.dup, &func) }
+    @@event_listeners[key].each { |func| instance_exec(event.dup, &func) }
   end
 
 end

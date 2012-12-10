@@ -4,6 +4,7 @@ class String
     self.gsub(/(.{1,#{line_width}})(\s+|\Z)/, "\\1\n")
   end
 
+  # Returns a string encoded with the IRC color code.
   def irc_color fg, bg
     "\x03#{"%02d" % fg},#{"%02d" % bg}#{self}\x03"
   end
