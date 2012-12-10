@@ -1,4 +1,9 @@
 module Scarlet
+
+  # This class is the meat of the bot, encapsulating the connection and
+  # various event listeners that respond to server messages, as well as 
+  # a list of users and channels the bot is connected to. All the magic 
+  # happens in this class.
   class Server
     include ActiveSupport::Configurable
     attr_accessor :scheduler, :banned, :connection
@@ -6,11 +11,6 @@ module Scarlet
 
     # Initializes a new abstracted connection instance to an IRC server. 
     # The actual EM connection instance gets set to +self.connection+.
-    #
-    # This class is the meat of the bot, encapsulating the connection and
-    # various event listeners that respond to server messages, as well as 
-    # a list of users and channels the bot is connected to. All the magic 
-    # happens in this class.
     def initialize cfg
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick

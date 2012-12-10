@@ -1,5 +1,6 @@
 # encoding: utf-8
 module Scarlet
+# This is a singleton, wrapping our DSL for custom bot commands.
 class Command
   @@listens = {}
   @@help = []
@@ -80,6 +81,8 @@ class Command
     return true
   end
 
+  # A callback instance, which contains a callback command that can later get
+  # executed, when an event listener matches.
   class Callback
     def initialize block
       @block = block
