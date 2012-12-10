@@ -13,10 +13,10 @@ module Scarlet
     end  
 
     def init_vars
-      @scheduler      = Scheduler.new
-      @channels       = Channels.add_server(self.name) # users on channel
-      @users          = Users.add_server(self.name)    # users (seen) on the server
-      @state          = :connecting
+      @scheduler = Scheduler.new
+      @channels  = ServerChannels.new # channels
+      @users     = Users.new    # users (seen) on the server
+      @state     = :connecting
       reset_vars
     end
 
@@ -39,8 +39,8 @@ module Scarlet
     end
 
     def unbind
-      Channels.clean(self.name)
-      Users.clean(self.name)
+      @channels.clear
+      @users.clear
       reset_vars
 
       reconnect = lambda {

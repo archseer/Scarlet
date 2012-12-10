@@ -57,7 +57,7 @@ class Server
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
       if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
-        Users.ns_login self.name, ns_params[:nick] if ns_params[:digit] == "3" && !Users.ns_login?(self.name, ns_params[:nick])
+        @users.get(ns_params[:nick]).ns_login = true if ns_params[:digit] == "3"
       end
     elsif event.sender.nick == "HostServ"
       event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) {|host| 
@@ -71,16 +71,23 @@ class Server
     # :nick!user@host JOIN :#channelname - normal
     # :nick!user@host JOIN #channelname accountname :Real Name - extended-join
 
+    if @current_nick == event.sender.nick    
+      @channels.add Channel.new(event.channel)
+      send "MODE #{event.channel}"
+      print_console "Joined channel #{event.channel}.", :light_yellow
+    end
+
+    user = @users.get_ensured(event.sender.nick)
+    user.join @channels.get(event.channel)
+
     if @current_nick != event.sender.nick
+
       if !event.params.empty? && @cap_extensions['extended-join']
         # extended-join is enabled, which means that join returns two extra params, 
         # NickServ account name and real name. This means, we don't need to query 
         # NickServ about the user's login status.
-        user_name = event.sender.nick
-        user = Users.add_user(self.name, user_name)
-        Channels.add_user_to_channel(self.name, user_name, event.channel)
-        user[:ns_login] = true
-        user[:account_name] = event.params[0]
+        user.ns_login = true
+        user.account_name = event.params[0]
       else
         # No luck, we need to manually query for a login check.
         # a) if WHOX is available, query with WHOX.
@@ -91,30 +98,24 @@ class Server
           check_ns_login event.sender.nick
         end
       end
-    else
-      Channels.add_channel(self.name, event.channel)
-      send "MODE #{event.channel}"
-      print_console "Joined channel #{event.channel}.", :light_yellow
+
     end
-    user_name = event.sender.nick
-    Users.add_user(self.name, user_name)
-    Channels.add_user_to_channel(self.name, user_name, event.channel)
   end
 
   on :part do |event|
     if event.sender.nick == @current_nick
-      Channels.remove_channel(self.name, event.channel) # remove chan if bot parted
+      @channels.remove event.channel # remove chan if bot parted
     else
-      Channels.remove_user_from_channel(self.name, event.sender.nick,event.channel)
+      @users.get(event.sender.nick).part @channels.get(event.channel)
     end
   end
 
   on :quit do |event|
-    Users.remove_user(self.name, event.sender.nick)
+    @users.quit event.sender.nick
   end
 
   on :nick do |event|
-    Users.rename_user(self.name, event.sender.nick, event.target)
+    @users.get(event.sender.nick).nick = event.target
     if event.sender.nick == @current_nick
       @current_nick = event.target
       print_console "You are now known as #{event.target}.", :light_yellow
@@ -128,10 +129,10 @@ class Server
     print_console messg, :light_red
     # we process this the same way as a part.
     if event.params.first == @current_nick
-      Channels.remove_channel(self.name, event.channel) # if scarlet was kicked, delete that chan's array.
+      @channels.remove(event.channel) # if scarlet was kicked, delete that chan's array.
     else
       # remove the kicked user from channels[#channel] array 
-      Channels.remove_user_from_channel(self.name, event.params.first, event.target)
+      @users.get(event.params.first).part(event.channel)
     end
   end
 
@@ -143,18 +144,19 @@ class Server
       event.params.compact!
       if event.params.count > 1 # user list - USER modes
         event.params[1..-1].each do |nick|
-          chan = Channels[self.name, event.channel]
-          chan[:user_flags][nick] ||= {}
-          @parser.parse_user_modes ev_params, chan[:user_flags][nick]       
+          chan = @channels.get(event.channel)
+          user = @users.get_ensured(nick)
+          chan.user_flags[user] ||= {}
+          @parser.parse_user_modes ev_params, chan.user_flags[user]
         end
       else # CHAN modes
-        Parser.parse_modes ev_params, @channels[event.channel][:flags]
+        Parser.parse_modes ev_params, @channels.get(event.channel).modes
       end
     end
   end
 
   on :topic do |event| # Channel topic was changed
-    Channels[self.name, event.channel][:topic] = event.params.first
+    @channels.get(event.channel).topic = event.params.first
   end
 
   on :error do |event|
@@ -186,18 +188,18 @@ class Server
     
     # if the command isn't LS (the first LS sent in the handshake)
     # and no command still needs processing
-    send "CAP END" if event.params[0] != "LS" && @state == :connecting && !@cap_extensions.values.include?(:processing)    
+    send "CAP END" if event.params[0] != "LS" && @state == :connecting && !@cap_extensions.values.include?(:processing)
   end
 
   on :account do |event|
     # This is a capability extension for tracking user NickServ logins and logouts
     # event.target is the accountname, * if there is none. This must get executed
     # either way, because either the user logged in, or he logged out. (a change)
-    user = Users[self.name, event.sender.nick]
+    user = @users.get event.sender.nick
     if user
-      user[:ns_login] = event.target != "*" ? true : false
-      user[:account_name] = event.target != "*" ? event.target : nil
-    end    
+      user.ns_login = event.target != "*" ? true : false
+      user.account_name = event.target != "*" ? event.target : nil
+    end
   end
 
   on :'001' do |event|
@@ -224,11 +226,11 @@ class Server
   on :'315' # End of /WHO list
 
   on :'324' do |event| # Chan mode
-    Parser.parse_modes event.params[1].split(''), Channels[self.name, event.params.first][:flags]
+    Parser.parse_modes event.params[1].split(''), @channels.get(event.params.first).modes
   end
 
   on :'332' do |event| # Channel topic
-    Channels[self.name, event.params.first][:topic] = event.params[1]
+    @channels.get(event.params.first).topic = event.params[1]
   end
 
   on :'433' do |event| # Nickname is already in use
@@ -241,10 +243,11 @@ class Server
     # param[1] -> chan, param[2] - users
     event.params[2].split(" ").each do |nick| 
       user_name, flags = @parser.parse_names_list(nick)
-      Channels.add_user_to_channel(self.name, user_name,event.params[1])
-      channel = Channels[self.name, event.params[1]]
-      channel[:user_flags][user_name] = flags
-    end  
+      user = @users.get_ensured(user_name)
+      channel = @channels.get(event.params[1])
+      user.join channel
+      channel.user_flags[user] = flags
+    end
   end
 
   on :'354' do |event| # WHOX response
@@ -254,10 +257,10 @@ class Server
     if event.params.first == '42'
       # 0 - 42, 1 - channel, 2 - nick, 3 - account name (0 if none)
       if event.params[3] != '0'
-        user = Users[self.name, event.params[2]]
+        user = @users.get(event.params[2])
         if user
-          user[:ns_login] = true
-          user[:account_name] = event.params[3]
+          user.ns_login = true
+          user.account_name = event.params[3]
         end
       end
     else
@@ -279,7 +282,7 @@ class Server
     if @extensions[:whox]
       send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
     else
-      check_ns_login @channels[event.params.first][:users]
+      check_ns_login @channels.get(event.params.first).users.to_a.map(&:name)
     end
   end  
 
@@ -316,7 +319,7 @@ class Server
       true
     else
       false
-    end  
+    end
   end
 
   on :todo do |event|

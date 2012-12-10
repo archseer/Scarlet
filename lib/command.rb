@@ -60,7 +60,7 @@ class Command
       return false
     end
     return true if @@clearance[privilege] == 0 # if it doesn't need clearance (:any)
-    if Users.ns_login? event.server.name, event.sender.nick # check login
+    if event.server.users.get(event.sender.nick).ns_login # check login
       if !nick
         event.reply "Registration not found, please register."
         return false
