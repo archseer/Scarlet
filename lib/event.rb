@@ -1,3 +1,6 @@
+# Event is a class that represents a parsed event recieved from the server.
+# It contains the basic information of the sender of the event, where it was
+# sent from, and what was sent. 
 class Scarlet::Event
   attr_accessor :server, :sender, :command, :params, :target, :channel, :return_path
 
@@ -35,6 +38,7 @@ class Scarlet::Event
     reply "\001ACTION #{message}\001"
   end
 
+  # A representation of the message sender, created from the hostmask.
   class Sender
     attr_accessor :nick, :username, :host, :user
 
@@ -46,7 +50,7 @@ class Scarlet::Event
         @nick, @username, @host = $1, $2, $3
         @server = false
       else
-        @host = string
+        @host = hostmask
         @server = true
       end
       @user = nil

@@ -1,8 +1,10 @@
-module Scarlet; end # Stub class so we can safely load in files
+module Scarlet; end
 base_path = File.expand_path File.dirname(__FILE__)
 Modules.load_models base_path
 Modules.load_libs base_path
 
+# Our main module, namespacing all of our classes. It is used as a singleton,
+# offering a limited few of methods to start or stop Scarlet.
 module Scarlet
   include ActiveSupport::Configurable
   @@servers = {}
@@ -41,7 +43,7 @@ module Scarlet
       Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Command.parse_help path}
     end
 
-    # DSL delegator to Command. (Scarlet.hear is more expressive than Command.hear)
+    # Delegate to Command. (Scarlet.hear is more expressive than Command.hear)
     delegate :hear, to: 'Scarlet::Command'
   end
 end

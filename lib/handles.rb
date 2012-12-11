@@ -1,4 +1,5 @@
 module Scarlet
+# @todo Split the listeners into a new class.
 class Server
   # Contains all of our event listeners.
   @@event_listeners = {}

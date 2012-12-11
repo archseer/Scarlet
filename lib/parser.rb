@@ -1,4 +1,6 @@
+# A parser class, wrapping the common tasks of parsing various IRC message types.
 class Scarlet::Parser
+  # Contains a map of the de facto user mode list.
   @@base_mode_list = {
     :owner      => {:name=>'owner'     ,:prefix=>'q',:symbol=>'~'},
     :admin      => {:name=>'admin'     ,:prefix=>'a',:symbol=>'&'},
@@ -9,8 +11,8 @@ class Scarlet::Parser
   }
 
   # Creates a new instance of the parser, mapping @mode_list to the list of modes
-  # available on the network, by parsing the +prefix_list+, which is the ISUPPORT
-  # prefix string.
+  # available on the network, by parsing the +prefix_list+.
+  # @param [String] prefix_list The ISUPPORT prefix string.
   def initialize prefix_list
     name_lookup = @@base_mode_list.remap{ |k,v| [v[:prefix], k] }
     #prefix_list.match(/\((?<prefix>\w+)\)(?<symbol>.+)/) {|matches|
@@ -26,6 +28,8 @@ class Scarlet::Parser
   end
 
   # Parses NAMES list.
+  # @param [String] string The NAMES list string which includes the user and
+  #  his prefixes.
   def parse_names_list string
     modes = @mode_list.except(:registered).remap { |k,v| [k, v[:symbol]] }
     #{:owner => '~', :admin => '&', :operator => '@', :halfop => '%', :voice => '+'}
@@ -34,6 +38,10 @@ class Scarlet::Parser
     return params[:nick], modes
   end
 
+  # Works in a similar manner as +#parse_modes+, except that it works with
+  # hashes which contain a certain user's modes.
+  # @param [String] new_modes The mode string we recieved on MODE message.
+  # @param [Array] mode_hash The hash we want to apply the mode changes to.
   def parse_user_modes new_modes, mode_hash
     mode = true
     map = @mode_list.remap { |k,v| [v[:prefix], k] }
@@ -45,7 +53,10 @@ class Scarlet::Parser
     end
   end
 
-  # // Using a C styled approach (Pointer mode_array),
+  # Goes trough the +new_modes+ string char by char and makes changes accordingly
+  # on +mode_array+.
+  # @param [String] new_modes The mode string we recieved on MODE message.
+  # @param [Array] mode_array The array we want to apply the mode changes to.
   def self.parse_modes new_modes, mode_array
     mode = true
     new_modes.each do |c|
@@ -60,6 +71,9 @@ class Scarlet::Parser
   end
 
   # Parses IRC escape codes into ANSI or removes them.
+  # @param [String] msg The message to parse.
+  # @param [Boolean] remove True if we want to remove the IRC code and not parse
+  #  it to ANSI.
   def self.parse_esc_codes msg, remove=false
     new_msg = msg.gsub(/\x02(.+?)\x02/) {
       remove ?  "#{$1}" : "\x1b[1m#{$1}\x1b[22m"
@@ -72,6 +86,8 @@ class Scarlet::Parser
   
   # Parses the message sent by the server into several distinct parts:
   # prefix, command, params and target.
+  # @param [String] line The raw line message we got from the server.
+  # @return [Hash] A hash containing the parsed message parts.
   def self.parse_line line
     matches = line.match /^(:(?<prefix>\S+)\s+)?(?<command>\S+)\s+(?<params>.*)\s*/
     result = Hash[matches.names.map(&:to_sym).zip(matches.captures)]

@@ -11,6 +11,8 @@
 #================================================
 require 'rufus/scheduler'
 
+# A proxy class used to create individual scheduler instances for each class 
+# that needs it. 
 class Scheduler
   class << self
     @@instances = []
@@ -28,12 +30,14 @@ class Scheduler
 
   attr_accessor :queue, :jobs
 
+  # Creates a new instance of the scheduler.
   def initialize
     @@instances << self
     @queue = []
     @jobs = []
   end
 
+  # Remove all jobs from the scheduler.
   def remove_all
     @jobs.each do |job|
       job.unschedule
@@ -41,6 +45,7 @@ class Scheduler
     @@instances.delete self
   end
 
+  # Delegates methods to Rufus Scheduler.
   def method_missing(name, *args, &block)
     if [:in, :at, :every, :cron].include? name
       if defined? @@scheduler
