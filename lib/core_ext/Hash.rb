@@ -1,25 +1,16 @@
 class Hash
-  def replace_key *args,&block
-    dup.replace_key! *args, &block
-  end
-
-  def replace_key! hash={}
-    k,v = [nil]*2
-    if block_given?
-      self.keys.each { |k| 
-        v = yield k
-        self[v] = self.delete k 
-      }
-    else
-      hash.each_pair { |k,v| self[v] = self.delete k }
-    end
-    self
-  end
-
+  # Remaps a copy of the hash using the block. The block should return an array
+  # containing the key and value. Array<key, value>
+  # @return [Hash] the remapped hash.
+  # @yield [key, value] Gives each key value pair of the hash to the block.
   def remap &block
     Hash[*self.map(&block).flatten]
   end
 
+  # Remaps the hash using the block. The block should return an array
+  # containing the key and value. Array<key, value>
+  # @return (see #remap)
+  # @yield (see #remap)
   def remap! &block
     self.replace remap(&block)
   end

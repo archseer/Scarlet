@@ -2,8 +2,9 @@
 # Provides basic IRC initialization and automated timeout checking.
 class Scarlet::Connection < EM::Connection
   include EventMachine::Protocols::LineText2
-  # Initialize a new connection. This never gets called directly, but by EM.connect.
-  # our server instance gets set to +@server+, so we can pass data to it.
+  # Initialize a new connection. 
+  # @note Never make a new instance directly, but by using EM.connect.
+  # @param [Server] server Our server instance to give the messages to.
   def initialize server
     @server = server
   end
@@ -17,7 +18,8 @@ class Scarlet::Connection < EM::Connection
     reset_check_connection_timer
   end
 
-  # Gets a recieved message and sends it to +Server+.
+  # Gets a recieved message and gives it to +Server+.
+  # @param [String] line The line that was recieved from the server.
   def receive_line line
     reset_check_connection_timer
     @server.receive_line(line.force_encoding('utf-8'))
@@ -25,6 +27,7 @@ class Scarlet::Connection < EM::Connection
 
   # Sends data back to the server, using the carriage return as an escape symbol
   # (as per IRC specs).
+  # @param [String, #to_s] data The data to be sent to server.
   def send_data data
     super "#{data}\r"
   end

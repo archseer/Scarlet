@@ -11,6 +11,7 @@ module Scarlet
 
     # Initializes a new abstracted connection instance to an IRC server. 
     # The actual EM connection instance gets set to +self.connection+.
+    # @param [Hash] cfg A hash with configuration keys and values.
     def initialize cfg
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick
@@ -22,7 +23,7 @@ module Scarlet
       @users     = Users.new          # users (seen) on the server
       @state     = :connecting
       reset_vars
-    end  
+    end
 
     # Resets the variables to their default values. This gets triggered when the
     # instance gets created as well as any time the bot reconnects to the server.
@@ -65,6 +66,8 @@ module Scarlet
       EM.add_timer(3) { reconnect.call } if not @state == :disconnecting
     end
 
+    # Sends the data over to the server.
+    # @param [String] data The message to be sent.
     def send data
       if data =~ /(PRIVMSG|NOTICE)\s(\S+)\s(.+)/i
         stack = []
@@ -78,8 +81,9 @@ module Scarlet
       nil
     end
 
-    # Parses the recieved line from the server and creates a new event out of it,
-    # then it logs the event and distributes the event over to handlers.
+    # Parses the recieved line from the server into an event, then it logs the 
+    # event and distributes the event over to handlers.
+    # @param [String] line The line that was recieved from the server.
     def receive_line line
       parsed_line = Parser.parse_line line
       event = Event.new(self, parsed_line[:prefix],
@@ -89,13 +93,17 @@ module Scarlet
       handle_event event
     end
 
-    # Sends a PRIVMG message to +target+. Logs the message to the log.
+    # Sends a PRIVMG message. Logs the message to the log.
+    # @param [String, Symbol] target The target recipient of the message.
+    # @param [String] message The message to be sent.
     def msg target, message
       send "PRIVMSG #{target} :#{message}"
       write_log :privmsg, message, target
     end
 
     # Sends a NOTICE message to +target+. Logs the message to the log.
+    # @param [String, Symbol] target The target recipient of the message.
+    # @param [String] message The message to be sent.
     def notice target, message
       send "NOTICE #{target} :#{message}"
       write_log :notice, message, target
@@ -110,12 +118,16 @@ module Scarlet
     #
     #  join '#channel password'
     #
+    # @param [*Array] channels A list of channels to join.
     def join *channels
       send "JOIN #{channels.join(',')}"
     end
 
     # Write down the command to the log (in our case a MongoDB database), ignoring
     # any message sent to +*Serv+ bots.
+    # @param [Symbol] command The type of the command we recieved.
+    # @param [String] message The message we want to log for the command.
+    # @param [String] target Whom the command has targeted. 
     def write_log command, message, target
       return if target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
       log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
@@ -126,6 +138,8 @@ module Scarlet
     # Prints a message to the console with a timestamp. Optionally color of the
     # message can be passed in as a symbol. If debug is set to false in the config,
     # no messages will be logged.
+    # @param [String] message The message to be written to the console.
+    # @param [Symbol] color The color of the message.
     def print_console message, color=nil
       return unless Scarlet.config.debug
       msg = Scarlet::Parser.parse_esc_codes message
@@ -133,19 +147,22 @@ module Scarlet
       puts color ? msg.colorize(color) : msg
     end
 
-    # Prints a message in the same format as +print_console+. Message will be
+    # Prints a message in the same format as +#print_console+. Message will be
     # output to console, regardless of the debug value in the config.
+    # @param [String] message The message to be written to the console.
     def print_error message
       msg = Scarlet::Parser.parse_esc_codes message
       msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
       puts msg.colorize(:light_red)
     end
 
+    # Sends a login check to NickServ, to check whether user(s) are logged in.
+    # @param [String, Array] nick The nicks to check.
     def check_ns_login nick
       # According to the docs, those servers that use STATUS may query up to
       # 16 nicknames at once. if we pass an Array do:
-      #   a) on STATUS send groups of up to 16 nicknames
-      #   b) on ACC, we have no such luck, send each message separately.
+      #  a) on STATUS send groups of up to 16 nicknames.
+      #  b) on ACC, we have no such luck, send each message separately.
 
       if nick.is_a? Array
         if @ircd =~ /unreal/i

@@ -1,11 +1,27 @@
 module Scarlet
 class Server
+  # Contains all of our event listeners.
   @@event_listeners = {}
-  # Adds a new event listener, that is listening for +command+.
-  def self.on command,*args,&func
+
+  # Adds a new event listener.
+  # @param [Symbol] command The command to listen for.
+  # @param [*Array] args A list of arguments.
+  # @param [Proc] block The block we want to execute when we catch the command.
+  def self.on command,*args,&block
     listeners = @@event_listeners[command] ||= []
-    func = func || proc { nil }
-    args.include?(:prepend) ? listeners.unshift(func) : listeners.push(func)
+    block ||= proc { nil }
+    args.include?(:prepend) ? listeners.unshift(block) : listeners.push(block)
+  end
+
+  # Passes the event on to any event listeners that are listening for this command.
+  # All events get passed to the +:all+ listener, and those without any listeners get
+  # passed to the +:todo+ listener, to alert us of any events we aren't yet processing.
+  # @param [Event] event The event that was recieved.
+  def handle_event event
+    r = @@event_listeners[:all].each { |block| instance_exec(event.dup, &block) } # Execute before every other handle
+    key = @@event_listeners.has_key?(event.command) ? event.command : :todo
+    return if r and key == :todo
+    @@event_listeners[key].each { |block| instance_exec(event.dup, &block) }
   end
 
   on :ping do |event|
@@ -326,16 +342,6 @@ class Server
   on :todo do |event|
     print "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect};
        target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};".yellow
-  end
-
-  # Passes the event on to any event listeners that are listening for this command.
-  # All events get passed to the +:all+ listener, and those without any listeners get
-  # passed to the +:todo+ listener, to alert us of any events we aren't yet processing.
-  def handle_event event
-    r = @@event_listeners[:all].each { |func| instance_exec(event.dup, &func) } # Execute before every other handle
-    key = @@event_listeners.has_key?(event.command) ? event.command : :todo
-    return if r and key == :todo
-    @@event_listeners[key].each { |func| instance_exec(event.dup, &func) }
   end
 
 end
