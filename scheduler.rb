@@ -11,14 +11,6 @@
 #================================================
 require 'rufus/scheduler'
 
-module Rufus::Scheduler
-  class EmScheduler
-    def trigger_job(blocking, &block)
-      EM.next_tick { block.call }
-    end
-  end
-end
-
 class Scheduler
   class << self
     @@instances = []
