@@ -4,6 +4,12 @@ Scarlet is an IRC bot written in Ruby. It's main purpose is to serve as an IRC b
 
 It is designed with multi-channel and multi-server support and offers [a very simple and verbose DSL interface to define new commands] (https://github.com/archSeer/Scarlet/wiki/Scripts)
 
+## Installation
+
+```
+bundle install --without development
+```
+
 ## Usage
 
 In order to use Scarlet, you must first create a `config.yml` file. Here is an example of such file:
@@ -36,3 +42,9 @@ servers: {
 ```
 
 Various IRC networks can be defined in the `servers` hash. Control character can be overriden per-server. If a password is defined, Scarlet will try to login to that server, otherwise if there is no key, it will just skip login. Debug tells Scarlet whether to log all messages to console or only errors and more important messages. 
+
+Afterwards, just run it!
+
+```
+ruby core.rb
+```
