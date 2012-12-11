@@ -7,6 +7,7 @@ module Scarlet
   include ActiveSupport::Configurable
   @@servers = {}
   class << self
+    # Points to the root directory of Scarlet.
     attr_accessor :root
 
     # Starts up Scarlet, setting the basic variables and opening connections to servers.
@@ -35,7 +36,7 @@ module Scarlet
       end
     end
 
-    # Loads up commands from the /commands directory.
+    # Loads up commands from the /commands directory under the +Scarlet.root+ path.
     def load_commands
       Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Command.parse_help path}
     end

@@ -1,86 +1,72 @@
-class HashDowncased < Hash ; end # // Stub
 module Scarlet
+  class Channel
+    attr_accessor :topic, :bans, :users, :modes, :user_flags
+    attr_reader :name
 
-  module Channels
-    # Hash<server_name, Hash<channel_name, channel_hash>>
-    @@channels = DowncasedHash[]
-
-    class << self
-
-    def clean server_name
-      @@channels[server_name].clear
+    def initialize name
+      @name = name
+      @users = Users.new
+      @user_flags = {}
+      @modes = []
+      @bans = []
+      @topic = nil
     end
 
-    def mk_hash
-      {
-        users:      [],
-        user_flags: {},
-        flags:      [],
-        topic:      "", 
+    def remove_user user
+      @users.remove user.name
+      @user_flags.delete user
+    end
+
+    def inspect
+      "#<#{self.class.name}:#{self.object_id} name=#{@name}, modes=#{@modes}, bans=#{@bans}, topic=#{@topic}>"
+    end
+  end
+
+  class Channels
+    def initialize
+      @channels = {}
+    end
+
+    def get channel
+      @channels[channel.to_s]
+    end
+
+    def add channel
+      @channels[channel.name] = channel
+    end
+
+    def remove channel
+      if channel.is_a? Channel
+        @channels.delete(channel.name)
+      else
+        @channels.delete(channel)
+      end
+    end
+
+    def clear
+      @channels.clear
+    end
+
+    def each(&block)
+      @channels.values.each(&block)
+    end
+  end
+
+  class ServerChannels < Channels
+    def remove channel
+      if channel.is_a? Channel
+        c = @channels.delete(channel.name)
+      else
+        c = @channels.delete(channel)
+      end
+      c.users.each {|user|
+        user.remove_channel channel
       }
     end
 
-    def get_server server_name
-      @@channels[server_name]
+    def remove_channel channel
+      @channels.remove channel
     end
-
-    def get_channel server_name, channel_name
-      server = get_server(server_name)
-      return nil unless server
-      server[channel_name]
-    end
-
-    def get *args
-      if args.size == 1
-        get_server *args
-      elsif args.size == 2
-        get_channel *args
-      else
-        nil
-      end
-    end
-
-    def add_server server_name
-      @@channels[server_name] ||= DowncasedHash[]
-    end
-
-    def add_channel server_name, channel_name
-      server = get_server(server_name)
-      server[channel_name] ||= mk_hash
-    end
-
-    alias [] get
-
-    def remove_channel server_name, channel_name
-      server  = get_server(server_name)
-      channel = server[channel_name]
-      return unless channel
-      channel[:users].each do |user_name|
-        remove_user_from_channel(server_name, user_name, channel_name)
-      end
-      server.delete(channel_name)
-    end
-
-    def remove_user_from_channel server_name, user_name, channel_name
-      server  = get_server(server_name)
-      user    = Scarlet::Users[server_name, user_name]
-      channel = self[server_name, channel_name]
-      return unless user and channel
-      channel[:users].delete(user_name)
-      user[:channels].delete(channel_name)
-      Scarlet::Users.remove_user(server_name, user_name) if user[:channels].empty?
-    end
-
-    def add_user_to_channel server_name, user_name, channel_name
-      server  = get_server(server_name)
-      user    = Scarlet::Users.add_user(server_name, user_name)
-      channel = add_channel(server_name, channel_name) 
-      channel[:users] << user_name unless channel[:users].include?(user_name)
-      user[:channels] << channel_name unless user[:channels].include?(channel_name)
-    end
-
-    end
-
   end
 
 end

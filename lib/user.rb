@@ -1,92 +1,81 @@
 module Scarlet
-  
-  module Users
-    # Hash<server_name, Hash<user_name, user_hash>>
-    @@users = {}
-  
-    class << self
+  class User
+    attr_accessor :name, :ns_login, :channels, :account_name
+    alias :nick :name
 
-    def clean server_name
-      @@users[server_name].clear
+    def initialize name
+      @name = name
+      @ns_login = false
+      @account_name = nil
+      @channels = Channels.new
     end
 
-    def ns_login? server_name, nick
-      server = get_server(server_name)
-      user = server[nick]
-      user ? user[:ns_login] : false
+    def inspect
+      "#<#{self.class.name}:#{self.object_id} name=#{@name}, ns_login=#{ns_login}>"
     end
 
-    def ns_logout server_name, nick
-      server = get_server(server_name)
-      server[nick][:ns_login] = false if server[nick]
+    def join channel
+      @channels.add channel
+      channel.users.add self
     end
 
-    def ns_login server_name, nick
-      server = get_server(server_name)
-      server[nick][:ns_login] = true if server[nick]
+    def part channel
+      chan = @channels.remove(channel) # we can pass a string or Channel and it will return a Channel.
+      chan.users.remove @name
     end
 
-    def mk_hash nick
-      {
-        nick:         nick,
-        ns_login:     false,
-        channels:     []
-      }
+    def part_all
+      @channels.each { |channel| channel.remove_user self }
+      @channels.clear
+    end
+  end
+
+  class Users
+    def initialize
+      @users = {}
     end
 
-    def rename_user server_name, old_name, new_name
-      return if old_name == new_name
-      user = self[server_name, old_name]
-      return unless user
-      user[:channels].each do |channel_name|
-        channel_hash = Scarlet::Channels[server_name, channel_name]
-        channel_hash[:users].map! do |s| s == old_name ? new_name : s end
-      end
-      get_server(server_name).replace_key!(old_name => new_name)
-    end
-
-    def get_server server_name
-      @@users[server_name]
-    end
-
-    def get_user server_name, user_name
-      server = get_server(server_name)
-      return nil unless server
-      server[user_name]
-    end
-
-    def get *args
-      if args.size == 1
-        get_server *args
-      elsif args.size == 2
-        get_user *args
+    # gets an user if he exists, else it creates one.
+    def get_ensured user
+      if exist? user
+        get user
       else
-        nil
+        add User.new(user)
       end
     end
 
-    def add_server server_name
-      @@users[server_name] ||= {}
+    # checks if user exists
+    def exist? user
+      !!@users[user.to_s]
     end
 
-    def add_user server_name, user_name
-      server = get_server(server_name)
-      server[user_name] ||= mk_hash(user_name)
+    def get user
+      @users[user.to_s]
     end
 
-    alias [] get
-
-    def remove_user server_name, user_name
-      server = get_server(server_name)
-      user   = server[user_name]
-      return unless user
-      user[:channels].each do |channel_name|
-        Scarlet::Channels.remove_user_from_channel(server_name, user_name, channel_name)
-      end
-      server.delete(user_name)
+    def add user
+      @users[user.name] = user
     end
 
-    end # // << self
+    def remove user
+      @users.delete(user.to_s)
+    end
+
+    def quit user
+      remove(user).part_all
+    end
+
+    def clear
+      @users.clear
+    end
+
+    def each(&block)
+      @users.values.each(&block)
+    end
+
+    def to_a
+      @users.values
+    end
   end
 
 end

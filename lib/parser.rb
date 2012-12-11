@@ -8,9 +8,10 @@ class Scarlet::Parser
     :registered => {:name=>'registered',:prefix=>'r',:symbol=>'' }
   }
 
+  # Creates a new instance of the parser, mapping @mode_list to the list of modes
+  # available on the network, by parsing the +prefix_list+, which is the ISUPPORT
+  # prefix string.
   def initialize prefix_list
-    # map @mode_list to the list of modes available on the network.
-
     name_lookup = @@base_mode_list.remap{ |k,v| [v[:prefix], k] }
     #prefix_list.match(/\((?<prefix>\w+)\)(?<symbol>.+)/) {|matches|
     #  Hash[matches[:prefix].split("").zip(matches[:symbol].split(""))]
@@ -24,7 +25,8 @@ class Scarlet::Parser
     @mode_list = @@base_mode_list.slice(*prefixes)
   end
 
-  def parse_names_list string # parses NAMES list
+  # Parses NAMES list.
+  def parse_names_list string
     modes = @mode_list.except(:registered).remap { |k,v| [k, v[:symbol]] }
     #{:owner => '~', :admin => '&', :operator => '@', :halfop => '%', :voice => '+'}
     params = string.match /(?<prefix>[\+%@&~]*)(?<nick>\S+)/
@@ -43,8 +45,6 @@ class Scarlet::Parser
     end
   end
 
-  # Global methods
-
   # // Using a C styled approach (Pointer mode_array),
   def self.parse_modes new_modes, mode_array
     mode = true
@@ -59,7 +59,8 @@ class Scarlet::Parser
     end
   end
 
-  def self.parse_esc_codes msg, remove=false # parses IRC escape codes into ANSI or removes them.
+  # Parses IRC escape codes into ANSI or removes them.
+  def self.parse_esc_codes msg, remove=false
     new_msg = msg.gsub(/\x02(.+?)\x02/) {
       remove ?  "#{$1}" : "\x1b[1m#{$1}\x1b[22m"
     }
@@ -69,6 +70,8 @@ class Scarlet::Parser
     new_msg
   end
   
+  # Parses the message sent by the server into several distinct parts:
+  # prefix, command, params and target.
   def self.parse_line line
     matches = line.match /^(:(?<prefix>\S+)\s+)?(?<command>\S+)\s+(?<params>.*)\s*/
     result = Hash[matches.names.map(&:to_sym).zip(matches.captures)]
