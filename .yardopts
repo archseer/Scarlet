@@ -1,5 +1,6 @@
 --main README.md
 --plugin yard-delegate
+models/
 lib/
 commands/
 core.rb
