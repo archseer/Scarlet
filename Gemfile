@@ -15,6 +15,7 @@ gem "em-http-request", :git => 'git://github.com/igrigorik/em-http-request.git'
 gem 'text-table', :git => 'git://github.com/archSeer/text-table.git'
 
 group :development, :test do
+  gem 'rspec'
   gem 'yard'
   gem 'yard-delegate'
 end
