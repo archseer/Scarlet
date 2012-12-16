@@ -90,7 +90,7 @@ module Scarlet
                         parsed_line[:command].downcase.to_sym,
                         parsed_line[:target], parsed_line[:params])
       Log.write(event)
-      handle_event event
+      Handler.handle_event event
     end
 
     # Sends a PRIVMG message. Logs the message to the log.

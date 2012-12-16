@@ -1,8 +1,7 @@
 module Scarlet
-# @todo Split the listeners into a new class.
-class Server
+module Handler
   # Contains all of our event listeners.
-  @@event_listeners = {}
+  @@event_listeners = {:all => []}
 
   # Adds a new event listener.
   # @param [Symbol] command The command to listen for.
@@ -15,14 +14,12 @@ class Server
   end
 
   # Passes the event on to any event listeners that are listening for this command.
-  # All events get passed to the +:all+ listener, and those without any listeners get
-  # passed to the +:todo+ listener, to alert us of any events we aren't yet processing.
+  # All events get passed to the +:all+ listener.
   # @param [Event] event The event that was recieved.
-  def handle_event event
-    r = @@event_listeners[:all].each { |block| instance_exec(event.dup, &block) } # Execute before every other handle
-    key = @@event_listeners.has_key?(event.command) ? event.command : :todo
-    return if r and key == :todo
-    @@event_listeners[key].each { |block| instance_exec(event.dup, &block) }
+  def self.handle_event event
+    execute = lambda { |block| event.server.instance_exec(event.dup, &block) }
+    @@event_listeners[:all].each(&execute) # Execute before every other handle
+    @@event_listeners[event.command].each(&execute) if @@event_listeners.has_key?(event.command)
   end
 
   on :ping do |event|
@@ -324,27 +321,16 @@ class Server
 
   on :all do |event|
     case event.command
-    when /(372|26[56]|25[012345])/ # ignore MOTD and some statuses
-      true
     when /451/ # ERROR: You have not registered
       # Something was sent before the USER NICK PASS handshake completed.
       # This is quite useful but we need to ignore it as otherwise ircd's 
       # like UnrealIRCd (synIRC) cries if we use CAP.
-      true
     when /4\d\d/ # Error message range
       unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
         print_error event.params.join(' ')
         msg @channels.keys.join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0)
       end
-      true
-    else
-      false
     end
-  end
-
-  on :todo do |event|
-    print "TODO SERV -- sender: #{event.sender.inspect}; command: #{event.command.inspect};
-       target: #{event.target.inspect}; channel: #{event.channel.inspect}; params: #{event.params.inspect};".yellow
   end
 
 end
