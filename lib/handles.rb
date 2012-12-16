@@ -122,14 +122,16 @@ class Server
 
   on :part do |event|
     if event.sender.nick == @current_nick
-      @channels.remove event.channel # remove chan if bot parted
+      @channels.remove @channels.get(event.channel) # remove chan if bot parted
     else
       @users.get(event.sender.nick).part @channels.get(event.channel)
     end
   end
 
   on :quit do |event|
-    @users.quit event.sender.nick
+    user = @users.get(name: event.sender.nick)
+    @users.remove(user)
+    user.part_all
   end
 
   on :nick do |event|

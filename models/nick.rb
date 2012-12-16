@@ -7,7 +7,6 @@ class Scarlet::Nick
   key :win_points, Integer, :default => 0
   key :settings,   Hash
   timestamps!
-  many :memos
 end
 # 0 - regular
 # 1 - registered
