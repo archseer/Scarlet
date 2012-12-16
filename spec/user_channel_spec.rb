@@ -1,20 +1,6 @@
 require_relative '../lib/user.rb'
 require_relative '../lib/channel.rb'
 
-describe Scarlet::User do
-
-  before :each do
-    @user = Scarlet::User.new('test')
-  end
-
-  describe '#new' do
-    it 'takes a param and returns a User' do
-      @user.should be_an_instance_of Scarlet::User
-    end
-  end
-
-end
-
 describe Scarlet::Collection do
   before :each do
     @users = Scarlet::Collection.new
