@@ -27,7 +27,7 @@ class Command
     # @param [String] file The file from which it should parse help.
     def parse_help file
       File.readlines(file).each do |line|
-        next unless line[0] == '#'
+        next unless line.start_with? '#'
         next if line.include? 'encoding'
         next unless line.include? '-'
         @@help << line[2..line.length].strip
