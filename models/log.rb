@@ -9,6 +9,8 @@ class Scarlet::Log
   key :message,  String
   timestamps!
 
+  # Create a new log entry from an event.
+  # @param [Event] event The event we want to log.
   def self.write event
     return if !event.sender.nick || (event.sender.nick == "Global" or event.sender.nick =~ /Serv$/)
     log = self.new(

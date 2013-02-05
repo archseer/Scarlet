@@ -1,0 +1,16 @@
+# Creates an owner for Scarlet.
+
+require 'mongo_mapper'
+module Scarlet; end
+require_relative '../models/nick'
+
+MongoMapper.database = 'scarlet'
+
+puts "Owner already exists!" and exit if Scarlet::Nick.count(:privileges => 9) > 0
+
+if nick = Scarlet::Nick.first(:nick => ARGV.shift)
+  nick.update_attributes!(:privileges => 9)
+  puts "Successfuly set #{nick.nick} as owner."
+else
+  puts "No user with that name exists! Register first with Scarlet (use !register in the channel)."
+end

@@ -48,3 +48,13 @@ Afterwards, just run it!
 ```
 ruby core.rb
 ```
+
+### Creating an owner account
+
+To create an owner account (account having the highest privilege level on the bot), you must first use the `!register` command on one of the channels the Scarlet is in. After successfully registering with the bot, we chdir into the root folder of Scarlet and run the following command:
+
+```
+ruby script/owner [USERNAME]
+```
+
+Replacing `[USERNAME]` with your username. Scarlet will now recognise you as her owner.

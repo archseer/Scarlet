@@ -17,13 +17,3 @@ EventMachine::run do
     EM.add_timer(0.1) { EM.stop }
   }
 end
-
-
-#module KeyboardHandler
-#  include EM::Protocols::LineText2
-#  def receive_line data
-#    puts "I received the following line from the keyboard: #{data}"
-#  end
-#end
-
-#EM.open_keyboard(KeyboardHandler)
