@@ -6,7 +6,10 @@ require_relative '../models/nick'
 
 MongoMapper.database = 'scarlet'
 
-puts "Owner already exists!" and exit if Scarlet::Nick.count(:privileges => 9) > 0
+if Scarlet::Nick.count(:privileges => 9) > 0
+  puts "Owner already exists!"
+  exit
+end
 
 if nick = Scarlet::Nick.first(:nick => ARGV.shift)
   nick.update_attributes!(:privileges => 9)
