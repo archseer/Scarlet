@@ -10,11 +10,11 @@ module Scarlet
   @@servers = {}
   class << self
     # Points to the root directory of Scarlet.
-    attr_accessor :root
+    attr_reader :root
 
     # Starts up Scarlet, setting the basic variables and opening connections to servers.
     def start!
-      Scarlet.root = File.expand_path File.dirname(__FILE__)
+      @root = File.expand_path File.dirname(__FILE__)
       Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
       # create servers
       Scarlet.config.servers.each do |name, cfg|
