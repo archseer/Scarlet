@@ -6,7 +6,7 @@ module Scarlet
   # happens in this class.
   class Server
     include ActiveSupport::Configurable
-    attr_accessor :scheduler, :banned, :connection
+    attr_accessor :scheduler, :connection
     attr_reader :channels, :users, :state, :extensions, :cap_extensions, :current_nick, :vHost
 
     # Initializes a new abstracted connection instance to an IRC server. 
@@ -28,7 +28,6 @@ module Scarlet
     # Resets the variables to their default values. This gets triggered when the
     # instance gets created as well as any time the bot reconnects to the server.
     def reset_vars
-      @banned         = []     # who's banned here?
       @modes          = []     # bot account's modes (ix,..)
       @extensions     = {}     # what the server-side supports (PROTOCTL)
       @cap_extensions = {}     # CAPability extensions (CAP REQ)
