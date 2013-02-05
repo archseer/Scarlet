@@ -20,19 +20,6 @@ Scarlet.hear (/poke (.+)/), :registered do
 end
 
 Scarlet.hear (/eval (.+)/), :dev do
-  if !Scarlet::Nick.where(:nick => sender.nick).empty? && Scarlet::Nick.where(:nick => sender.nick).first.privileges == 9
-    parm = params[1]
-  else
-    safe = true
-    names_list = ["a poopy-head", "a meanie", "a retard", "an idiot"]
-    if params[1].match(/(.*(Thread|Process|File|Kernel|system|Dir|IO|fork|while\s*true|require|load|ENV|%x|\`|sleep|Modules|Socket|send|undef|\/0|INFINITY|loop|variable_set|\$|@|Nick.*privileges.*save!|disconnecting\s*\=\s*true).*)/) 
-      parm = "\"#{sender.nick} is #{names_list[rand(4)-1]}.\"" 
-    else 
-      parm = params[1]
-    end
-    parm.taint
-  end
-
   begin
     t = Thread.new {
       Thread.current[:output] = "==> #{eval(parm)}"
