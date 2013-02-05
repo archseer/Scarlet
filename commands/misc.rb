@@ -22,7 +22,7 @@ end
 Scarlet.hear (/eval (.+)/), :dev do
   begin
     t = Thread.new {
-      Thread.current[:output] = "==> #{eval(parm)}"
+      Thread.current[:output] = "==> #{eval(params[1])}"
     }
     t.join(10)
     reply t[:output] if t[:output].size > 4
