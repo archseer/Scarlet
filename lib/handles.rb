@@ -212,8 +212,7 @@ module Handler
     # This is a capability extension for tracking user NickServ logins and logouts
     # event.target is the accountname, * if there is none. This must get executed
     # either way, because either the user logged in, or he logged out. (a change)
-    user = @users.get event.sender.nick
-    if user
+    if user = @users.get(event.sender.nick)
       user.ns_login = event.target != "*" ? true : false
       user.account_name = event.target != "*" ? event.target : nil
     end

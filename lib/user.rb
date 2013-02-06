@@ -26,9 +26,9 @@ module Scarlet
     # Remove the user from a channel.
     # @param [Channel] channel The channel we want to part.
     def part channel
-      chan = @channels.remove(channel)
+      @channels.remove(channel)
       channel.user_flags.delete self
-      chan.users.remove self
+      channel.users.remove self
     end
 
     # Remove the user from all channels.
