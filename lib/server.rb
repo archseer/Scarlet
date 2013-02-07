@@ -66,16 +66,9 @@ module Scarlet
 
     # Sends the data over to the server.
     # @param [String] data The message to be sent.
+    # @todo Split the command to be under 500 chars
     def send data
-      if data =~ /(PRIVMSG|NOTICE)\s(\S+)\s(.+)/i
-        stack = []
-        command, trg, text = $1, $2, $3
-        length = 510 - command.length - trg.length - 2 - 120
-        text.word_wrap(length).split("\n").each do |s| stack << '%s %s %s' % [command,trg,s] end
-      else
-        stack = [data]
-      end
-      stack.each {|d| connection.send_data d}
+      connection.send_data data
       nil
     end
 
