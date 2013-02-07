@@ -16,14 +16,14 @@ end
 # time - Prints the current owners time
 Scarlet.hear /time(?:\s(\S+))?/i, :registered do
   unless params[1]
-    reply Time.now.to_s
+    reply Time.now
   else
     nck = params[1].gsub(/-me/i, sender.nick)
     nick = Scarlet::Nick.first(:nick => nck)
     if nick
-      zone_str = nick.settings[:timezone] 
+      zone_str = nick.settings[:timezone]
       if zone_str
-        reply Time.now.in_time_zone(zone_str).to_s
+        reply Time.now.in_time_zone(zone_str)
       else
         reply "Your timezone is not set: Use !settings timezone your_timezone_string"
       end

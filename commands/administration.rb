@@ -7,19 +7,18 @@ Scarlet.hear /bot ban ([0-3]) (.+)(?:\: (.+))?/i, :dev do
   sender_nik = Scarlet::Nick.first(:nick => sender.nick)
   nicks.each { |nick_str|
     #notice sender.nick, "%s is currently not present on this network"
-    Scarlet::Ban.new(:nick => nick_str).save! if !Scarlet::Ban.first(:nick => nick_str)
-    usr = Scarlet::Ban.first(:nick => nick_str)
+    ban = Scarlet::Ban.first_or_create(:nick => nick_str)
     nck = Scarlet::Nick.first(:nick => nick_str)
-    if usr && (nck ? nck.privileges : 0) < sender_nik.privileges
-      usr.level = lvl
-      usr.by = sender.nick
-      usr.reason = reason
-      usr.servers |= [server.config.address]
-      list << usr.nick
+    if ban && (nck ? nck.privileges : 0) < sender_nik.privileges
+      ban.level = lvl
+      ban.by = sender.nick
+      ban.reason = reason
+      ban.servers |= [server.config.address]
+      list << ban.nick
     else
       notice sender.nick, "You cannot ban %s" % nick_str
     end
-    usr.save!
+    ban.save!
   }
   if list.size > 0
     reply "#{list.join ", "} #{list.length == 1 ? "is" : "are"} now banned from using #{server.current_nick} with ban level #{lvl}."
@@ -31,11 +30,11 @@ end
 # bot unban <user> - Unbans a user from using the bot.
 Scarlet.hear /bot unban (.+)/i, :dev do
   nicks = params[1].split " "
-  sender_nik = Scarlet::Nick.first(:nick=>sender.nick)
+  sender_nik = Scarlet::Nick.first(:nick => sender.nick)
   list = []
   nicks.each { |nick_str|
     next if sender_nik.nick.upcase == nick_str.upcase
-    ban = Scarlet::Ban.first(:nick=>nick_str)
+    ban = Scarlet::Ban.first(:nick => nick_str)
     if ban
       ban.level = 0
       ban.by = sender.nick
@@ -69,8 +68,7 @@ end
 # restart - Restarts the bot.
 Scarlet.hear /restart/i, :dev do
   reply 'Restarting myself...'
-  server.send_cmd :quit, :quit => Scarlet.config.quit
-  EM.add_timer(1) { server.unbind }
+  server.reconnect
 end
 
 # // Good ol' bot commands
@@ -87,20 +85,17 @@ end
  ["voice",[:+,:voice]],["devoice",[:-,:voice]]
 ].each { |str|
   Scarlet.hear /#{str[0]}\s(\S+)/i, :dev do
-    op,md = str[1]
-    modes_hsh = server.mode_list[md]
-    unless modes_hsh
-      notice sender.nick, "The network does not support this mode: #{md}"
-    else
+    op, md = str[1]
+    if modes_hsh = server.mode_list[md]
       mode = op.to_s + modes_hsh[:prefix].to_s
-      server.send "mode %s #{mode} %s" % [channel,params[1]]
+      server.send "MODE %s #{mode} %s" % [channel, params[1]]
+    else
+      notice sender.nick, "The network does not support this mode: #{md}"
     end
   end
 }
 
-#Scarlet.hear /kick (\S+(?:\s*,\s*\S+)*)(?: \#(\w+))?[ ]*(?:\: (.+))/i, :dev do
 # kick <nick> <channel> : <reason>
-
 Scarlet.hear /kick\s(?<nick>\S+)(?<channel>\s\#\S+)?(?:\s\:\s(?<reason>.+))?/i, :dev do
   send "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
 end

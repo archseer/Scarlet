@@ -13,9 +13,9 @@ class Scarlet::Event
   def initialize server, prefix, command, target, params
     @server = server
     @sender = Sender.new prefix
-    #unless @sender.server?
-    #  @sender.user = server.users.get(@sender.nick)
-    #end
+    unless @sender.server?
+      @sender.user = server.users.get(@sender.nick)
+    end
     @command = command.downcase.to_sym
     @target = target
     @channel = target if target and target[0] == '#'

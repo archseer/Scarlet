@@ -6,10 +6,7 @@ end
 
 # join <#channel>[,<#channel>,<#channel>] - ask bot to join #channel or channels
 Scarlet.hear /join\s(.+)/i, :dev do
-  params[1].gsub(' ','').split(',').each do |channel_name|
-    channel_name = ?# + channel_name unless channel_name.start_with? ?#
-    send "JOIN #{channel_name}"
-  end
+  send "JOIN #{params[1].gsub(' ',',')}"
 end
 
 # quit - 
@@ -37,6 +34,6 @@ Scarlet.hear /cycle(?:\s(\S+))?/i, :dev do
   if params[1]
     send "CYCLE #{params[1]}"
   else
-    server.channels.keys.each { |n| send "CYCLE #{n}" }
+    server.channels.map(&:name).each { |n| send "CYCLE #{n}" }
   end
 end

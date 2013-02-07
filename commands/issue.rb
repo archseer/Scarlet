@@ -1,6 +1,6 @@
 # add issue <message> - Logs a message on the issue tracker.
 Scarlet.hear /add issue (.+)/i, :dev do
-  Scarlet::Issue.new(:msg => params[1], :by => sender.nick).save!
+  Scarlet::Issue.create(:msg => params[1], :by => sender.nick)
   reply "Issue was added."
 end
 

@@ -1,7 +1,7 @@
 # login - Logs the user into his bot account.
 Scarlet.hear /login/i do
   if !Scarlet::Nick.where(:nick => sender.nick).empty?
-    if !Scarlet::Users.ns_login? server.name, sender.nick
+    if !sender.user.ns_login
       server.check_ns_login sender.nick
       notice sender.nick, "#{sender.nick}, you have been logged in successfuly."
     else
@@ -14,16 +14,16 @@ end
 
 # logout - Logs the user out from his bot account.
 Scarlet.hear /logout/i do
-  if Scarlet::Users.ns_login? server.name, sender.nick
-    Scarlet::Users.ns_logout server.name, sender.nick
+  if sender.user.ns_login
+    sender.user.ns_login = false
     notice sender.nick, "#{sender.nick}, you are now logged out."
   end
 end
 
 # register - Registers an account with the bot.
 Scarlet.hear /register/i do
-  if Scarlet::Nick.where(:nick => sender.nick).empty?
-    nick = Scarlet::Nick.new(:nick => sender.nick).save!
+  if !Scarlet::Nick.first(:nick => sender.nick)
+    Scarlet::Nick.create(:nick => sender.nick)
     notice sender.nick, "Successfuly registered with the bot."
   else
     notice sender.nick, "ERROR: You are already registered!"
@@ -36,11 +36,10 @@ end
 # // 
 # set timezone <timezone> - self-explanatory; used with !time command
 Scarlet.hear /set(?:\smy)?\stimezone\s(.+)/i, :registered do
-  n = Scarlet::Nick.first(:nick => sender.nick)
-  if n
+  if nick = Scarlet::Nick.first(:nick => sender.nick)
     if TZInfo::Timezone.all_identifiers.include? params[1]
-      n.settings[:timezone] = params[1]
-      notice sender.nick, "Your current Time Zone is: %s" % n.settings[:timezone]
+      nick.settings[:timezone] = params[1]
+      notice sender.nick, "Your current Time Zone is: %s" % nick.settings[:timezone]
     else
       notice sender.nick, "Invalid Time Zone: %s" % params[1]
     end

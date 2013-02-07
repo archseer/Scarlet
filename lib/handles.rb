@@ -297,7 +297,7 @@ module Handler
     if @extensions[:whox]
       send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
     else
-      check_ns_login @channels.get(event.params.first).users.to_a.map(&:name)
+      check_ns_login @channels.get(event.params.first).users.map(&:name)
     end
   end  
 
@@ -326,7 +326,7 @@ module Handler
     when /4\d\d/ # Error message range
       unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
         print_error event.params.join(' ')
-        msg @channels.to_a.map(&:name).join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0)
+        msg @channels.map(&:name).join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0)
       end
     end
   end
