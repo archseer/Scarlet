@@ -19,7 +19,7 @@ module Scarlet
     def join channel
       return if @channels.exist? channel.name
       @channels.add channel
-      channel.user_flags[self] ||= {}
+      channel.user_flags[self] = {}
       channel.users.add self
     end
 
