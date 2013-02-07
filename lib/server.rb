@@ -77,8 +77,7 @@ module Scarlet
     # @param [String] line The line that was recieved from the server.
     def receive_line line
       parsed_line = Parser.parse_line line
-      event = Event.new(self, parsed_line[:prefix],
-                        parsed_line[:command].downcase.to_sym,
+      event = Event.new(self, parsed_line[:prefix], parsed_line[:command],
                         parsed_line[:target], parsed_line[:params])
       Log.write(event)
       Handler.handle_event event

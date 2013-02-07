@@ -16,7 +16,7 @@ class Scarlet::Event
     #unless @sender.server? and server.users.include? @sender.nick
     #  @sender.user = server.user[@sender.nick]
     #end
-    @command = command
+    @command = command.downcase.to_sym
     @target = target
     @channel = target if target and target[0, 1] == '#'
     @return_path = @channel ? @channel : @sender.nick
