@@ -50,7 +50,6 @@ class Scarlet::Connection < EM::Connection
   # message to the server and forcefully close the connection, which then triggers the
   # reconnect mechanism.
   def timeout
-    print "Timed out waiting for server, reconnecting...".light_red
     send_data "QUIT :Ping timeout"
     close_connection_after_writing
   end
