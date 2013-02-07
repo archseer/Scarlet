@@ -32,10 +32,10 @@ module Handler
 
   on :privmsg do |event|
     if event.params.first =~ /\001PING (.+)\001/
-      puts "[ CTCP PING from #{event.sender.nick} ]" 
+      puts "[ CTCP PING from #{event.sender.nick} ]"
       send "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
     elsif event.params.first =~ /\001VERSION\001/
-      puts "[ CTCP VERSION from #{event.sender.nick} ]" 
+      puts "[ CTCP VERSION from #{event.sender.nick} ]"
       send "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
     else
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
@@ -273,8 +273,7 @@ module Handler
     if event.params.first == '42'
       # 0 - 42, 1 - channel, 2 - nick, 3 - account name (0 if none)
       if event.params[3] != '0'
-        user = @users.get(event.params[2])
-        if user
+        if user = @users.get(event.params[2])
           user.ns_login = true
           user.account_name = event.params[3]
         end
@@ -315,7 +314,7 @@ module Handler
 
   on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
     @vHost = event.params.first
-    print_console event.params.join(' '), :light_magenta  
+    print_console event.params.join(' '), :light_magenta
   end
 
   on :all do |event|
