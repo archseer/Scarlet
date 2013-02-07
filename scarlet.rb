@@ -23,10 +23,6 @@ module Scarlet
       end
       # for safety delete the servers list after it gets loaded
       Scarlet.config.delete :servers
-      # connect servers
-      @@servers.values.each do |server|
-        server.connection = EventMachine::connect(server.config.address, server.config.port, Connection, server)
-      end
       Scarlet.load_commands
     end
 

@@ -22,6 +22,7 @@ module Scarlet
       @users     = Users.new          # users (seen) on the server
       @state     = :connecting
       reset_vars
+      connect!
     end
 
     # Resets the variables to their default values. This gets triggered when the
@@ -38,12 +39,18 @@ module Scarlet
       config.server_name
     end
 
+    # Connects the bot to the network.
+    def connect!
+      return if @connection
+      @connection = EventMachine::connect(config.address, config.port, Connection, self)
+    end
+
     # Disconnects the bot from the network. It sends a +QUIT+ message to the server,
     # and closes the connection to the server.
     def disconnect
       send "QUIT :#{Scarlet.config.quit}"
       @state = :disconnecting
-      connection.close_connection(true)
+      @connection.close_connection(true)
     end
 
     # This method gets called from the connection instance once the connection to
@@ -57,8 +64,8 @@ module Scarlet
 
       reconnect = lambda {
         print_error "Connection to server lost. Reconnecting..."
-        connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
-        connection.post_init
+        @connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
+        @connection.post_init
         init_vars
       }
       EM.add_timer(3) { reconnect.call } if not @state == :disconnecting
@@ -68,7 +75,7 @@ module Scarlet
     # @param [String] data The message to be sent.
     # @todo Split the command to be under 500 chars
     def send data
-      connection.send_data data
+      @connection.send_data data
       nil
     end
 
