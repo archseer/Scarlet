@@ -23,7 +23,7 @@ module Scarlet
       end
       # for safety delete the servers list after it gets loaded
       Scarlet.config.delete :servers
-      Scarlet.load_commands
+      Command.load_commands
     end
 
     # Shuts down Scarlet. Disconnects from all servers and removes any scheduled tasks.
@@ -32,11 +32,6 @@ module Scarlet
         server.disconnect
         server.scheduler.remove_all
       end
-    end
-
-    # Loads up commands from the /commands directory under the +Scarlet.root+ path.
-    def load_commands
-      Dir["#{Scarlet.root}/commands/**/*.rb"].each {|path| load path and Command.parse_help path}
     end
 
     # Delegate to Command. (Scarlet.hear is more expressive than Command.hear)

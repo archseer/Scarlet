@@ -1,6 +1,6 @@
 # encoding: utf-8
 module Scarlet
-# This is a singleton, wrapping our DSL for custom bot commands.
+# This wraps our DSL for custom bot commands.
 class Command
   # Contains all of our listeners.
   @@listeners = {}
@@ -21,6 +21,18 @@ class Command
       @@listeners[regex] ||= {}
       @@listeners[regex][:clearance] = clearance
       @@listeners[regex][:callback] = Callback.new(block)
+    end
+
+    # Loads (or reloads) commands from the /commands directory under the
+    # +Scarlet.root+ path.
+    def load_commands
+      @@listeners.clear
+      @@help.clear
+      Dir["#{Scarlet.root}/commands/**/*.rb"].each do |path|
+        load path
+        parse_help path
+      end
+      return true
     end
 
     # Parses the help comments from a file.
