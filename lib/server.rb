@@ -28,6 +28,8 @@ module Scarlet
     # Resets the variables to their default values. This gets triggered when the
     # instance gets created as well as any time the bot reconnects to the server.
     def reset_vars
+      @channels.clear
+      @users.clear
       @modes          = []     # bot account's modes (ix,..)
       @extensions     = {}     # what the server-side supports (PROTOCTL)
       @cap_extensions = {}     # CAPability extensions (CAP REQ)
@@ -40,9 +42,22 @@ module Scarlet
     end
 
     # Connects the bot to the network.
+    # @note This method does nothing, once a connection exists. Use reconnect instead.
     def connect!
       return if @connection
       @connection = EventMachine::connect(config.address, config.port, Connection, self)
+      @state = :connected
+    end
+
+    def reconnect
+      disconnect unless @state == :disconnecting
+      reset_vars
+      EM.add_timer(3) do
+        @state = :connecting
+        @connection.reconnect(config.address, config.port) rescue return EM.add_timer(3) { reconnect }
+        @connection.post_init
+        @state = :connected
+      end
     end
 
     # Disconnects the bot from the network. It sends a +QUIT+ message to the server,
@@ -58,17 +73,12 @@ module Scarlet
     # whether the bot lost connection from the server. If the connection was 
     # unintentional, it starts the reconnection process.
     def unbind
-      @channels.clear
-      @users.clear
       reset_vars
 
-      reconnect = lambda {
+      if not @state == :disconnecting
         print_error "Connection to server lost. Reconnecting..."
-        @connection.reconnect(@config.address, @config.port) rescue return EM.add_timer(3) { reconnect.call }
-        @connection.post_init
-        init_vars
-      }
-      EM.add_timer(3) { reconnect.call } if not @state == :disconnecting
+        reconnect
+      end
     end
 
     # Sends the data over to the server.
