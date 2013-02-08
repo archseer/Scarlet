@@ -1,7 +1,7 @@
 module Scarlet; end
-base_path = File.expand_path File.dirname(__FILE__)
-Modules.load_models base_path
-Modules.load_libs base_path
+# Load models and library files.
+Dir["{models,lib}/**/*.rb"].each {|path| load path }
+
 
 # Our main module, namespacing all of our classes. It is used as a singleton,
 # offering a limited few of methods to start or stop Scarlet.

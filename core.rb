@@ -3,7 +3,6 @@
 require 'bundler/setup'
 Bundler.require
 require_relative 'scheduler'
-require_relative 'modules'
 require_relative 'scarlet'
 
 MongoMapper.database = 'scarlet'
