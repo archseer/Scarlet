@@ -1,7 +1,6 @@
 module Scarlet; end
 # Load models and library files.
-Dir["{models,lib}/**/*.rb"].each {|path| load path }
-
+Dir["{models,lib}/**/*.rb"].each {|path| require path }
 
 # Our main module, namespacing all of our classes. It is used as a singleton,
 # offering a limited few of methods to start or stop Scarlet.
@@ -13,7 +12,9 @@ module Scarlet
     attr_reader :root
 
     # Starts up Scarlet, setting the basic variables and opening connections to servers.
+    # If Scarlet was already started, it just returns.
     def start!
+      return if not @@servers.empty?
       @root = File.expand_path File.dirname(__FILE__)
       Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
       # create servers
@@ -32,6 +33,21 @@ module Scarlet
         server.disconnect
         server.scheduler.remove_all
       end
+    end
+
+    # Reconnects Scarlet to all servers. It reuses connections instead of reinitializing.
+    def reconnect
+      @@servers.values.each do |server|
+        server.reconnect
+      end
+    end
+
+    # Restarts Scarlet. It disconnects all servers and reloads them, as well as
+    # reloads commands.
+    def restart
+      shutdown
+      @@servers.clear
+      start!
     end
 
     # Delegate to Command. (Scarlet.hear is more expressive than Command.hear)
