@@ -84,7 +84,7 @@ class Command
   # @param [Symbol] privilege The privilege level required for the command.
   def check_access event, privilege
     nick = Scarlet::Nick.first(:nick => event.sender.nick)
-    ban = Scarlet::Ban.first(:nick => nick.nick) if nick
+    ban = Scarlet::Ban.first(:nick => event.sender.nick)
     if ban and ban.level > 0 and ban.servers.include?(event.server.config.address)
       event.reply "#{event.sender.nick} is banned and cannot use any commands."
       return false
