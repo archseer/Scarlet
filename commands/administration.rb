@@ -1,8 +1,6 @@
 # bot ban <user> - Bans a user from using the bot.
-Scarlet.hear /bot ban ([0-3]) (.+)(?:\: (.+))?/i, :dev do
-  lvl   = params[1].to_i
+Scarlet.hear /bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\: (?<reason>.+))?/i, :dev do
   nicks = params[2].split(" ").compact
-  reason= params[3].to_s
   list = []
   sender_nik = Scarlet::Nick.first(:nick => sender.nick)
   nicks.each { |nick_str|
@@ -10,13 +8,13 @@ Scarlet.hear /bot ban ([0-3]) (.+)(?:\: (.+))?/i, :dev do
     ban = Scarlet::Ban.first_or_create(:nick => nick_str)
     nck = Scarlet::Nick.first(:nick => nick_str)
     if ban && (nck ? nck.privileges : 0) < sender_nik.privileges
-      ban.level = lvl
+      ban.level = params[:lvl].to_i
       ban.by = sender.nick
-      ban.reason = reason
+      ban.reason = params[:reason]
       ban.servers |= [server.config.address]
       list << ban.nick
     else
-      notice sender.nick, "You cannot ban %s" % nick_str
+      notice sender.nick, "You cannot ban #{nick_str}"
     end
     ban.save!
   }
@@ -34,8 +32,7 @@ Scarlet.hear /bot unban (.+)/i, :dev do
   list = []
   nicks.each { |nick_str|
     next if sender_nik.nick.upcase == nick_str.upcase
-    ban = Scarlet::Ban.first(:nick => nick_str)
-    if ban
+    if ban = Scarlet::Ban.first(:nick => nick_str)
       ban.level = 0
       ban.by = sender.nick
       ban.reason = ""

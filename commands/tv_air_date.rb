@@ -6,7 +6,6 @@ Scarlet.hear (/when does next (.+?)(?: episode)? air\??/), :registered do
     if info
       if info[:date]
         num = info[:season].match(/Season (\d+) : Episode (\d+)/)
-        air = info[:date].match(/Airs on 2012/)
         date = DateTime.strptime(info[:date], "Airs on %m/%d/%Y").to_time
         reply "#{info[:show_name]} S#{"%02d" % num[1].to_i}E#{"%02d" % num[2].to_i} - #{info[:name]} airs on #{date.strftime("%A, #{date.day.ordinalize} %B %Y")}."
       elsif info[:status] == "Ended"

@@ -7,13 +7,13 @@ end
 # delete issue <id> - Deletes issue with <id>.
 Scarlet.hear /delete issue (\d+)/i, :dev do
   id = params[1].strip.to_i
-  t = Scarlet::Issue.sort(:created_at).all[id-1].delete
+  Scarlet::Issue.sort(:created_at).all[id-1].delete
   reply "Issue ##{id} was deleted."
 end
 
 # count issues - Shows the total count of issue's.
 Scarlet.hear /count issues/i do
-  reply "Issue count: #{Scarlet::Issue.all.count}"
+  reply "Issue count: #{Scarlet::Issue.count}"
 end
 
 # show issue <id> - Shows the message of issue with <id>.
@@ -30,15 +30,15 @@ Scarlet.hear /show issue (\d+)/i do
     issue.msg.word_wrap.split("\n").each {|line| 
       table.rows << [{:value => line, :colspan => 2, :align => :center}]
     }
-    table.to_s.split("\n").each {|line| reply line, true }
+    table.to_s.split("\n").each {|line| reply line }
   else
     reply "Issue ##{id} could not be found."
   end
 end
 
-# list issues - Displays a list with the latest 10 issue's.
+# list issues - Displays a list with the latest 10 issues.
 Scarlet.hear /list issues/i do
-  c = Scarlet::Issue.all.count
+  c = Scarlet::Issue.count
   if c > 0
     issues = Scarlet::Issue.sort(:created_at.desc).limit(10).all
     table = Text::Table.new
@@ -46,7 +46,7 @@ Scarlet.hear /list issues/i do
       table.rows << [c-i, t.by, t.created_at.strftime("%B %d %Y, %H:%M")]
     }
     table.head = [{:value => 'Latest entries', :colspan => 3, :align => :center}]
-    table.to_s.split("\n").each {|line| reply line, true }
+    table.to_s.split("\n").each {|line| reply line }
   else
     reply "No entries found."
   end
