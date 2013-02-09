@@ -1,6 +1,6 @@
 module Scarlet; end
 # Load models and library files.
-Dir["{models,lib}/**/*.rb"].each {|path| require path }
+Dir["{models,lib}/**/*.rb"].each {|path| require_relative path }
 
 # Our main module, namespacing all of our classes. It is used as a singleton,
 # offering a limited few of methods to start or stop Scarlet.

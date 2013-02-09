@@ -7,7 +7,7 @@ require_relative 'scarlet'
 
 MongoMapper.database = 'scarlet'
 
-puts ">> Scarlet v1 (development)".light_green
+puts ">> Scarlet v1.1 (development)".light_green
 
 EventMachine::run do
   Scarlet.start!

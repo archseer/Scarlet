@@ -71,6 +71,8 @@ class Command
     end
   end
 
+  private # Make the checks private.
+
   # Runs the command trough a filter to check whether any of the words
   # it uses are disallowed.
   # @param [String] params The parameters to check for censored words.
@@ -82,16 +84,14 @@ class Command
   # Checks whether the user actually has access to the command and can use it.
   # @param [Event] event The event that was recieved.
   # @param [Symbol] privilege The privilege level required for the command.
+  # @return [Boolean] True if access is allowed, else false.
   def check_access event, privilege
     nick = Scarlet::Nick.first(:nick => event.sender.nick)
-    ban = Scarlet::Ban.first(:nick => event.sender.nick)
-    if ban and ban.level > 0 and ban.servers.include?(event.server.config.address)
-      event.reply "#{event.sender.nick} is banned and cannot use any commands."
-      return false
-    end
+    return false if check_ban(event) # if the user is banned
     return true if privilege == :any # if it doesn't need clearance (:any)
+
     if event.server.users.get(event.sender.nick).ns_login # check login
-      if !nick
+      if !nick # check that user is registered
         event.reply "Registration not found, please register."
         return false
       elsif nick.privileges < @@clearance[privilege]
@@ -103,6 +103,16 @@ class Command
       return false
     end
     return true
+  end
+
+  # @return [Boolean] True if user is banned, else false.
+  def check_ban event
+    ban = Scarlet::Ban.first(:nick => event.sender.nick)
+    if ban and ban.level > 0 and ban.servers.include?(event.server.config.address)
+      event.reply "#{event.sender.nick} is banned and cannot use any commands."
+      return true
+    end
+    return false
   end
 
   # A callback instance, which contains a callback command that we can save for

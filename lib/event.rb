@@ -18,7 +18,7 @@ class Scarlet::Event
     end
     @command = command.downcase.to_sym
     @target = target
-    @channel = target if target and target[0] == '#'
+    @channel = target if target and target.start_with? '#'
     @return_path = @channel ? @channel : @sender.nick
     @params = params
   end

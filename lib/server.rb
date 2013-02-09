@@ -149,7 +149,7 @@ module Scarlet
     # @param [Symbol] color The color of the message.
     def print_console message, color=nil
       return unless Scarlet.config.debug
-      msg = Scarlet::Parser.parse_esc_codes message
+      msg = Parser.parse_esc_codes message
       msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
       puts color ? msg.colorize(color) : msg
     end
@@ -158,7 +158,7 @@ module Scarlet
     # output to console, regardless of the debug value in the config.
     # @param [String] message The message to be written to the console.
     def print_error message
-      msg = Scarlet::Parser.parse_esc_codes message
+      msg = Parser.parse_esc_codes message
       msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
       puts msg.colorize(:light_red)
     end
