@@ -17,40 +17,35 @@ module Scarlet
         begin
           send_data [@total].pack("N")
         rescue Errno::EWOULDBLOCK, Errno::AGAIN
-          # Nobody cares about ACKs, really. And if the sender
-          # couldn't receive it at this point, he probably doesn't
-          # care, either.
+          # Nobody cares about ACKs, really. And if the sender couldn't
+          # receive it at this point, he probably doesn't care, either.
         end
 
         @io << data
-        disconnect if @total == @send.size # Download complete
+        @io.flush
+        disconnect if @total == @send.size # Download complete!
       end
 
       def disconnect
         @io.close
-        @send.complete if @send.respond_to? :complete
         close_connection_after_writing
       end
     end
 
     class OutConnection < EventMachine::Connection
-      def initialize(send)
-        @send = send
+      def initialize(filename)
+        @filename = filename
         @timeout_timer = EM::Timer.new 30, method(:disconnect) # Wait 30s at most for a connection.
       end
 
-      # Once the client connects, send file!
+      # Once the user connects, send file!
       def post_init
-        @timeout_timer.cancel # Stop timeout timer, we got a connection.
-        streamer = stream_file_data @send.filename
-        streamer.callback {disconnect}
-        streamer.errback {disconnect}
-      end
-
-      def disconnect
-        @io.close
-        @send.complete if @send.respond_to? :complete
-        close_connection_after_writing
+        # Stop timeout timer, we got a connection.
+        @timeout_timer.cancel
+        # Stream file and close server on success or error.
+        streamer = stream_file_data(@filename)
+        streamer.callback {close_connection_after_writing}
+        streamer.errback {close_connection_after_writing}
       end
     end
 
@@ -67,7 +62,7 @@ module Scarlet
 
         def accept
           # start server on this computer and port 0 means start on any open port.
-          @server = EM.start_server '0.0.0.0', 0, Scarlet::DCC::OutConnection, self
+          @server = EM.start_server '0.0.0.0', 0, Scarlet::DCC::OutConnection, @filename
 
           sockname = EM.get_sockname(@server)
           @port, @ip = Socket.unpack_sockaddr_in(sockname)
@@ -80,10 +75,6 @@ module Scarlet
           @event.reply "\001DCC SEND \"#{@filename}\" #{ip} #{@port} #{@size}\001"
         end
 
-        # Stop the server on complete.
-        def complete
-          EM.stop_server @server
-        end
       end
 
     end
@@ -116,19 +107,14 @@ module Scarlet
           @server = EM.start_server '0.0.0.0', 0, Scarlet::DCC::Connection, self
 
           sockname = EM.get_sockname(@server)
-          @port, address = Socket.unpack_sockaddr_in(sockname)
+          @port, @ip = Socket.unpack_sockaddr_in(sockname)
 
-          # Hack, get IP
-          @ip = %x{curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+'}.delete("\n")
-          # Debug, local sends
-          @ip = "127.0.0.1"
+          # @ip can be local, so assign to global
+          @ip = Scarlet::DCC::IP
+
+          @ip = "127.0.0.1" # Debug, local sends
           ip = IPAddr.new(@ip).to_i
           @event.reply "\001DCC SEND \"#{@filename}\" #{ip} #{@port} #{@size} #{@token}\001"
-        end
-
-        # Stop the server on complete.
-        def complete
-          EM.stop_server @server
         end
       end
 
