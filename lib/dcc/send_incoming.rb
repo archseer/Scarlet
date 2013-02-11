@@ -1,9 +1,3 @@
-#:Speed!~Speed@lightspeed.org PRIVMSG Scarletto :\u0001DCC CHAT chat 3232235782 37349\u0001
-#:nightmare.uk.eu.synirc.net NOTICE Scarletto :Speed (~Speed@lightspeed.org) tried to DCC SEND you a file named 'slkrd', the request has been blocked.
-#:nightmare.uk.eu.synirc.net NOTICE Scarletto :Files like these might contain malicious content (viruses, trojans). Therefore, you must explicitly allow anyone that tries to send you such files.
-#:nightmare.uk.eu.synirc.net NOTICE Scarletto :If you trust Speed, and want him/her to send you this file, you may obtain more information on using the dccallow system by typing '/DCCALLOW HELP'
-#:Speed!~Speed@lightspeed.org PRIVMSG Scarletto :\u0001DCC SEND 413456828_c524486c36_o.jpg 199 0 790829 91\u0001
-
 require 'socket'
 require 'ipaddr'
 
@@ -29,41 +23,34 @@ module Scarlet
         end
 
         @io << data
-
-        if @total == @send.size
-          @io.flush
-          @io.close
-          @send.complete
-          close_connection_after_writing
-        end
+        disconnect if @total == @send.size # Download complete
       end
 
+      def disconnect
+        @io.close
+        @send.complete if @send.respond_to? :complete
+        close_connection_after_writing
+      end
     end
 
     class OutConnection < EventMachine::Connection
       def initialize(send)
         @send = send
-        @io = File.open(@send.filename, 'rb')
-        @io.advise(:sequential)
+        @timeout_timer = EM::Timer.new 30, method(:disconnect) # Wait 30s at most for a connection.
       end
 
-      # once the client connects, send file!
+      # Once the client connects, send file!
       def post_init
-        send_file
+        @timeout_timer.cancel # Stop timeout timer, we got a connection.
+        streamer = stream_file_data @send.filename
+        streamer.callback {disconnect}
+        streamer.errback {disconnect}
       end
 
-      def send_file
-        chunk = @io.read(4096)
-        send_data chunk
-
-        # send next bit at next tick
-        if !@io.eof?
-          EM.next_tick {send_file}
-        else # if we are at EOF, close server!
-          @io.close
-          @send.complete
-          close_connection_after_writing
-        end
+      def disconnect
+        @io.close
+        @send.complete if @send.respond_to? :complete
+        close_connection_after_writing
       end
     end
 
@@ -74,8 +61,6 @@ module Scarlet
         def initialize(event, filename)
           @event = event
           @filename = filename
-          #comm_inactivity_timeout
-          #pending_connect_timeout
           @size = File.size(@filename)
           accept
         end
@@ -92,7 +77,6 @@ module Scarlet
           @ip = "127.0.0.1" # Debug, local sends
 
           ip = IPAddr.new(@ip).to_i
-
           @event.reply "\001DCC SEND \"#{@filename}\" #{ip} #{@port} #{@size}\001"
         end
 
@@ -116,9 +100,6 @@ module Scarlet
 
         def accept
           @connection = EM.connect(config.address, config.port, Scarlet::DCC::Connection, self)
-        end
-
-        def complete
         end
       end
 

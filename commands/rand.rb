@@ -38,5 +38,5 @@ Scarlet.hear /update(?:\s(\S+))?/i, :dev do
 end
 
 Scarlet.hear /dcc/i, :owner do
-  Scarlet::DCC::Outgoing::Send.new(@event, 'chellocat.jpg')
+  Scarlet::DCC.send(@event, 'chellocat.jpg')
 end

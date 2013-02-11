@@ -33,8 +33,8 @@ module Scarlet
       end
     end
 
-    def self.dcc_send event, filename
-      Scarlet::DCC::Incoming::Send.new(event, 'chellocat.jpg')
+    def self.send event, filename
+      Scarlet::DCC::Outgoing::Send.new(event, filename)
     end
 
   end
