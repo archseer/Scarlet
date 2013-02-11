@@ -37,6 +37,8 @@ module Handler
     elsif event.params.first =~ /\001VERSION\001/
       puts "[ CTCP VERSION from #{event.sender.nick} ]"
       send "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
+    elsif event.params.first =~ /\001DCC .+\001/ # DCC connection
+      Scarlet::DCC.handle_request(event)
     else
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
       if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != config.control_char
