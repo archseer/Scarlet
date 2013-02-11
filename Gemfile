@@ -3,7 +3,7 @@ source :rubygems
 # Main Platform
 gem 'eventmachine'
 gem 'mongo'
-gem 'bson_ext'
+#gem 'bson_ext'
 gem 'mongo_mapper', :git => 'git://github.com/jnunemaker/mongomapper.git'
 gem 'rufus-scheduler'
 gem 'activesupport'

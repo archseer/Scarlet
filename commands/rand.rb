@@ -36,3 +36,7 @@ Scarlet.hear /update(?:\s(\S+))?/i, :dev do
   notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
   notice sender.nick, "Notice sent."
 end
+
+Scarlet.hear /dcc/i, :owner do
+  Scarlet::DCC::Outgoing::Send.new(@event, 'chellocat.jpg')
+end

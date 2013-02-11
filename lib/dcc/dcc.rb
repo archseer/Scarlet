@@ -1,5 +1,7 @@
 module Scarlet
   module DCC
+    # Hack, get IP
+    IP = %x{curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+'}.delete("\n")
 
     def self.handle_request(event)
       matches = event.params.first.match(/\001DCC (?<type>\S+) (?<params>.+)\001/)
@@ -29,6 +31,10 @@ module Scarlet
       else # Send
         Scarlet::DCC::Incoming::Send.new(event: event, filename: filename, size: size, token: token)
       end
+    end
+
+    def self.dcc_send event, filename
+      Scarlet::DCC::Incoming::Send.new(event, 'chellocat.jpg')
     end
 
   end

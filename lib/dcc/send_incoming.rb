@@ -9,16 +9,12 @@ require 'ipaddr'
 
 module Scarlet
   module DCC
+
     class Connection < EventMachine::Connection
       def initialize(send)
         @send = send
-        @file = File.open(@send.filename, 'wb')
+        @io = File.open(@send.filename, 'wb')
         @total = 0
-      end
-
-      def unbind
-        @file.flush
-        @file.close
       end
 
       def receive_data data
@@ -32,9 +28,11 @@ module Scarlet
           # care, either.
         end
 
-        @file << data
+        @io << data
 
         if @total == @send.size
+          @io.flush
+          @io.close
           @send.complete
           close_connection_after_writing
         end
@@ -42,7 +40,88 @@ module Scarlet
 
     end
 
+    class OutConnection < EventMachine::Connection
+      def initialize(send)
+        @send = send
+        @io = File.open(@send.filename, 'rb')
+        @io.advise(:sequential)
+      end
+
+      # once the client connects, send file!
+      def post_init
+        send_file
+      end
+
+      def send_file
+        chunk = @io.read(4096)
+        send_data chunk
+
+        # send next bit at next tick
+        if !@io.eof?
+          EM.next_tick {send_file}
+        else # if we are at EOF, close server!
+          @io.close
+          @send.complete
+          close_connection_after_writing
+        end
+      end
+    end
+
+    module Outgoing
+      class Send
+        attr_accessor :filename, :size
+
+        def initialize(event, filename)
+          @event = event
+          @filename = filename
+          #comm_inactivity_timeout
+          #pending_connect_timeout
+          @size = File.size(@filename)
+          accept
+        end
+
+        def accept
+          # start server on this computer and port 0 means start on any open port.
+          @server = EM.start_server '0.0.0.0', 0, Scarlet::DCC::OutConnection, self
+
+          sockname = EM.get_sockname(@server)
+          @port, @ip = Socket.unpack_sockaddr_in(sockname)
+          # @ip can be local, so assign to global
+          @ip = Scarlet::DCC::IP
+          
+          @ip = "127.0.0.1" # Debug, local sends
+
+          ip = IPAddr.new(@ip).to_i
+
+          @event.reply "\001DCC SEND \"#{@filename}\" #{ip} #{@port} #{@size}\001"
+        end
+
+        # Stop the server on complete.
+        def complete
+          EM.stop_server @server
+        end
+      end
+
+    end
+
     module Incoming
+
+      class Send
+        attr_accessor :filename, :size
+
+        def initialize(opts)
+          @event, @filename, @ip, @port, @size = opts.values_at(:event, :filename, :ip, :port, :size)
+          accept
+        end
+
+        def accept
+          @connection = EM.connect(config.address, config.port, Scarlet::DCC::Connection, self)
+        end
+
+        def complete
+        end
+      end
+
       class ReverseSend < Send
         def initialize(opts)
           super
@@ -69,22 +148,6 @@ module Scarlet
         # Stop the server on complete.
         def complete
           EM.stop_server @server
-        end
-      end
-
-      class Send
-        attr_accessor :filename, :size
-
-        def initialize(opts)
-          @event, @filename, @ip, @port, @size = opts.values_at(:event, :filename, :ip, :port :size)
-          accept
-        end
-
-        def accept
-          @connection = EM.connect(config.address, config.port, Scarlet::DCC::Connection, self)
-        end
-
-        def complete
         end
       end
 
