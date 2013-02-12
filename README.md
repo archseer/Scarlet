@@ -58,3 +58,29 @@ ruby script/owner [USERNAME]
 ```
 
 Replacing `[USERNAME]` with your username. Scarlet will now recognise you as her owner.
+
+### Scarletoids
+
+Scarletoids are Scarlet bots, where the additional commands and responses are written via a DSL directly into the Scarlet object:
+
+```ruby
+#!/usr/bin/env ruby
+require_relative 'scarlet'
+MongoMapper.database = 'scarlet'
+
+module Scarlet
+  on :privmsg do |event|
+    event.reply 'Oh, a message!'
+  end
+
+  ctcp :version do |event|
+    notice event.sender.nick "Scarletoid v2"
+  end
+
+  hear /test/ do
+    reply 'You called !test.'
+  end
+end
+
+Scarlet.run!
+```

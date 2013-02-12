@@ -5,23 +5,23 @@ module Scarlet
   module DCC
     module Outgoing
 
-    class Connection < EventMachine::Connection
-      def initialize(filename)
-        @filename = filename
-        # Wait 30s at most for a connection.
-        @timeout_timer = EM::Timer.new 30, method(:close_connection_after_writing)
-      end
+      class Connection < EventMachine::Connection
+        def initialize(filename)
+          @filename = filename
+          # Wait 30s at most for a connection.
+          @timeout_timer = EM::Timer.new 30, method(:close_connection_after_writing)
+        end
 
-      # Once the user connects, send file!
-      def post_init
-        # Stop timeout timer, we got a connection.
-        @timeout_timer.cancel
-        # Stream file and close server on success or error.
-        streamer = stream_file_data(@filename)
-        streamer.callback {close_connection_after_writing}
-        streamer.errback {close_connection_after_writing}
+        # Once the user connects, send file!
+        def post_init
+          # Stop timeout timer, we got a connection.
+          @timeout_timer.cancel
+          # Stream file and close server on success or error.
+          streamer = stream_file_data(@filename)
+          streamer.callback {close_connection_after_writing}
+          streamer.errback {close_connection_after_writing}
+        end
       end
-    end
 
       class Send
         attr_accessor :filename, :size
