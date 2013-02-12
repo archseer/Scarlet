@@ -36,7 +36,7 @@ module Handler
   def self.handle_ctcp event
     event = Scarlet::DCC::Event.new(event)
     execute = lambda { |block| event.server.instance_exec(event, &block) }
-    @@event_listeners[:all].each(&execute) # Execute before every other handle
+    @@ctcp_listeners[:all].each(&execute) # Execute before every other handle
     @@ctcp_listeners[event.command].each(&execute) if @@ctcp_listeners.has_key?(event.command)
   end
 
