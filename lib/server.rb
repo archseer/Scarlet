@@ -46,7 +46,6 @@ module Scarlet
     def connect!
       return if @connection
       @connection = EventMachine::connect(config.address, config.port, Connection, self)
-      @state = :connected
     end
 
     def reconnect
@@ -56,7 +55,6 @@ module Scarlet
         @state = :connecting
         @connection.reconnect(config.address, config.port) rescue return EM.add_timer(3) { reconnect }
         @connection.post_init
-        @state = :connected
       end
     end
 
@@ -171,14 +169,14 @@ module Scarlet
       #  a) on STATUS send groups of up to 16 nicknames.
       #  b) on ACC, we have no such luck, send each message separately.
 
-      if nick.is_a? Array
-        if @ircd =~ /unreal/i
+      nick.is_a? Array
+        if @ircd =~ /unreal|hybrid/i # synIRC (unreal), Rizon (hybrid)
           nick.each_slice(16) {|group| msg "NickServ", "STATUS #{group.join(' ')}"}
-        else
+        else #  freenode (ircd-sever)
           nick.each {|nickname| msg "NickServ", "ACC #{nick}"}
         end 
       else # one nick was given, send the message
-        msg "NickServ", "ACC #{nick}" if @ircd =~ /ircd-seven/i # freenode
+        msg "NickServ", "ACC #{nick}" if @ircd =~ /ircd-seven|hybrid/i 
         msg "NickServ", "STATUS #{nick}" if @ircd =~ /unreal/i
       end
     end

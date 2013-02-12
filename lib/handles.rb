@@ -183,7 +183,10 @@ module Handler
 
   on :mode do |event|
     ev_params = event.params.first.split("")
-    if event.sender.server? # Parse bot's private modes (ix,..) -- SERVER
+    if event.sender.server? || (event.sender.nick == @current_nick && event.target == @current_nick)
+      # Parse bot's private modes (ix,..) -- SERVER sent the reply
+      # OR BOT sent MODE targeting SELF.
+      # ie. ircd hybrid uses Sender's hostmask prefix!
       Parser.parse_modes ev_params, @modes
     else # USER/CHAN modes
       event.params.compact!
@@ -214,7 +217,6 @@ module Handler
 
   on :cap do |event|
     # This will need quite some correcting, but it should work.
-
     case event.params[0]
     when 'LS'
       event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
@@ -337,7 +339,7 @@ module Handler
   end
 
   on :'376' do |event| # END of MOTD command. Join channel(s)!
-    join config.channels
+    join config.channels unless config.channels.empty?
   end
 
   on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
@@ -351,10 +353,13 @@ module Handler
       # Something was sent before the USER NICK PASS handshake completed.
       # This is quite useful but we need to ignore it as otherwise ircd's 
       # like UnrealIRCd (synIRC) cries if we use CAP.
+    when /439/
+      # Rizon:
+      #  439 * :Please wait while we process your connection.
+      # Ignore.
     when /4\d\d/ # Error message range
       unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
         print_error event.params.join(' ')
-        msg @channels.map(&:name).join(","), "ERROR: #{event.params.join(' ')}".irc_color(4,0)
       end
     end
   end
