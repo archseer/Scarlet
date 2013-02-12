@@ -1,3 +1,7 @@
+require 'bundler/setup'
+Bundler.require
+require_relative 'scheduler'
+
 module Scarlet; end
 # Load models and library files.
 Dir["{models,lib}/**/*.rb"].each {|path| require_relative path }
@@ -50,7 +54,24 @@ module Scarlet
       start!
     end
 
+    # Start the EM reactor loop and start Scarlet.
+    def run!
+      return if EM::reactor_running? # Don't start the reactor if it's running!
+      puts ">> Scarlet v1.1 (development)".light_green
+
+      EventMachine::run do
+        Scarlet.start!
+        trap("INT") {
+          Scarlet.shutdown
+          EM.add_timer(0.1) { EM.stop }
+        }
+      end
+    end
+
     # Delegate to Command. (Scarlet.hear is more expressive than Command.hear)
     delegate :hear, to: 'Scarlet::Command'
+
+    # Delegate to Handler, more expressive and allows DSL.
+    delegate :on, :ctcp, to: 'Scarlet::Handler'
   end
 end
