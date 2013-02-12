@@ -43,12 +43,12 @@ module Scarlet
 
         def initialize(opts)
           @event, @filename, @ip, @port, @size, @token = opts.values_at(:event, :filename, :ip, :port, :size, :token)
-          if File.exist?(@filename)
-            @pos = File.size(@filename)
-            resume
-          else
+          #if File.exist?(@filename)
+          #  @pos = File.size(@filename)
+          #  resume
+          #else
             accept
-          end
+          #end
         end
 
         def accept
