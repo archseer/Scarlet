@@ -32,10 +32,15 @@ class Scarlet::Event
     msg return_path, message
   end
 
+  # Send a reply back as a ctcp message.
+  def ctcp message
+    reply "\001#{message}\001"
+  end
+
   # Sends a described action back to where the event came from.
   # @param (see #reply)
   def action message
-    reply "\001ACTION #{message}\001"
+    ctcp "ACTION #{message}"
   end
 
   # A representation of the message sender, created from the hostmask.

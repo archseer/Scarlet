@@ -2,6 +2,7 @@ module Scarlet
 module Handler
   # Contains all of our event listeners.
   @@event_listeners = {:all => []}
+  @@ctcp_listeners = {:all => []}
 
   # Adds a new event listener.
   # @param [Symbol] command The command to listen for.
@@ -9,6 +10,16 @@ module Handler
   # @param [Proc] block The block we want to execute when we catch the command.
   def self.on command,*args,&block
     listeners = @@event_listeners[command] ||= []
+    block ||= proc { nil }
+    args.include?(:prepend) ? listeners.unshift(block) : listeners.push(block)
+  end
+
+  # Adds a new ctcp listener.
+  # @param [Symbol] command The command to listen for.
+  # @param [*Array] args A list of arguments.
+  # @param [Proc] block The block we want to execute when we catch the command.
+  def self.ctcp command, *args, &block
+    listeners = @@ctcp_listeners[command] ||= []
     block ||= proc { nil }
     args.include?(:prepend) ? listeners.unshift(block) : listeners.push(block)
   end
@@ -22,6 +33,27 @@ module Handler
     @@event_listeners[event.command].each(&execute) if @@event_listeners.has_key?(event.command)
   end
 
+  def self.handle_ctcp event
+    event = Scarlet::DCC::Event.new(event)
+    execute = lambda { |block| event.server.instance_exec(event, &block) }
+    @@event_listeners[:all].each(&execute) # Execute before every other handle
+    @@ctcp_listeners[event.command].each(&execute) if @@ctcp_listeners.has_key?(event.command)
+  end
+
+  ctcp :PING do |event|
+    puts "[ CTCP PING from #{event.sender.nick} ]"
+    notice event.sender.nick, "\001PING #{$1}\001"
+  end
+
+  ctcp :VERSION do |event|
+    puts "[ CTCP VERSION from #{event.sender.nick} ]"
+    notice event.sender.nick, "\001VERSION RubyxCube v1.0\001"
+  end
+
+  ctcp :DCC do |event|
+    Scarlet::DCC.handle_dcc(event)
+  end
+
   on :ping do |event|
     send "PONG :#{event.target}"
   end
@@ -31,14 +63,8 @@ module Handler
   end
 
   on :privmsg do |event|
-    if event.params.first =~ /\001PING (.+)\001/
-      puts "[ CTCP PING from #{event.sender.nick} ]"
-      send "NOTICE #{event.sender.nick} :\001PING #{$1}\001"
-    elsif event.params.first =~ /\001VERSION\001/
-      puts "[ CTCP VERSION from #{event.sender.nick} ]"
-      send "NOTICE #{event.sender.nick} :\001VERSION RubyxCube v1.0\001"
-    elsif event.params.first =~ /\001DCC .+\001/ # DCC connection
-      Scarlet::DCC.handle_request(event)
+    if event.params.first =~ /\001.+\001/ # It's a CTCP message
+      Handler.handle_ctcp(event)
     else
       # simple channel symlink. added: now it doesn't relay any bot commands (!)
       if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != config.control_char
