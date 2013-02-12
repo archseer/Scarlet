@@ -52,7 +52,7 @@ module Scarlet
         end
 
         def accept
-          @connection = EM.connect(config.address, config.port, Connection, self)
+          @connection = EM.connect(@ip, @port, Connection, self)
         end
 
         def resume

@@ -2,7 +2,7 @@
 
 Scarlet is an IRC bot written in Ruby. It's main purpose is to serve as an IRC bot as well as a personal assistant.
 
-It is designed with multi-channel and multi-server support and offers [a very simple and verbose DSL interface to define new commands] (https://github.com/archSeer/Scarlet/wiki/Scripts)
+It is designed with multi-channel and multi-server support and offers [a very simple and verbose DSL interface to define new commands](https://github.com/archSeer/Scarlet/wiki/Scripts)
 
 ## Installation
 

@@ -49,8 +49,7 @@ module Scarlet
       filename, ip, port, size, token = event.params
       # ugly remove leading and trailing quote
       filename = filename.chomp('"').reverse.chomp('"').reverse
-      ip = ip.to_i
-      ip = [24, 16, 8, 0].collect {|b| (ip >> b) & 255}.join('.')
+      ip = IPAddr.new_ntoh([ip.to_i].pack("N")).to_s
       port = port.to_i
       size = size.to_i
 
