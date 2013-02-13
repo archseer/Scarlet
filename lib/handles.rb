@@ -42,16 +42,16 @@ module Handler
 
   ctcp :PING do |event|
     puts "[ CTCP PING from #{event.sender.nick} ]"
-    notice event.sender.nick, "\001PING #{$1}\001"
+    event.notify "\001PING #{$1}\001"
   end
 
   ctcp :VERSION do |event|
     puts "[ CTCP VERSION from #{event.sender.nick} ]"
-    notice event.sender.nick, "\001VERSION RubyxCube v1.0\001"
+    event.notify "\001VERSION RubyxCube v1.0\001"
   end
 
   ctcp :TIME do |event|
-    notice event.sender.nick, Time.now.strftime("%a %b %d %H:%M:%S %Z %Y")
+    event.notify Time.now.strftime("%a %b %d %H:%M:%S %Z %Y")
   end
 
   ctcp :DCC do |event|
@@ -76,7 +76,7 @@ module Handler
         begin
           EM::HttpRequest.new(url).get(:redirects => 1).callback {|http|
             http.response.match(/<title>(.*)<\/title>/) {|title| 
-              reply "Title: #{title[1]}" #(domain)
+              event.reply "Title: #{title[1]}" #(domain)
             }
           }
         rescue(Exception)

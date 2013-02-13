@@ -30,6 +30,12 @@ module Scarlet
         @server.msg @sender.nick, "#{message}"
       end
 
+      # Sends a NOTICE reply back to the sender (a user).
+      # @param [String] message The message to send back.
+      def notify message
+        @server.notice @sender.nick, message
+      end
+
       # Send a reply back as a ctcp message.
       def ctcp message
         reply "\001#{message}\001"

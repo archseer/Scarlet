@@ -5,6 +5,6 @@
 Scarlet.hear /help\s*(.*)?$/i do
   query = params[1].blank? ? nil : params[1] 
   Scarlet::Command.get_help(query).each { |line|
-    notice sender.nick, line
+    notify line
   }
 end

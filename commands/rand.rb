@@ -34,7 +34,7 @@ end
 # update <name>? - Just to nag the crap out of Speed
 Scarlet.hear /update(?:\s(\S+))?/i, :dev do
   notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
-  notice sender.nick, "Notice sent."
+  notify "Notice sent."
 end
 
 Scarlet.hear /dcc/i, :owner do

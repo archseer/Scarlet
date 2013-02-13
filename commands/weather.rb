@@ -8,7 +8,7 @@ Scarlet.hear /weather in (.+?)(?:\s*units\s*(.*))?\s*$/ do
 
   http = EventMachine::HttpRequest.new('http://xoap.weather.com/search/search').get :query => {'where' => params[1]}
 
-  http.errback { msg return_path, "ERROR! Fatal mistake." }
+  http.errback { reply "ERROR! Fatal mistake." }
   http.callback {
     locations = http.response.match(/<loc id="(.+)" type="1">(.+)<\/loc>/)
     if locations && locations[1]

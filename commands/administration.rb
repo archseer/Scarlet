@@ -4,7 +4,7 @@ Scarlet.hear /bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\: (?<reason>.+))?/i, :dev do
   list = []
   sender_nik = Scarlet::Nick.first(:nick => sender.nick)
   nicks.each { |nick_str|
-    #notice sender.nick, "%s is currently not present on this network"
+    #notify "%s is currently not present on this network"
     ban = Scarlet::Ban.first_or_create(:nick => nick_str)
     nck = Scarlet::Nick.first(:nick => nick_str)
     if ban && (nck ? nck.privileges : 0) < sender_nik.privileges
@@ -14,7 +14,7 @@ Scarlet.hear /bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\: (?<reason>.+))?/i, :dev do
       ban.servers |= [server.config.address]
       list << ban.nick
     else
-      notice sender.nick, "You cannot ban #{nick_str}"
+      notify "You cannot ban #{nick_str}"
     end
     ban.save!
   }
@@ -87,7 +87,7 @@ end
       mode = op.to_s + modes_hsh[:prefix].to_s
       server.send "MODE %s #{mode} %s" % [channel, params[1]]
     else
-      notice sender.nick, "The network does not support this mode: #{md}"
+      notify "The network does not support this mode: #{md}"
     end
   end
 }
