@@ -335,7 +335,7 @@ module Handler
   end
 
   on :'376' do |event| # END of MOTD command. Join channel(s)! (if any)
-    join config.channels unless config.channels.empty?
+    join *config.channels unless config.channels.empty?
   end
 
   on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
