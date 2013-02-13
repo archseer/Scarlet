@@ -50,6 +50,10 @@ module Handler
     notice event.sender.nick, "\001VERSION RubyxCube v1.0\001"
   end
 
+  ctcp :TIME do |event|
+    notice event.sender.nick, Time.now.strftime("%a %b %d %H:%M:%S %Z %Y")
+  end
+
   ctcp :DCC do |event|
     Scarlet::DCC.handle_dcc(event)
   end
