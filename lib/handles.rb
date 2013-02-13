@@ -148,7 +148,7 @@ module Handler
     if event.sender.nick == @current_nick
       @channels.remove @channels.get(event.channel) # remove chan if bot parted
     else
-      @users.get(event.sender.nick).part @channels.get(event.channel)
+      @sender.user.part @channels.get(event.channel)
     end
   end
 
@@ -159,7 +159,7 @@ module Handler
   end
 
   on :nick do |event|
-    @users.get(event.sender.nick).nick = event.target
+    @sender.user.nick = event.target
     if event.sender.nick == @current_nick
       @current_nick = event.target
       print_console "You are now known as #{event.target}.", :light_yellow
@@ -238,7 +238,7 @@ module Handler
     # This is a capability extension for tracking user NickServ logins and logouts
     # event.target is the accountname, * if there is none. This must get executed
     # either way, because either the user logged in, or he logged out. (a change)
-    if user = @users.get(event.sender.nick)
+    if user = @sender.user
       user.ns_login = event.target != "*" ? true : false
       user.account_name = event.target != "*" ? event.target : nil
     end
