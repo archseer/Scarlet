@@ -59,6 +59,10 @@ ruby script/owner [USERNAME]
 
 Replacing `[USERNAME]` with your username. Scarlet will now recognise you as her owner.
 
+### DCC
+
+Scarlet now fully supports DCC SEND for sending and recieving files, as well as [Firewall/Reverse SEND](http://en.wikipedia.org/wiki/Direct_Client-to-Client#Reverse_.2F_Firewall_DCC). There is no RESUME/ACCEPT support yet. This means one could potentially craft a XDCC bot using Scarlet.
+
 ### Scarletoids
 
 Scarletoids are Scarlet bots, where the additional commands and responses are written via a DSL directly into the Scarlet object:

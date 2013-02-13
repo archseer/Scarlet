@@ -183,14 +183,11 @@ module Handler
 
   on :mode do |event|
     ev_params = event.params.first.split("")
-    if event.sender.server? || (event.sender.nick == @current_nick && event.target == @current_nick)
-      # Parse bot's private modes (ix,..) -- SERVER sent the reply
-      # OR BOT sent MODE targeting SELF.
-      # ie. ircd hybrid uses Sender's hostmask prefix!
+    if event.target == @current_nick # Parse bot's private modes (ix,..) - self is the target of the event.
       Parser.parse_modes ev_params, @modes
     else # USER/CHAN modes
       event.params.compact!
-      if event.params.count > 1 # user list - USER modes
+      if event.params.count > 1 # user list - USER modes on CHAN (event.target/event.channel)
         event.params[1..-1].each do |nick|
           chan = @channels.get(event.channel)
           user = @users.get_ensured(nick)
