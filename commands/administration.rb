@@ -72,7 +72,7 @@ end
 # op <nick> - Give Operator Status to <nick>
 # hop <nick> - Give Half-Op Status to <nick>
 # voice <nick> - Give Voice Status to <nick>
-#//ban <str> 
+#//ban <str>
 #// - Bans <str>
 # kick <nick> - Kicks <nick>
 #flags = {"q"=>:owner,"a"=>:admin,"o"=>:operator,"h"=>:halfop,"v"=>:voice,"r"=> :registered}

@@ -31,9 +31,9 @@ Scarlet.hear /register/i do
 end
 
 # // settings: Change your account settings with the bot
-# // notify_login 
+# // notify_login
 # // timezone
-# // 
+# //
 # set timezone <timezone> - self-explanatory; used with !time command
 Scarlet.hear /set(?:\smy)?\stimezone\s(.+)/i, :registered do
   if nick = Scarlet::Nick.first(:nick => sender.nick)

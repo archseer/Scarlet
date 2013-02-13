@@ -27,7 +27,7 @@ Scarlet.hear /show issue (\d+)/i do
     table.rows << ['Opened by:', issue.by]
     table.align_column 1, :right
     table.rows << :separator
-    issue.msg.word_wrap.split("\n").each {|line| 
+    issue.msg.word_wrap.split("\n").each {|line|
       table.rows << [{:value => line, :colspan => 2, :align => :center}]
     }
     table.to_s.split("\n").each {|line| reply line }

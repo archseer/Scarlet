@@ -83,7 +83,7 @@ class Scarlet::Parser
     }
     new_msg
   end
-  
+
   # Parses the message sent by the server into several distinct parts:
   # prefix, command, params and target.
   # @param [String] line The raw line message we got from the server.
@@ -92,7 +92,7 @@ class Scarlet::Parser
     matches = line.match /^(:(?<prefix>\S+)\s+)?(?<command>\S+)\s+(?<params>.*)\s*/
     result = Hash[matches.names.map(&:to_sym).zip(matches.captures)]
     params = result[:params].match(/\A(?::)?(?<pieces>.+?)((?:^|\s):(?<rest>.+)\s*)?\z/) # params prefixed with : are separate.
-    
+
     result[:params] = params[:pieces].split
     result[:params] << params[:rest] if params[:rest]
     result[:params].delete("")

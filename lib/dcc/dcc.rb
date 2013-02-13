@@ -13,7 +13,7 @@ module Scarlet
         @command = matches['command'].to_sym
 
         # Split params into space separated sections, unless quoted.
-        # http://stackoverflow.com/questions/13040585/ 
+        # http://stackoverflow.com/questions/13040585/
         @params = matches['params'].scan(/(?:"(?:\\.|[^"])*"|[^" ])+/)
 
         if @command == :DCC

@@ -9,8 +9,8 @@ Scarlet.hear /join\s(.+)/i, :dev do
   send "JOIN #{params[1].gsub(' ',',')}"
 end
 
-# quit - 
-Scarlet.hear /quit/i, :dev do 
+# quit -
+Scarlet.hear /quit/i, :dev do
   send "QUIT"
 end
 
@@ -29,7 +29,7 @@ Scarlet.hear /notice\s(\S+)\s(.+)/i, :dev do
   send "NOTICE #{params[1]} #{params[2]}"
 end
 
-# cycle <#channel> - leave and rejoin #channel 
+# cycle <#channel> - leave and rejoin #channel
 Scarlet.hear /cycle(?:\s(\S+))?/i, :dev do
   if params[1]
     send "CYCLE #{params[1]}"

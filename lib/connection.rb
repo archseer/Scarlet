@@ -2,7 +2,7 @@
 # Provides basic IRC initialization and automated timeout checking.
 class Scarlet::Connection < EM::Connection
   include EventMachine::Protocols::LineText2
-  # Initialize a new connection. 
+  # Initialize a new connection.
   # @note Never make a new instance directly, but by using EM.connect.
   # @param [Server] server Our server instance to give the messages to.
   def initialize server

@@ -1,4 +1,3 @@
-# encoding: utf-8
 module Scarlet
 # This wraps our DSL for custom bot commands.
 class Command
@@ -138,7 +137,7 @@ class Command
     delegate :msg, :notice, :reply, :action, :send, :send_cmd, to: :@event
 
     # DSL delegator, delegates calls to +@event+ to be able to directly use it's
-    # attributes. 
+    # attributes.
     def method_missing method, *args
       return @event.__send__ method, *args if @event.respond_to? method
       super
@@ -152,7 +151,7 @@ class Command
       else      ; nick
       end
     end
-    
+
   end
 end
 end

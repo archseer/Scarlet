@@ -75,7 +75,7 @@ module Handler
       event.params.first.match(/(http:\/\/[^ ]*)/) {|url|
         begin
           EM::HttpRequest.new(url).get(:redirects => 1).callback {|http|
-            http.response.match(/<title>(.*)<\/title>/) {|title| 
+            http.response.match(/<title>(.*)<\/title>/) {|title|
               event.reply "Title: #{title[1]}" #(domain)
             }
           }
@@ -102,7 +102,7 @@ module Handler
         @users.get(ns_params[:nick]).ns_login = true if ns_params[:digit] == "3"
       end
     elsif event.sender.nick == "HostServ"
-      event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) {|host| 
+      event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) {|host|
         @vHost = host[1]
         print_console "#{@vHost} is now your hidden host (set by services.)", :light_magenta
       }
@@ -113,7 +113,7 @@ module Handler
     # :nick!user@host JOIN :#channelname - normal
     # :nick!user@host JOIN #channelname accountname :Real Name - extended-join
 
-    if @current_nick == event.sender.nick    
+    if @current_nick == event.sender.nick
       @channels.add Channel.new(event.channel)
       send "MODE #{event.channel}"
       print_console "Joined channel #{event.channel}.", :light_yellow
@@ -125,8 +125,8 @@ module Handler
     if @current_nick != event.sender.nick
 
       if !event.params.empty? && @cap_extensions['extended-join']
-        # extended-join is enabled, which means that join returns two extra params, 
-        # NickServ account name and real name. This means, we don't need to query 
+        # extended-join is enabled, which means that join returns two extra params,
+        # NickServ account name and real name. This means, we don't need to query
         # NickServ about the user's login status.
         user.ns_login = true
         user.account_name = event.params[0]
@@ -175,13 +175,13 @@ module Handler
     if event.params.first == @current_nick
       @channels.remove(event.channel) # if scarlet was kicked, delete that chan's array.
     else
-      # remove the kicked user from channels[#channel] array 
+      # remove the kicked user from channels[#channel] array
       @users.get(event.params.first).part(event.channel)
     end
   end
 
   on :mode do |event|
-    ev_params = event.params.first.split("")
+    ev_params = event.params.first.split('')
     if event.target == @current_nick # Parse bot's private modes (ix,..) - self is the target of the event.
       Parser.parse_modes ev_params, @modes
     else # USER/CHAN modes
@@ -218,7 +218,7 @@ module Handler
       event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
       # Handshake not yet complete. That means, request extensions!
       if @state == :connecting
-        %w[account-notify extended-join].each do |extension| 
+        %w[account-notify extended-join].each do |extension|
           @cap_extensions[extension] = :processing
           send "CAP REQ :#{extension}"
         end
@@ -277,13 +277,13 @@ module Handler
 
   on :'433' do |event| # Nickname is already in use
     # dumb retry, append "Bot" to nick and resend NICK
-    @current_nick += "Bot" and send "NICK #{@current_nick}"
+    @current_nick += 'Bot' and send "NICK #{@current_nick}"
   end
 
   on :'353' do |event| # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
     # param[1] -> chan, param[2] - users
-    event.params[2].split(" ").each do |nick| 
+    event.params[2].split(' ').each do |nick|
       user_name, flags = @parser.parse_names_list(nick)
       user = @users.get_ensured(user_name)
       channel = @channels.get(event.params[1])
@@ -311,10 +311,10 @@ module Handler
   end
 
   on :'366' do |event| # end of /NAMES list
-    # After we got our NAMES list, we want to check their NickServ login stat. 
+    # After we got our NAMES list, we want to check their NickServ login stat.
     # event.params.first <== channel
 
-    # if WHOX is enabled, we can use the a flag to get user's account names
+    # if WHOX is enabled, we can use the 'a' flag to get user's account names
     # if the user has an account name, he is logged in. This is the prefered
     # way to check logins on bot join, as it only needs one message.
     #
@@ -328,7 +328,7 @@ module Handler
   end
 
   on :'375' do |event| # START of MOTD
-    # create a new parser that uses the list of possible modes on this network. 
+    # create a new parser that uses the list of possible modes on this network.
     @parser = Parser.new(@extensions[:prefix])
     # this is immediately after 005 messages usually so set up extended NAMES command
     send "PROTOCTL NAMESX" if @extensions[:namesx]

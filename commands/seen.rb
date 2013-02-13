@@ -1,4 +1,4 @@
-# seen <nick> 
+# seen <nick>
 Scarlet.hear /seen (?<nick>\S+)/ do
   log = Scarlet::Log.nick(params[:nick]).sort(:created_at.asc).last
   unless log

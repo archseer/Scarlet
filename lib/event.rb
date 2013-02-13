@@ -1,6 +1,6 @@
 # Event is a class that represents a parsed event recieved from the server.
 # It contains the basic information of the sender of the event, where it was
-# sent from, and what was sent. 
+# sent from, and what was sent.
 class Scarlet::Event
   attr_accessor :server, :sender, :command, :params, :target, :channel, :return_path
 

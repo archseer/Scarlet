@@ -18,7 +18,7 @@ module Scarlet
     # @return [Array] An array of matching objects.
     def where query
       query = {name: query} if query.is_a? String
-      @collection.select do |object| 
+      @collection.select do |object|
         query.each_pair {|attribute, value|
           break false unless object.instance_variable_get("@#{attribute}") == value
         }

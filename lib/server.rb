@@ -1,14 +1,14 @@
 module Scarlet
 
   # This class is the meat of the bot, encapsulating the connection and
-  # various event listeners that respond to server messages, as well as 
-  # a list of users and channels the bot is connected to. All the magic 
+  # various event listeners that respond to server messages, as well as
+  # a list of users and channels the bot is connected to. All the magic
   # happens in this class.
   class Server
     include ActiveSupport::Configurable
     attr_reader :scheduler, :channels, :users, :state, :extensions, :cap_extensions, :current_nick, :vHost
 
-    # Initializes a new abstracted connection instance to an IRC server. 
+    # Initializes a new abstracted connection instance to an IRC server.
     # The actual EM connection instance gets set to +self.connection+.
     # @param [Hash] cfg A hash with configuration keys and values.
     def initialize cfg
@@ -68,7 +68,7 @@ module Scarlet
 
     # This method gets called from the connection instance once the connection to
     # the server was closed. It checks whether we actually wanted to disconnect, or
-    # whether the bot lost connection from the server. If the connection was 
+    # whether the bot lost connection from the server. If the connection was
     # unintentional, it starts the reconnection process.
     def unbind
       reset_vars
@@ -87,7 +87,7 @@ module Scarlet
       nil
     end
 
-    # Parses the recieved line from the server into an event, then it logs the 
+    # Parses the recieved line from the server into an event, then it logs the
     # event and distributes the event over to handlers.
     # @param [String] line The line that was recieved from the server.
     def receive_line line
@@ -119,7 +119,7 @@ module Scarlet
     #
     #  join '#channel', '#bots'
     #
-    # One can also pass in a password for the channel by separating the password 
+    # One can also pass in a password for the channel by separating the password
     # and channel name with a space.
     #
     #  join '#channel password'
@@ -133,7 +133,7 @@ module Scarlet
     # any message sent to +*Serv+ bots.
     # @param [Symbol] command The type of the command we recieved.
     # @param [String] message The message we want to log for the command.
-    # @param [String] target Whom the command has targeted. 
+    # @param [String] target Whom the command has targeted.
     def write_log command, message, target
       return if target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
       log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
@@ -166,7 +166,7 @@ module Scarlet
     # @param [Array] nicks The nicks to check.
     def check_ns_login *nicks
       # According to the docs, those servers that use STATUS may query up to
-      # 16 nicknames at once. if we pass an Array do:
+      # 16 nicknames at once.
       #  a) on STATUS send groups of up to 16 nicknames.
       #  b) on ACC, we have no such luck, send each message separately.
 

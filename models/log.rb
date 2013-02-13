@@ -14,7 +14,7 @@ class Scarlet::Log
   def self.write event
     return if !event.sender.nick || (event.sender.nick == "Global" or event.sender.nick =~ /Serv$/)
     log = self.new(
-      :nick => event.sender.nick, 
+      :nick => event.sender.nick,
       :message => event.params.join(" "),
       :channel => event.channel,
       :command => event.command.upcase,

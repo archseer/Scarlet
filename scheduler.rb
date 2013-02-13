@@ -11,8 +11,8 @@
 #================================================
 require 'rufus/scheduler'
 
-# A proxy class used to create individual scheduler instances for each class 
-# that needs it. 
+# A proxy class used to create individual scheduler instances for each class
+# that needs it.
 class Scheduler
   class << self
     @@instances = []

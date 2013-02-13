@@ -3,7 +3,7 @@ Scarlet.hear /recall(?:\s(\d+))?/ do
   if channel
     recall_depth = ([[(params[1]||5).to_i,5].min,1].max) + 1
     logs = Scarlet::Log.channel(channel).privmsg.sort(:created_at.desc).limit(recall_depth).all.reverse
-    # because we use limit, that limits to the first n elements. 
+    # because we use limit, that limits to the first n elements.
     # if we want to get the last n, we need to reverse order, then limit then reverse again
     logs.pop # remove the newest message, which is the user saying '!recall'
     logs.each do |log|
