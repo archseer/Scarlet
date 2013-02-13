@@ -29,6 +29,7 @@ class Scarlet::Connection < EM::Connection
   # (as per IRC specs).
   # @param [String, #to_s] data The data to be sent to server.
   def send_data data
+    p "Sent: #{data}"
     super "#{data}\r"
   end
 

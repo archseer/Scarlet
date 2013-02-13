@@ -98,7 +98,7 @@ module Handler
   on :notice do |event|
     # handle NickServ login checks
     if event.sender.nick == "NickServ"
-      if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$/i) || event.params.first.match(/(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
+      if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$|(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
         @users.get(ns_params[:nick]).ns_login = true if ns_params[:digit] == "3"
       end
     elsif event.sender.nick == "HostServ"
