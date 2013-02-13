@@ -8,7 +8,7 @@ module Handler
   # @param [Symbol] command The command to listen for.
   # @param [*Array] args A list of arguments.
   # @param [Proc] block The block we want to execute when we catch the command.
-  def self.on command,*args,&block
+  def self.on command, *args, &block
     listeners = @@event_listeners[command] ||= []
     block ||= proc { nil }
     args.include?(:prepend) ? listeners.unshift(block) : listeners.push(block)
@@ -70,25 +70,20 @@ module Handler
     if event.params.first =~ /\001.+\001/ # It's a CTCP message
       Handler.handle_ctcp(event)
     else
-      # simple channel symlink. added: now it doesn't relay any bot commands (!)
-      if event.channel && event.sender.nick != @current_nick && Scarlet.config.relay && event.params.first[0] != config.control_char
-        @channels.keys.reject{|key| key == event.channel}.each {|chan|
-          msg "#{chan}", "[#{event.channel}] <#{event.sender.nick}> #{event.params.first}"
-        }
-      end
-      # check for http:// URL's and output their titles (TO IMPROVE! THESE INDENTS ARE ANNOYING!)
+
+      # check for http:// URL's and output their titles (TO IMPROVE!)
       event.params.first.match(/(http:\/\/[^ ]*)/) {|url|
         begin
           EM::HttpRequest.new(url).get(:redirects => 1).callback {|http|
             http.response.match(/<title>(.*)<\/title>/) {|title| 
-              msg event.return_path, "Title: #{title[1]}" #(domain)
+              reply "Title: #{title[1]}" #(domain)
             }
           }
         rescue(Exception)
         end
       }
 
-      # if we detect a command sequence, we remove the prefix, we execute it.
+      # if we detect a command sequence, we remove the prefix and execute it.
       # it is prefixed with config.control_char or by mentioning the bot's current nickname
       if event.params.first =~ /^#{@current_nick}[:,]?\s*/i
         event.params[0] = event.params[0].split[1..-1].join(' ')
@@ -233,7 +228,7 @@ module Handler
     when 'NAK'
       event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
     end
-    
+
     # if the command isn't LS (the first LS sent in the handshake)
     # and no command still needs processing
     send "CAP END" if event.params[0] != "LS" && @state == :connecting && !@cap_extensions.values.include?(:processing)
@@ -330,7 +325,7 @@ module Handler
     else
       check_ns_login @channels.get(event.params.first).users.map(&:name)
     end
-  end  
+  end
 
   on :'375' do |event| # START of MOTD
     # create a new parser that uses the list of possible modes on this network. 
@@ -339,7 +334,7 @@ module Handler
     send "PROTOCTL NAMESX" if @extensions[:namesx]
   end
 
-  on :'376' do |event| # END of MOTD command. Join channel(s)!
+  on :'376' do |event| # END of MOTD command. Join channel(s)! (if any)
     join config.channels unless config.channels.empty?
   end
 
@@ -352,8 +347,8 @@ module Handler
     case event.command
     when /451/ # ERROR: You have not registered
       # Something was sent before the USER NICK PASS handshake completed.
-      # This is quite useful but we need to ignore it as otherwise ircd's 
-      # like UnrealIRCd (synIRC) cries if we use CAP.
+      # This is quite useful but we need to ignore it as otherwise ircd's
+      # that don't support CAP, trigger this if we use CAP.
     when /439/
       # Rizon:
       #  439 * :Please wait while we process your connection.

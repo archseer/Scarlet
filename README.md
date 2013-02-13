@@ -20,7 +20,6 @@ name: Scarlet
 quit: Thank you for participating in this Aperture Science computer-aided enrichment activity.
 control_char: "!"
 display_ping: FALSE
-relay: FALSE
 debug: FALSE
 
 servers: {
