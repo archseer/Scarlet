@@ -163,22 +163,19 @@ module Scarlet
     end
 
     # Sends a login check to NickServ, to check whether user(s) are logged in.
-    # @param [String, Array] nick The nicks to check.
-    def check_ns_login nick
+    # @param [Array] nicks The nicks to check.
+    def check_ns_login *nicks
       # According to the docs, those servers that use STATUS may query up to
       # 16 nicknames at once. if we pass an Array do:
       #  a) on STATUS send groups of up to 16 nicknames.
       #  b) on ACC, we have no such luck, send each message separately.
 
-      nick.is_a? Array
-        if @ircd =~ /unreal|hybrid/i # synIRC (unreal), Rizon (hybrid)
-          nick.each_slice(16) {|group| msg "NickServ", "STATUS #{group.join(' ')}"}
-        else #  freenode (ircd-sever)
-          nick.each {|nickname| msg "NickServ", "ACC #{nick}"}
-        end 
-      else # one nick was given, send the message
-        msg "NickServ", "ACC #{nick}" if @ircd =~ /ircd-seven|hybrid/i 
-        msg "NickServ", "STATUS #{nick}" if @ircd =~ /unreal/i
+      if @ircd =~ /unreal|hybrid/i # synIRC (unreal), Rizon (hybrid)
+        nicks.each_slice(16) {|group| msg "NickServ", "STATUS #{group.join(' ')}"}
+      elsif @ircd =~ /ircd-seven/i # freenode (ircd-seven)
+        nicks.each {|nickname| msg "NickServ", "ACC #{nick}"}
+      else
+        raise "Unknown IRCd #{@ircd}!"
       end
     end
 
