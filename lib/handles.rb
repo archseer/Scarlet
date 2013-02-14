@@ -153,9 +153,8 @@ module Handler
   end
 
   on :quit do |event|
-    user = @users.get(name: event.sender.nick)
-    @users.remove(user)
-    user.part_all
+    @users.remove(@sender.user)
+    @sender.user.part_all
   end
 
   on :nick do |event|
