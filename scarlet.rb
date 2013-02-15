@@ -57,7 +57,7 @@ module Scarlet
     # Start the EM reactor loop and start Scarlet.
     def run!
       return if EM::reactor_running? # Don't start the reactor if it's running!
-      puts ">> Scarlet v1.2 (development)".light_green
+      puts ">> Scarlet v#{Scarlet::VERSION} (development)".light_green
 
       EventMachine::run do
         Scarlet.start!
