@@ -11,7 +11,7 @@ class Scarlet::Connection < EM::Connection
 
   # Once our connection is open, send the +NICK+, +USER+ and +CAP+ message,
   # to start the handshake.
-  def post_init
+  def connection_completed
     send_data "CAP LS" # CAP extension http://ircv3.atheme.org/ (freenode)
     send_data "NICK #{@server.current_nick}"
     send_data "USER #{Scarlet.config.host} * * :#{Scarlet.config.name}"
