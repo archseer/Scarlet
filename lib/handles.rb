@@ -346,7 +346,6 @@ module Handler
     print_console event.params.join(' '), :light_magenta
   end
 
-
   on :'433' do |event| # ERR_NICKNAMEINUSE - Nickname is already in use
     # dumb retry, append "Bot" to nick and resend NICK
     @current_nick += 'Bot' and send "NICK #{@current_nick}"

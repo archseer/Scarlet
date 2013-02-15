@@ -35,7 +35,7 @@ class Scarlet::Event
   # Sends a NOTICE reply back to the sender (a user).
   # @param [String] message The message to send back.
   def notify message
-    notice event.sender.nick, message
+    notice @sender.nick, message
   end
 
   # Send a reply back as a ctcp message.
