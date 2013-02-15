@@ -134,7 +134,7 @@ module Handler
         # No luck, we need to manually query for a login check.
         # a) if WHOX is available, query with WHOX.
         # b) if still no luck, query NickServ.
-        if @cap_extensions[:whox]
+        if @cap_extensions['whox']
           send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
         else
           check_ns_login event.sender.nick
