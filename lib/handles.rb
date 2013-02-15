@@ -217,20 +217,27 @@ module Handler
       event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
       # Handshake not yet complete. That means, request extensions!
       if @state == :connecting
-        %w[account-notify extended-join].each do |extension|
-          @cap_extensions[extension] = :processing
-          send "CAP REQ :#{extension}"
-        end
+        # get an array of extensions we want and that server supports
+        ext = (%w[multi-prefix account-notify extended-join sasl] & @cap_extensions.keys)
+        send "CAP REQ :#{ext.join(' ')}"
       end
     when 'ACK'
-      event.params[1].split(" ").each {|extension| @cap_extensions[extension] = true }
+      event.params[1].split(' ').each {|extension| @cap_extensions[extension] = true }
+
+      if @cap_extensions['sasl'] && config.sasl
+        send_sasl
+      else
+        send "CAP END"
+      end
     when 'NAK'
-      event.params[1].split(" ").each {|extension| @cap_extensions[extension] = false}
+      event.params[1].split(' ').each {|extension| @cap_extensions[extension] = false}
+      send "CAP END"
     end
 
-    # if the command isn't LS (the first LS sent in the handshake)
-    # and no command still needs processing
-    send "CAP END" if event.params[0] != "LS" && @state == :connecting && !@cap_extensions.values.include?(:processing)
+  end
+
+  on :authenticate do |event|
+    send "AUTHENTICATE #{@sasl.generate(config.nick, config.password, event.target)}"
   end
 
   on :account do |event|
@@ -245,7 +252,8 @@ module Handler
 
   on :'001' do |event|
     @state = :connected
-    msg 'NickServ', "IDENTIFY #{config.password}" if config.password? # login only if a password was supplied
+    # login only if a password was supplied and SASL wasn't used
+    msg 'NickServ', "IDENTIFY #{config.password}" if config.password && !@sasl
   end
 
   on :'004' do |event|
@@ -340,6 +348,16 @@ module Handler
   on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
     @vHost = event.params.first
     print_console event.params.join(' '), :light_magenta
+  end
+
+  on :'903' do |event| # SASL authentification successful
+    puts "[SASL] Auth with #{@sasl.mechanism_name} successful".light_green
+    send "CAP END"
+  end
+
+  on :'904' do |event| # SASL mechanism failed
+    puts "[SASL] Auth with #{@sasl.mechanism_name} failed".light_red
+    send_sasl
   end
 
   on :all do |event|

@@ -28,12 +28,24 @@ module Scarlet
     # Resets the variables to their default values. This gets triggered when the
     # instance gets created as well as any time the bot reconnects to the server.
     def reset_vars
+      @sasl_mechanisms = [Scarlet::SASL::DH_Blowfish, Scarlet::SASL::Plain]
+      @sasl = nil
+
       @channels.clear
       @users.clear
       @modes          = []     # bot account's modes (ix,..)
       @extensions     = {}     # what the server-side supports (PROTOCTL)
       @cap_extensions = {}     # CAPability extensions (CAP REQ)
       @vHost          = nil    # vHost/cloak
+    end
+
+    def send_sasl
+      if @sasl = @sasl_mechanisms.shift
+        puts "[SASL] Authentication attempt with #{@sasl.mechanism_name}".light_blue
+        send "AUTHENTICATE #{@sasl.mechanism_name}"
+      else
+        send 'CAP END'
+      end
     end
 
     # An alias for config.server_name.
