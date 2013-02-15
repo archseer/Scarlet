@@ -236,7 +236,7 @@ module Handler
 
   end
 
-  on :authenticate do |event|
+  on :authenticate do |event| # SASL AUTHENTICATE
     send "AUTHENTICATE #{@sasl.generate(config.nick, config.password, event.target)}"
   end
 
@@ -250,7 +250,7 @@ module Handler
     end
   end
 
-  on :'001' do |event|
+  on :'001' do |event| # RPL_WELCOME - First message sent after client registration.
     @state = :connected
     # login only if a password was supplied and SASL wasn't used
     msg 'NickServ', "IDENTIFY #{config.password}" if config.password && !@sasl
@@ -274,7 +274,7 @@ module Handler
 
   on :'315' # End of /WHO list
 
-  on :'324' do |event| # Chan mode
+  on :'324' do |event| # RPL_CHANNELMODEIS - Channel mode
     Parser.parse_modes event.params[1].split(''), @channels.get(event.params.first).modes
   end
 
@@ -282,10 +282,6 @@ module Handler
     @channels.get(event.params.first).topic = event.params[1]
   end
 
-  on :'433' do |event| # Nickname is already in use
-    # dumb retry, append "Bot" to nick and resend NICK
-    @current_nick += 'Bot' and send "NICK #{@current_nick}"
-  end
 
   on :'353' do |event| # NAMES list
     # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
@@ -334,10 +330,10 @@ module Handler
     end
   end
 
-  on :'375' do |event| # START of MOTD
+  on :'375' do |event| # START of MOTD - immediately after 005 messages
     # create a new parser that uses the list of possible modes on this network.
     @parser = Parser.new(@extensions[:prefix])
-    # this is immediately after 005 messages usually so set up extended NAMES command
+    # set up CAP extension multi-prefix the legacy way if it doesn't support CAP
     send "PROTOCTL NAMESX" if @extensions[:namesx]
   end
 
@@ -348,6 +344,12 @@ module Handler
   on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
     @vHost = event.params.first
     print_console event.params.join(' '), :light_magenta
+  end
+
+
+  on :'433' do |event| # ERR_NICKNAMEINUSE - Nickname is already in use
+    # dumb retry, append "Bot" to nick and resend NICK
+    @current_nick += 'Bot' and send "NICK #{@current_nick}"
   end
 
   on :'903' do |event| # SASL authentification successful

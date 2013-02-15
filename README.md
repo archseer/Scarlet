@@ -61,7 +61,7 @@ Replacing `[USERNAME]` with your username. Scarlet will now recognise you as her
 
 ### SSL/TLS
 
-[*SSL/TLS* (Secure Sockets Layer/Transport Layer Security)](http://en.wikipedia.org/wiki/Transport_Layer_Security) is supported. In order to enable it, one must first lookup the port number on which the IRC network accepts SSL/TLS only connections. (Canonically, this port usually is 6697.) The server's config hash in yaml also needs the SSL key set to true:
+[**SSL/TLS** (Secure Sockets Layer/Transport Layer Security)](http://en.wikipedia.org/wiki/Transport_Layer_Security) is supported. In order to enable it, one must first lookup the port number on which the IRC network accepts SSL/TLS only connections. (Canonically, this port usually is 6697.) The server's config hash in yaml also needs the SSL key set to true:
 
 ```yaml
 freenode: {
@@ -74,7 +74,7 @@ freenode: {
 
 ### SASL
 
-In complement to SSL/TLS, [*SASL* (Simple Authentication and Security Layer)](http://en.wikipedia.org/wiki/Simple_Authentication_and_Security_Layer) is also supported. The authentification mechanisms are PLAIN (use only when using SSL/TLS! Sends credentials via cleartext) and DH-BLOWFISH (Diffie-Hellman key exchange with Blowfish encyrption).
+In complement to SSL/TLS, [**SASL** (Simple Authentication and Security Layer)](http://en.wikipedia.org/wiki/Simple_Authentication_and_Security_Layer) is also supported. The authentification mechanisms are PLAIN (use only when using SSL/TLS! Sends credentials via cleartext) and DH-BLOWFISH (Diffie-Hellman key exchange with Blowfish encyrption).
 
 ```yaml
 freenode: {
@@ -85,7 +85,7 @@ freenode: {
 
 ### DCC
 
-Scarlet now fully supports DCC SEND for sending and recieving files, as well as [Firewall/Reverse SEND](http://en.wikipedia.org/wiki/Direct_Client-to-Client#Reverse_.2F_Firewall_DCC). There is no RESUME/ACCEPT support yet. This means one could potentially craft a XDCC bot using Scarlet.
+Scarlet now fully supports [DCC SEND](http://en.wikipedia.org/wiki/Direct_Client-to-Client#DCC_SEND) for sending and recieving files, as well as [Firewall/Reverse SEND](http://en.wikipedia.org/wiki/Direct_Client-to-Client#Reverse_.2F_Firewall_DCC). There is no RESUME/ACCEPT support yet. This means one could potentially craft a XDCC bot using Scarlet.
 
 ### Scarletoids
 
