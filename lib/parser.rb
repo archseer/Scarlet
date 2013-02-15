@@ -27,6 +27,29 @@ class Scarlet::Parser
     @mode_list = @@base_mode_list.slice(*prefixes)
   end
 
+  def self.parse_isupport params
+    hash = {}
+    params.each do |segment|
+      if s = segment.match(/(?<token>.+)\=(?<params>.+)/)
+        if s[:params].include? ':'
+          val = Hash[s[:params].scan(/([^,]+):([^,]+)/).map {|(k,v)| [k.downcase.to_sym, convert_digit(v)]}]
+        elsif s[:params].include? ',' # convert arrays and it's digit keys
+          val = s[:params].split(',').map {|c| convert_digit(c)}
+        else
+          val = convert_digit(s[:params])
+        end
+        hash[s[:token].downcase.to_sym] = val
+      else
+        hash[segment.downcase.to_sym] = true
+      end
+    end
+    hash
+  end
+  # converts val to int if it's made from digits only
+  def self.convert_digit val
+    val.match(/^[[:digit:]]+$/) ? val.to_i : val
+  end
+
   # Parses NAMES list.
   # @param [String] string The NAMES list string which includes the user and
   #  his prefixes.

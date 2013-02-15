@@ -262,14 +262,7 @@ module Handler
 
   on :'005' do |event| # PROTOCTL NAMESX reply with a list of options
     event.params.pop # remove last item (:are supported by this server)
-    event.params.each do |segment|
-      if s = segment.match(/(?<token>.+)\=(?<parameters>.+)/)
-        param = s[:parameters].match(/^[[:digit:]]+$/) ? s[:parameters].to_i : s[:parameters] # convert digit only to digits
-        @extensions[s[:token].downcase.to_sym] = param
-      else
-        @extensions[segment.downcase.to_sym] = true
-      end
-    end
+    @extensions.merge! Parser.parse_isupport(event.params)
   end
 
   on :'315' # End of /WHO list
