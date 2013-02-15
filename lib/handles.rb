@@ -42,12 +42,12 @@ module Handler
 
   ctcp :PING do |event|
     puts "[ CTCP PING from #{event.sender.nick} ]"
-    event.notify "\001PING #{$1}\001"
+    event.notify "\001PING #{event.params.first}\001"
   end
 
   ctcp :VERSION do |event|
     puts "[ CTCP VERSION from #{event.sender.nick} ]"
-    event.notify "\001VERSION RubyxCube v1.0\001"
+    event.notify "\001VERSION Scarlet v#{Scarlet::VERSION}\001"
   end
 
   ctcp :TIME do |event|
