@@ -12,10 +12,19 @@ class Scarlet::Connection < EM::Connection
   # Once our connection is open, send the +NICK+, +USER+ and +CAP+ message,
   # to start the handshake.
   def connection_completed
+    start_tls if @server.config.ssl
+    handshake
+    reset_check_connection_timer
+  end
+
+  def ssl_handshake_completed
+    puts ">> TLS/SSL is ENABLED for #{@server.name}".green
+  end
+
+  def handshake
     send_data "CAP LS" # CAP extension http://ircv3.atheme.org/ (freenode)
     send_data "NICK #{@server.current_nick}"
     send_data "USER #{Scarlet.config.host} * * :#{Scarlet.config.name}"
-    reset_check_connection_timer
   end
 
   # Gets a recieved message and gives it to +Server+.
@@ -29,7 +38,6 @@ class Scarlet::Connection < EM::Connection
   # (as per IRC specs).
   # @param [String, #to_s] data The data to be sent to server.
   def send_data data
-    p "Sent: #{data}"
     super "#{data}\r"
   end
 

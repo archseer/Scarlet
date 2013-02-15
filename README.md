@@ -25,7 +25,8 @@ debug: FALSE
 servers: {
   server1: {
     address: 'test.irc.net',
-    port: 6667,
+    port: 6697,
+    ssl: TRUE,
     channels: ['#scarlet', '#bot'],
     nick: "Scarlet",
     password: "password"
@@ -57,6 +58,19 @@ ruby script/owner [USERNAME]
 ```
 
 Replacing `[USERNAME]` with your username. Scarlet will now recognise you as her owner.
+
+### SSL/TLS
+
+SSL/TLS is supported. In order to enable it, one must first lookup the port number on which the IRC network accepts SSL/TLS only connections. (Canonically, this port usually is 6697.) The server's config hash in yaml also needs the SSL key set to true:
+
+```yaml
+freenode: {
+  address: 'wolfe.freenode.net',
+  port: 6697,
+  ssl: TRUE,
+  # ...
+}
+```
 
 ### DCC
 
