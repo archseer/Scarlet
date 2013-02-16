@@ -15,15 +15,12 @@ end
 
 # poke <nick> - Sends a notice to <nick>, saying you poked him.
 Scarlet.hear (/poke (.+)/), :registered do
-  nick = context_nick params[1]
-  notice nick, "#{sender.nick} has poked you."
+  notice params[1], "#{sender.nick} has poked you."
 end
 
 Scarlet.hear (/eval (.+)/), :dev do
   begin
-    t = Thread.new {
-      Thread.current[:output] = "==> #{eval(params[1])}"
-    }
+    t = Thread.new { Thread.current[:output] = "==> #{eval(params[1])}"}
     t.join(10)
     reply t[:output] if t[:output].size > 4
   rescue(Exception) => result

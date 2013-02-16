@@ -37,9 +37,6 @@ module Scarlet
       end
 
       def self.generate user, password, payload
-        user     = user.dup
-        password = password.dup
-
         p, g, y = unpack_payload(Base64.decode64(payload).force_encoding("ASCII-8BIT"))
 
         dh = OpenSSL::PKey::DH.new
@@ -51,6 +48,7 @@ module Scarlet
         public_key = dh.pub_key.to_s(2)
 
         # Pad the password to the nearest multiple of cipher block size
+        password = password.dup
         password << "\0"
         password << "." * (8 - (password.size % 8))
 

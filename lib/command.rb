@@ -143,15 +143,6 @@ class Command
       super
     end
 
-    # Get a context of the nick, you = the bot, me = the sender.
-    def context_nick nick
-      case nick.downcase
-      when "you"; server.current_nick
-      when "me" ; sender.nick
-      else      ; nick
-      end
-    end
-
   end
 end
 end

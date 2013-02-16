@@ -1,15 +1,17 @@
 ﻿module Scarlet
-  def self.klik
-    @klik ||= [Time.now,Time.now]
-    @klik[0] = Time.now - @klik[1]
-    @klik[1] = Time.now
-    @klik[0]
+  module Plugins
+    def self.klik
+      @klik ||= [Time.now,Time.now]
+      @klik[0] = Time.now - @klik[1]
+      @klik[1] = Time.now
+      @klik[0]
+    end
   end
 end
 
 # klik - Is a one click stopwatch
 Scarlet.hear /klik/i, :registered do
-  n = Scarlet.klik.round(2)
+  n = Scarlet::Plugins.klik.round(2)
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
 

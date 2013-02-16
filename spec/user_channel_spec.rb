@@ -1,5 +1,5 @@
-require_relative '../lib/user.rb'
-require_relative '../lib/channel.rb'
+require_relative '../lib/user'
+require_relative '../lib/channel'
 
 describe Scarlet::Collection do
   before :each do
