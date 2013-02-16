@@ -48,7 +48,7 @@ module Scarlet
         dh.generate_key!
 
         secret_key = dh.compute_key(y)
-        public_key = dh.public_key.to_der
+        public_key = dh.pub_key.to_s(2)
 
         # Pad the password to the nearest multiple of cipher block size
         password << "\0"
