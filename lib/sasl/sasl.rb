@@ -6,6 +6,8 @@ module Scarlet
 
     class Mechanism; end
 
+    # Plain sends the password unencrypted, so it should only be used in
+    # complement to SSL/TLS.
     class Plain < Mechanism
       def self.mechanism_name
         "PLAIN"
@@ -16,6 +18,13 @@ module Scarlet
       end
     end
 
+    # DH-BLOWFISH is a secure SASL mechanism, combining Blowfish encryption
+    # with Diffie–Hellman key exchange. The Diffie–Hellman key exchange method
+    # allows two parties that have no prior knowledge of each other to jointly
+    # establish a shared secret key over an insecure communications channel.
+    # This key can then be used to encrypt subsequent communications.
+    # Blowfish on the other hand, is an efficient and fast cipher, which has
+    # not been cryptanalised as of today.
     class DH_Blowfish
       def self.mechanism_name
         "DH-BLOWFISH"
@@ -36,6 +45,10 @@ module Scarlet
         pgy.map {|i| OpenSSL::BN.new(i, 2)}
       end
 
+      # @param [String] user
+      # @param [String] password
+      # @param [String] payload
+      # @return [String]
       def self.generate user, password, payload
         p, g, y = unpack_payload(Base64.decode64(payload).force_encoding("ASCII-8BIT"))
 
