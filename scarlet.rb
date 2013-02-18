@@ -60,6 +60,7 @@ module Scarlet
       puts ">> Scarlet v#{Scarlet::VERSION} (development)".light_green
 
       EventMachine::run do
+        yield if block_given?
         Scarlet.start!
         trap("INT") {
           Scarlet.shutdown
