@@ -1,5 +1,4 @@
 module Scarlet
-
   # This class is the meat of the bot, encapsulating the connection and
   # various event listeners that respond to server messages, as well as
   # a list of users and channels the bot is connected to. All the magic
@@ -11,7 +10,7 @@ module Scarlet
     # Initializes a new abstracted connection instance to an IRC server.
     # The actual EM connection instance gets set to +self.connection+.
     # @param [Hash] cfg A hash with configuration keys and values.
-    def initialize cfg
+    def initialize(cfg)
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick
       config.control_char ||= Scarlet.config.control_char
@@ -157,7 +156,7 @@ module Scarlet
     # no messages will be logged.
     # @param [String] message The message to be written to the console.
     # @param [Symbol] color The color of the message.
-    def print_console message, color=nil
+    def print_console message, color = nil
       return unless Scarlet.config.debug
       msg = Parser.parse_esc_codes message
       msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
@@ -180,15 +179,13 @@ module Scarlet
       # 16 nicknames at once.
       #  a) on STATUS send groups of up to 16 nicknames.
       #  b) on ACC, we have no such luck, send each message separately.
-
       if @ircd =~ /unreal|hybrid/i # synIRC (unreal), Rizon (hybrid)
-        nicks.each_slice(16) {|group| msg "NickServ", "STATUS #{group.join(' ')}"}
+        nicks.each_slice(16) { |group| msg "NickServ", "STATUS #{group.join(' ')}" }
       elsif @ircd =~ /ircd-seven/i # freenode (ircd-seven)
-        nicks.each {|nickname| msg "NickServ", "ACC #{nick}"}
+        nicks.each { |nickname| msg "NickServ", "ACC #{nick}" }
       else
         raise "Unknown IRCd #{@ircd}!"
       end
     end
-
   end
 end

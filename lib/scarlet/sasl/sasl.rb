@@ -1,10 +1,10 @@
-require "openssl"
-require "base64"
+require 'openssl'
+require 'base64'
 
 module Scarlet
   module SASL
-
-    class Mechanism; end
+    class Mechanism
+    end
 
     # Plain sends the password unencrypted, so it should only be used in
     # complement to SSL/TLS.
@@ -76,6 +76,5 @@ module Scarlet
         Base64.strict_encode64(answer)
       end
     end
-
   end
 end

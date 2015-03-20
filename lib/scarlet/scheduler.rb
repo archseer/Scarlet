@@ -9,7 +9,7 @@
 # Use as usual (http://rufus.rubyforge.org/rufus-scheduler/)
 # Call scheduler.remove_all when unloading the module
 #================================================
-require 'rufus/scheduler'
+require 'rufus-scheduler'
 
 # A proxy class used to create individual scheduler instances for each class
 # that needs it.
@@ -18,7 +18,7 @@ class Scheduler
     @@instances = []
 
     EM.next_tick do
-      @@scheduler = Rufus::Scheduler::EmScheduler.start_new
+      @@scheduler = Rufus::Scheduler.new
       @@instances.each do |scheduler|
         scheduler.queue.each do |name, args, block|
           scheduler.jobs << @@scheduler.send(name, *args, &block)

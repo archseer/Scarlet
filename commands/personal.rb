@@ -1,5 +1,5 @@
 # login - Logs the user into his bot account.
-Scarlet.hear /login/i do
+hear /login/i, :any do
   if !Scarlet::Nick.where(:nick => sender.nick).empty?
     if !sender.user.ns_login
       server.check_ns_login sender.nick
@@ -13,7 +13,7 @@ Scarlet.hear /login/i do
 end
 
 # logout - Logs the user out from his bot account.
-Scarlet.hear /logout/i do
+hear /logout/i, :registered do
   if sender.user.ns_login
     sender.user.ns_login = false
     notify "#{sender.nick}, you are now logged out."
@@ -21,7 +21,7 @@ Scarlet.hear /logout/i do
 end
 
 # register - Registers an account with the bot.
-Scarlet.hear /register/i do
+hear /register/i, :any do
   if !Scarlet::Nick.first(:nick => sender.nick)
     Scarlet::Nick.create(:nick => sender.nick)
     notify "Successfuly registered with the bot."
@@ -35,7 +35,7 @@ end
 # // timezone
 # //
 # set timezone <timezone> - self-explanatory; used with !time command
-Scarlet.hear /set(?:\smy)?\stimezone\s(.+)/i, :registered do
+hear /set(?:\smy)?\stimezone\s(.+)/i, :registered do
   if nick = Scarlet::Nick.first(:nick => sender.nick)
     if TZInfo::Timezone.all_identifiers.include? params[1]
       nick.settings[:timezone] = params[1]

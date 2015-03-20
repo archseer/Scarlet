@@ -16,7 +16,8 @@ tmp
 .yardoc
 _yardoc
 doc/
-
+data/db
+var/
 Gemfile.lock
 
 config.yml

@@ -69,6 +69,5 @@ module Scarlet
     def self.send event, filename
       Scarlet::DCC::Outgoing::Send.new(event, filename)
     end
-
   end
 end

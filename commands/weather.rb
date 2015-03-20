@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 # weather in <location> units <unit> - Displays the current weather stats for <location> in <units>.
-Scarlet.hear /weather in (.+?)(?:\s*units\s*(.*))?\s*$/ do
+hear (/weather in (.+?)(?:\s*units\s*(.*))?\s*$/), :any do
   units = 'c'
   units = 'c' if params[2] =~ /celsius/i
   units = 'f' if params[2] =~ /fahrenheit/i
@@ -9,11 +9,11 @@ Scarlet.hear /weather in (.+?)(?:\s*units\s*(.*))?\s*$/ do
   http = EventMachine::HttpRequest.new('http://xoap.weather.com/search/search').get :query => {'where' => params[1]}
 
   http.errback { reply "ERROR! Fatal mistake." }
-  http.callback {
+  http.callback do
     locations = http.response.match(/<loc id="(.+)" type="1">(.+)<\/loc>/)
     if locations && locations[1]
       request = EventMachine::HttpRequest.new('http://weather.yahooapis.com/forecastjson').get :query => {'p' => locations[1], 'u' => units}
-      request.callback {
+      request.callback do
         h = JSON.parse(request.response)
         location = locations[2].end_with?(", ") ? locations[2].chop.chop : locations[2]
         condition = h["condition"]["text"].downcase
@@ -29,9 +29,9 @@ Scarlet.hear /weather in (.+?)(?:\s*units\s*(.*))?\s*$/ do
         r << "#{h["atmosphere"]["humidity"]}% humidity, #{h["atmosphere"]["visibility"]} #{h["units"]["distance"]} visibility"
         r << "and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"].to_i} #{h["units"]["pressure"]}."
         reply r.join(' ')
-      }
+      end
     else
       reply "There was a problem with the location..."
     end
-  }
+  end
 end

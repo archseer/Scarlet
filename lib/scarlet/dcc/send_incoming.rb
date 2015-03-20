@@ -4,7 +4,6 @@ require 'ipaddr'
 module Scarlet
   module DCC
     module Incoming
-
       class Connection < EventMachine::Connection
         def initialize(send)
           @send = send
@@ -76,7 +75,6 @@ module Scarlet
           @event.ctcp "DCC SEND \"#{@filename}\" #{ip} #{@port} #{@size} #{@token}"
         end
       end
-
     end
   end
 end

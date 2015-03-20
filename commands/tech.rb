@@ -1,5 +1,5 @@
 ﻿# dice <x>d<y> - rolls <x> dies with <y> sides
-Scarlet.hear /dice (\d+)d(\d+)/i, :any do
+hear /dice (\d+)d(\d+)/i, :any do
   sides, diecoun = params[2].to_i, params[1].to_i
   sides   = 1 if sides <= 0
   diecoun = 1 if diecoun <= 0
@@ -8,7 +8,7 @@ Scarlet.hear /dice (\d+)d(\d+)/i, :any do
 end
 
 # coin <x> - Flips <x> coins O is heads, and X is tails
-Scarlet.hear /coin (\d+)/i, :any do
+hear /coin (\d+)/i, :any do
   count, = params[1].to_i
   reply count.times.collect{|i|rand(2) == 0 ? "O" : "X"}.inspect.gsub('"',"")
 end

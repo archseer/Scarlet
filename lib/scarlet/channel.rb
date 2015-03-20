@@ -1,4 +1,4 @@
-require_relative 'collection.rb'
+require 'scarlet/collection'
 
 module Scarlet
   # A representation of a channel on the network.
@@ -29,15 +29,14 @@ module Scarlet
   end
 
   class ServerChannels < Channels
-    def remove channel
-      @collection.delete(channel).users.each {|user|
+    def remove(channel)
+      @collection.delete(channel).users.each do |user|
         user.part channel
-      }
+      end
     end
 
-    def remove_channel channel
+    def remove_channel(channel)
       @collection.remove channel
     end
   end
-
 end

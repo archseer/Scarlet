@@ -1,7 +1,5 @@
-module Scarlet; end
-require_relative '../lib/core_ext/Hash'
-require_relative '../lib/parser'
-require 'active_support/core_ext'
+require 'scarlet/core_ext/hash'
+require 'scarlet/parser'
 
 describe Scarlet::Parser do
   before :all do

@@ -1,22 +1,13 @@
-﻿module Scarlet
-  module Plugins
-    def self.klik
-      @klik ||= [Time.now,Time.now]
-      @klik[0] = Time.now - @klik[1]
-      @klik[1] = Time.now
-      @klik[0]
-    end
-  end
-end
+﻿require 'scarlet/plugins/klik'
 
 # klik - Is a one click stopwatch
-Scarlet.hear /klik/i, :registered do
+hear /klik/i, :registered do
   n = Scarlet::Plugins.klik.round(2)
   reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
 end
 
 # time - Prints the current owners time
-Scarlet.hear /time(?:\s(\S+))?/i, :registered do
+hear /time(?:\s(\S+))?/i, :registered do
   unless params[1]
     reply Time.now
   else
@@ -34,11 +25,11 @@ Scarlet.hear /time(?:\s(\S+))?/i, :registered do
 end
 
 # update <name>? - Just to nag the crap out of Speed
-Scarlet.hear /update(?:\s(\S+))?/i, :dev do
+hear /update(?:\s(\S+))?/i, :dev do
   notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
   notify "Notice sent."
 end
 
-Scarlet.hear /dcc/i, :owner do
-  Scarlet::DCC.send(@event, 'chellocat.jpg')
+hear /dcc/i, :owner do
+  Scarlet::DCC.send @event, 'chellocat.jpg'
 end

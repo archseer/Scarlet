@@ -1,5 +1,5 @@
 # win <name> - Show some respect to <name>, and give em a win point
-Scarlet.hear /win(?:\s(\S+))?/i, :registered do
+hear (/win(?:\s(\S+))?/i), :registered do
   given = !!params[1]
   nick = Scarlet::Nick.first(:nick => params[1])
   same = nick ? sender.nick.downcase == nick.nick.downcase : false

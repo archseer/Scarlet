@@ -2,23 +2,23 @@
 # Do it. For science.
 
 # give me <item> - Responds with an action, "giving" the user the requested item.
-Scarlet.hear (/give me (.+)/) do
+hear /give me (.+)/, :any do
   reply "\x01ACTION gives #{params[1]} to #{sender.nick}!\x01"
 end
 
 # show colors - Draws the entire IRC color pallete.
-Scarlet.hear (/show colors/), :dev do
+hear /show colors/, :dev do
   for i in 0..15
     reply "#{"%02d" % i}".align(10, :center).irc_color(0, i), true
   end
 end
 
 # poke <nick> - Sends a notice to <nick>, saying you poked him.
-Scarlet.hear (/poke (.+)/), :registered do
+hear /poke (.+)/, :registered do
   notice params[1], "#{sender.nick} has poked you."
 end
 
-Scarlet.hear (/eval (.+)/), :dev do
+hear /eval (.+)/, :dev do
   begin
     t = Thread.new { Thread.current[:output] = "==> #{eval(params[1])}"}
     t.join(10)

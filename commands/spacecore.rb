@@ -1,4 +1,4 @@
-Scarlet.hear (/space core/) do
+hear /space core/, :any do
 quotes = [
 "What's your favorite thing about space? Mine is space.",
 "Space going to space can't wait.",

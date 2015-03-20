@@ -1,16 +1,15 @@
-require 'bundler/setup'
-Bundler.require
-require_relative 'scheduler'
-
-module Scarlet; end
-# Load models and library files.
-Dir["{models,lib}/**/*.rb"].each {|path| require_relative path }
+require 'yaml'
+require 'colorize'
+require 'active_support/configurable'
+require 'active_support/core_ext/kernel/singleton_class'
+require 'active_support/core_ext/module/delegation'
 
 # Our main module, namespacing all of our classes. It is used as a singleton,
 # offering a limited few of methods to start or stop Scarlet.
 module Scarlet
   include ActiveSupport::Configurable
   @@servers = {}
+
   class << self
     # Points to the root directory of Scarlet.
     attr_reader :root
@@ -19,7 +18,7 @@ module Scarlet
     # If Scarlet was already started, it just returns.
     def start!
       return if not @@servers.empty?
-      @root = File.expand_path File.dirname(__FILE__)
+      @root = File.expand_path '../../', File.dirname(__FILE__)
       Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
       # create servers
       Scarlet.config.servers.each do |name, cfg|
@@ -62,10 +61,10 @@ module Scarlet
       EventMachine::run do
         yield if block_given?
         Scarlet.start!
-        trap("INT") {
+        trap('INT') do
           Scarlet.shutdown
           EM.add_timer(0.1) { EM.stop }
-        }
+        end
       end
     end
 
