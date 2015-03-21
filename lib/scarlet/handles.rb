@@ -1,17 +1,22 @@
+require 'scarlet/listeners'
+
 module Scarlet
   module Handler
     # Contains all of our event listeners.
-    @@event_listeners = { all: [] }
-    @@ctcp_listeners = { all: [] }
+    @@event_listeners = Listeners.new
+    @@ctcp_listeners = Listeners.new
+    @@plugins = Listeners.new
+
+    def self.plugin(plugin)
+      plugin.join(@@plugins)
+    end
 
     # Adds a new event listener.
     # @param [Symbol] command The command to listen for.
     # @param [*Array] args A list of arguments.
     # @param [Proc] block The block we want to execute when we catch the command.
     def self.on(command, *args, &block)
-      listeners = @@event_listeners[command] ||= []
-      block ||= proc { nil }
-      args.include?(:prepend) ? listeners.unshift(block) : listeners.push(block)
+      @@event_listeners.on(command, *args, &block)
     end
 
     # Adds a new ctcp listener.
@@ -19,9 +24,7 @@ module Scarlet
     # @param [*Array] args A list of arguments.
     # @param [Proc] block The block we want to execute when we catch the command.
     def self.ctcp(command, *args, &block)
-      listeners = @@ctcp_listeners[command] ||= []
-      block ||= proc { nil }
-      args.include?(:prepend) ? listeners.unshift(block) : listeners.push(block)
+      @@ctcp_listeners.on(command, *args, &block)
     end
 
     # Passes the event on to any event listeners that are listening for this command.
@@ -29,15 +32,13 @@ module Scarlet
     # @param [Event] event The event that was recieved.
     def self.handle_event(event)
       execute = lambda { |block| event.server.instance_exec(event.dup, &block) }
-      @@event_listeners[:all].each(&execute) # Execute before every other handle
-      @@event_listeners[event.command].each(&execute) if @@event_listeners.has_key?(event.command)
+      @@event_listeners.each_listener(event.command, &execute)
     end
 
     def self.handle_ctcp(event)
       event = Scarlet::DCC::Event.new(event)
       execute = lambda { |block| event.server.instance_exec(event, &block) }
-      @@ctcp_listeners[:all].each(&execute) # Execute before every other handle
-      @@ctcp_listeners[event.command].each(&execute) if @@ctcp_listeners.has_key?(event.command)
+      @@ctcp_listeners.each_listener(event.command, &execute)
     end
 
     ctcp :PING do |event|
@@ -70,19 +71,8 @@ module Scarlet
       if event.params.first =~ /\001.+\001/ # It's a CTCP message
         Handler.handle_ctcp(event)
       else
-
-        # check for http:// URL's and output their titles (TO IMPROVE!)
-        event.params.first.match(/(http:\/\/[^ ]*)/) do |url|
-          begin
-            EM::HttpRequest.new(url).get(:redirects => 1).callback do |http|
-              http.response.match(/<title>(.*)<\/title>/) do |title|
-                event.reply "Title: #{title[1]}" #(domain)
-              end
-            end
-          rescue Exception
-          end
-        end
-
+        execute = lambda { |block| event.server.instance_exec(event.dup, &block) }
+        @@plugins.trigger :privmsg, &execute
         # if we detect a command sequence, we remove the prefix and execute it.
         # it is prefixed with config.control_char or by mentioning the bot's current nickname
         if event.params.first =~ /^#{@current_nick}[:,]?\s*/i

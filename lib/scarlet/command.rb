@@ -4,7 +4,7 @@ require 'active_support/core_ext/module/delegation'
 module Scarlet
   class CommandLoad
     def hear(*args, &block)
-      Scarlet.hear(*args, &block)
+      Command.hear(*args, &block)
     end
 
     def load_file(filename)
@@ -25,7 +25,7 @@ module Scarlet
 
       def initialize
         @clearance = :dev
-        @callback = proc { }
+        @callback = nil
         @description = ''
         @usage = ''
       end
@@ -41,6 +41,7 @@ module Scarlet
 
       def initialize(listener)
         @listener = listener
+        @helpers = []
       end
 
       # Sets the clearance level
@@ -64,9 +65,22 @@ module Scarlet
         @listener.usage = text
       end
 
+      private def extend_with_helpers
+        if c = @listener.callback
+          @helpers.each { |mod| c.extend mod }
+        end
+      end
+
+      # Extends the callback context
+      def helpers(*modules)
+        @helpers = modules
+        extend_with_helpers
+      end
+
       # Sets the callback
       def on(&block)
         @listener.callback = Callback.new(block)
+        extend_with_helpers
       end
     end
 
@@ -88,14 +102,30 @@ module Scarlet
         @@listeners[regex] = Listener.new.tap { |l| CommandBuilder.new(l).instance_eval(&block) }
       end
 
+      def load_command(path)
+        CommandLoad.load_file path
+      end
+
+      def load_command_rel(path)
+        load_command File.join(Scarlet.root, 'commands', path)
+      end
+
       # Loads (or reloads) commands from the /commands directory under the
       # +Scarlet.root+ path.
       def load_commands
+        old_listeners = @@listeners.dup
         @@listeners.clear
-        Dir[File.join(Scarlet.root, 'commands/**/*.rb')].each do |path|
-          CommandLoad.load_file path
+        begin
+          Dir[File.join(Scarlet.root, 'commands/**/*.rb')].each do |path|
+            load_command path
+          end
+          true
+        rescue => ex
+          puts ex.inspect
+          puts ex.backtrace.join("\n")
+          @@listeners.replace old_listeners
+          false
         end
-        return true
       end
 
       def select_commands
@@ -119,7 +149,7 @@ module Scarlet
 
     # Initialize is here abused to run a new instance of the Command.
     # @param [Event] event The event that was caught by the server.
-    def initialize event
+    def initialize(event)
       if word = check_filters(event.params.first)
         event.reply "Cannot execute because \"#{word}\" is blocked."
         return
@@ -139,7 +169,7 @@ module Scarlet
     # Runs the command trough a filter to check whether any of the words
     # it uses are disallowed.
     # @param [String] params The parameters to check for censored words.
-    def check_filters params
+    def check_filters(params)
       return false if @@filter.empty? or params.start_with?("unfilter")
       return Regexp.new("(#{@@filter.join("|")})").match(params)
     end
@@ -148,7 +178,7 @@ module Scarlet
     # @param [Event] event The event that was recieved.
     # @param [Symbol] privilege The privilege level required for the command.
     # @return [Boolean] True if access is allowed, else false.
-    def check_access event, privilege
+    def check_access(event, privilege)
       nick = Scarlet::Nick.first(:nick => event.sender.nick)
       return false if check_ban(event) # if the user is banned
       return true if privilege == :any # if it doesn't need clearance (:any)

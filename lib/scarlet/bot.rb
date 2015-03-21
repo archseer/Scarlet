@@ -8,22 +8,32 @@ require 'active_support/core_ext/module/delegation'
 # offering a limited few of methods to start or stop Scarlet.
 module Scarlet
   include ActiveSupport::Configurable
-  @@servers = {}
-
   class << self
     # Points to the root directory of Scarlet.
-    attr_reader :root
+    attr_accessor :root
+
+    # Delegate to Handler, more expressive and allows DSL.
+    delegate :on, :ctcp, to: 'Scarlet::Handler'
+
+    def run!(&block)
+      Bot.new.run(&block)
+    end
+  end
+  class Bot
+    def initialize
+      @servers = {}
+    end
 
     # Starts up Scarlet, setting the basic variables and opening connections to servers.
     # If Scarlet was already started, it just returns.
-    def start!
-      return if not @@servers.empty?
-      @root = File.expand_path '../../', File.dirname(__FILE__)
+    def start
+      return unless @servers.empty?
+      Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
       Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
       # create servers
       Scarlet.config.servers.each do |name, cfg|
         cfg[:server_name] = name
-        @@servers[name] = Server.new cfg
+        @servers[name] = Server.new cfg
       end
       # for safety delete the servers list after it gets loaded
       Scarlet.config.delete :servers
@@ -32,7 +42,7 @@ module Scarlet
 
     # Shuts down Scarlet. Disconnects from all servers and removes any scheduled tasks.
     def shutdown
-      @@servers.values.each do |server|
+      @servers.values.each do |server|
         server.disconnect
         server.scheduler.unschedule_jobs
       end
@@ -40,7 +50,7 @@ module Scarlet
 
     # Reconnects Scarlet to all servers. It reuses connections instead of reinitializing.
     def reconnect
-      @@servers.values.each do |server|
+      @servers.values.each do |server|
         server.reconnect
       end
     end
@@ -49,29 +59,23 @@ module Scarlet
     # reloads commands.
     def restart
       shutdown
-      @@servers.clear
-      start!
+      @servers.clear
+      start
     end
 
     # Start the EM reactor loop and start Scarlet.
-    def run!
-      return if EM::reactor_running? # Don't start the reactor if it's running!
+    def run
+      return if EM.reactor_running? # Don't start the reactor if it's running!
       puts ">> Scarlet v#{Scarlet::VERSION} (development)".light_green
 
-      EventMachine::run do
+      EventMachine.run do
         yield if block_given?
-        Scarlet.start!
-        trap('INT') do
-          Scarlet.shutdown
+        start
+        trap 'INT' do
+          shutdown
           EM.add_timer(0.1) { EM.stop }
         end
       end
     end
-
-    # Delegate to Command. (Scarlet.hear is more expressive than Command.hear)
-    delegate :hear, to: 'Scarlet::Command'
-
-    # Delegate to Handler, more expressive and allows DSL.
-    delegate :on, :ctcp, to: 'Scarlet::Handler'
   end
 end

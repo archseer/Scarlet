@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'scarlet'
+require 'scarlet/plugins/link_printer'
 require 'optparse'
 
 db = 'scarlet'
@@ -10,4 +11,5 @@ argv = OptionParser.new do |opts|
 end.parse(ARGV.dup)
 
 MongoMapper.database = db
+Scarlet::Handler.plugin ScarletPlugin::LinkPrinter.new
 Scarlet.run!
