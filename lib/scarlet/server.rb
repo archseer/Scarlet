@@ -70,11 +70,11 @@ module Scarlet
         @state = :connecting
         begin
           @connection.reconnect(config.address, config.port)
+          @connection.post_init
         rescue => ex
           print_console ex.message
-          return EM.add_timer(3) { reconnect }
+          EM.add_timer(3) { reconnect }
         end
-        @connection.post_init
       end
     end
 
