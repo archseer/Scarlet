@@ -29,13 +29,13 @@ module Scarlet
   end
 
   class ServerChannels < Channels
-    def remove(channel)
+    def remove channel
       @collection.delete(channel).users.each do |user|
         user.part channel
       end
     end
 
-    def remove_channel(channel)
+    def remove_channel channel
       @collection.remove channel
     end
   end

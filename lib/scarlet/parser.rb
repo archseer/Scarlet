@@ -14,7 +14,7 @@ module Scarlet
     # Creates a new instance of the parser, mapping @mode_list to the list of modes
     # available on the network, by parsing the +prefix_list+.
     # @param [String] prefix_list The ISUPPORT prefix string.
-    def initialize(prefix_list)
+    def initialize prefix_list
       name_lookup = @@base_mode_list.remap { |k,v| [v[:prefix], k] }
       #prefix_list.match(/\((?<prefix>\w+)\)(?<symbol>.+)/) {|matches|
       #  Hash[matches[:prefix].split("").zip(matches[:symbol].split(""))]
@@ -81,7 +81,7 @@ module Scarlet
     def self.parse_modes new_modes, mode_array
       mode = true
       new_modes.each do |c|
-        mode = (c=="+") ? true : (c == "-" ? false : mode)
+        mode = (c == "+") ? true : (c == "-" ? false : mode)
         next if "+- ".include?(c)
         if mode
           mode_array << c unless mode_array.include?(c)

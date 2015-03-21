@@ -31,7 +31,7 @@ class Scarlet::Connection < EM::Connection
   # @param [String] line The line that was recieved from the server.
   def receive_line line
     reset_check_connection_timer
-    @server.receive_line(line.force_encoding('utf-8'))
+    @server.receive_line line.force_encoding('utf-8')
   end
 
   # Sends data back to the server, using the carriage return as an escape symbol

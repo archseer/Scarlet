@@ -1,6 +1,6 @@
 module Scarlet
   module Plugin
-    def join(listeners)
+    def join listeners
       plugin = self
       listeners.on event_name do |event|
         plugin.invoke event

@@ -36,10 +36,10 @@ module Scarlet
 
       @channels.clear
       @users.clear
-      @modes          = []     # bot account's modes (ix,..)
-      @extensions     = {}     # what the server-side supports (PROTOCTL)
-      @cap_extensions = {}     # CAPability extensions (CAP REQ)
-      @vHost          = nil    # vHost/cloak
+      @modes           = []     # bot account's modes (ix,..)
+      @extensions      = {}     # what the server-side supports (PROTOCTL)
+      @cap_extensions  = {}     # CAPability extensions (CAP REQ)
+      @vHost           = nil    # vHost/cloak
     end
 
     def send_sasl

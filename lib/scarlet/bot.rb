@@ -15,8 +15,8 @@ module Scarlet
     # Delegate to Handler, more expressive and allows DSL.
     delegate :on, :ctcp, to: 'Scarlet::Handler'
 
-    def run!(&block)
-      Bot.new.run(&block)
+    def run! &block
+      Bot.new.run &block
     end
   end
   class Bot

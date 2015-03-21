@@ -8,16 +8,18 @@ module Scarlet
     end
 
     # Enumerate trough all items on the list.
+    #
     # @yield [Object] Gives the object to the block.
-    def each(&block)
-      @collection.each(&block)
+    def each &block
+      @collection.each &block
     end
 
     # Gets the queried objects from the collection.
+    #
     # @param [Hash] query The parameters we want to match on our objects.
     # @return [Array] An array of matching objects.
-    def where(query)
-      query = {name: query} if query.is_a? String
+    def where query
+      query = { name: query } if query.is_a? String
       @collection.select do |object|
         query.each_pair do |attribute, value|
           break false unless object.instance_variable_get("@#{attribute}") == value
@@ -26,23 +28,26 @@ module Scarlet
     end
 
     # Gets the first object that matches our where query.
+    #
     # @return [Object, nil] The object, or nil if no such object exists.
-    def get(query)
+    def get query
       where(query).first
     end
 
     # Adds a object to the collection.
+    #
     # @param [Object] object The object we want to add to the collection.
     # @return [Object] The object we've just added.
-    def add(object)
+    def add object
       @collection << object
       object
     end
 
     # Removes a object from the list.
+    #
     # @param [Object] object The object we want to delete.
     # @return [Object] The object we've just deleted.
-    def remove(object)
+    def remove object
       @collection.delete object
     end
 
@@ -52,9 +57,10 @@ module Scarlet
     end
 
     # Checks if object with such query exists.
+    #
     # @param [Hash] query The parameters we want to match on our objects.
     # @return [Boolean] True if any objects match, false if not.
-    def exist?(query)
+    def exist? query
       !where(query).empty?
     end
 

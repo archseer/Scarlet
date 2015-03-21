@@ -16,11 +16,11 @@ module Scarlet
     def self.write event
       return if !event.sender.nick || (event.sender.nick == "Global" or event.sender.nick =~ /Serv$/)
       log = self.new(
-        :nick => event.sender.nick,
-        :message => event.params.join(" "),
-        :channel => event.channel,
-        :command => event.command.upcase,
-        :target => event.target
+        nick: event.sender.nick,
+        message: event.params.join(" "),
+        channel: event.channel,
+        command: event.command.upcase,
+        target: event.target
       )
       log.save!
     end

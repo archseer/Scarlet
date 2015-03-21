@@ -8,7 +8,7 @@ module ScarletPlugin
       :privmsg
     end
 
-    def invoke(event)
+    def invoke event
       # check for http:// URL's and output their titles (TO IMPROVE!)
       event.params.first.match(/((?:http|https):\/\/[^ ]*)/) do |url|
         begin

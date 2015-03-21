@@ -7,7 +7,7 @@ module Scarlet
     alias :nick :name
 
     # @param [String] name The name of the user.
-    def initialize(name)
+    def initialize name
       @name = name
       @ns_login = false
       @account_name = nil
@@ -16,7 +16,7 @@ module Scarlet
 
     # Add the user to a channel.
     # @param [Channel] channel The channel we want to join.
-    def join(channel)
+    def join channel
       return if @channels.exist? channel.name
       @channels.add channel
       channel.user_flags[self] = {}
@@ -25,8 +25,8 @@ module Scarlet
 
     # Remove the user from a channel.
     # @param [Channel] channel The channel we want to part.
-    def part(channel)
-      @channels.remove(channel)
+    def part channel
+      @channels.remove channel
       channel.user_flags.delete self
       channel.users.remove self
     end

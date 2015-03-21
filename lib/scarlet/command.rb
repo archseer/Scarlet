@@ -3,16 +3,16 @@ require 'active_support/core_ext/module/delegation'
 
 module Scarlet
   class CommandLoad
-    def hear(*args, &block)
-      Command.hear(*args, &block)
+    def hear *args, &block
+      Command.hear *args, &block
     end
 
-    def load_file(filename)
+    def load_file filename
       instance_eval File.read(filename), filename, 1
     end
 
-    def self.load_file(filename)
-      new.load_file(filename)
+    def self.load_file filename
+      new.load_file filename
     end
   end
   # This wraps our DSL for custom bot commands.
@@ -39,7 +39,7 @@ module Scarlet
     class CommandBuilder
       attr_reader :listener
 
-      def initialize(listener)
+      def initialize listener
         @listener = listener
         @helpers = []
       end
@@ -47,21 +47,21 @@ module Scarlet
       # Sets the clearance level
       #
       # @param [Symbol] level
-      def clearance(level)
+      def clearance level
         @listener.clearance = level
       end
 
       # Sets the description
       #
       # @param [String] text
-      def description(text)
+      def description text
         @listener.description = text
       end
 
       # Sets the usage text
       #
       # @param [String] text
-      def usage(text)
+      def usage text
         @listener.usage = text
       end
 
@@ -72,14 +72,14 @@ module Scarlet
       end
 
       # Extends the callback context
-      def helpers(*modules)
+      def helpers *modules
         @helpers = modules
         extend_with_helpers
       end
 
       # Sets the callback
-      def on(&block)
-        @listener.callback = Callback.new(block)
+      def on &block
+        @listener.callback = Callback.new block
         extend_with_helpers
       end
     end
@@ -97,17 +97,21 @@ module Scarlet
       #
       # @param [Regexp] regex The regex that should match when we want to trigger our callback.
       # @param [Proc] block The block to execute when the command is used.
-      def hear(regex, &block)
+      def hear regex, &block
         regex = Regexp.new("^#{regex.source}$", regex.options)
         @@listeners[regex] = Listener.new.tap { |l| CommandBuilder.new(l).instance_eval(&block) }
       end
 
+      # Loads a command file from the given path
+      #
+      # @param [String] path
       def load_command(path)
         CommandLoad.load_file path
       end
 
-      def load_command_rel(path)
-        load_command File.join(Scarlet.root, 'commands', path)
+      # Loads a command file from the given name.
+      def load_command_rel(name)
+        load_command File.join(Scarlet.root, 'commands', name)
       end
 
       # Loads (or reloads) commands from the /commands directory under the
@@ -128,35 +132,44 @@ module Scarlet
         end
       end
 
+      # Selects all commands which evaluate true in the block.
+      #
+      # @yieldparam [Listener]
+      # @return [Array<Listener>]
       def select_commands
         @@listeners.each_value.select do |l|
           yield l
         end
       end
 
-      def match_commands(command)
+      # Selects all commands which match the provided command string
+      #
+      # @param [String] command
+      # @return [Array<Listener>]
+      def match_commands command
         select_commands { |c| command.match c.regex }
       end
 
       # Returns help matching the specified string. If no command is used, then
       # returns the entire list of help.
+      #
       # @param [String] command The keywords to search for.
-      def get_help(command = nil)
+      def get_help command = nil
         return @@listeners.each_value.map(&:help) unless command
-        match_commands(command).map(&:help)
+        match_commands(command).map &:help
       end
     end
 
     # Initialize is here abused to run a new instance of the Command.
     # @param [Event] event The event that was caught by the server.
-    def initialize(event)
+    def initialize event
       if word = check_filters(event.params.first)
         event.reply "Cannot execute because \"#{word}\" is blocked."
         return
       end
 
       @@listeners.keys.each do |key|
-        key.match(event.params.first) do |matches|
+        key.match event.params.first do |matches|
           if check_access(event, @@listeners[key].clearance)
             @@listeners[key].callback.run event.dup, matches
           end
@@ -169,17 +182,17 @@ module Scarlet
     # Runs the command trough a filter to check whether any of the words
     # it uses are disallowed.
     # @param [String] params The parameters to check for censored words.
-    def check_filters(params)
+    def check_filters params
       return false if @@filter.empty? or params.start_with?("unfilter")
-      return Regexp.new("(#{@@filter.join("|")})").match(params)
+      return Regexp.new("(#{@@filter.join("|")})").match params
     end
 
     # Checks whether the user actually has access to the command and can use it.
     # @param [Event] event The event that was recieved.
     # @param [Symbol] privilege The privilege level required for the command.
     # @return [Boolean] True if access is allowed, else false.
-    def check_access(event, privilege)
-      nick = Scarlet::Nick.first(:nick => event.sender.nick)
+    def check_access event, privilege
+      nick = Scarlet::Nick.first nick: event.sender.nick
       return false if check_ban(event) # if the user is banned
       return true if privilege == :any # if it doesn't need clearance (:any)
 
@@ -199,8 +212,8 @@ module Scarlet
     end
 
     # @return [Boolean] True if user is banned, else false.
-    def check_ban(event)
-      ban = Scarlet::Ban.first(:nick => event.sender.nick)
+    def check_ban event
+      ban = Scarlet::Ban.first nick: event.sender.nick
       if ban and ban.level > 0 and ban.servers.include?(event.server.config.address)
         event.reply "#{event.sender.nick} is banned and cannot use any commands."
         return true
@@ -213,7 +226,7 @@ module Scarlet
     class Callback
       # Create a new callback instance,
       # @param [Proc] block The block we want to call as a callback.
-      def initialize(block)
+      def initialize block
         @block = block
       end
 
@@ -222,7 +235,7 @@ module Scarlet
       # @param [Event] event The event we captured.
       # @param [MatchData] matches The matches we caught when we matched the
       #  callback to the event.
-      def run(event, matches)
+      def run event, matches
         @event = event
         @event.params = matches
         begin
@@ -238,7 +251,7 @@ module Scarlet
 
       # DSL delegator, delegates calls to +@event+ to be able to directly use it's
       # attributes.
-      def method_missing(method, *args)
+      def method_missing method, *args
         return @event.__send__ method, *args if @event.respond_to? method
         super
       end

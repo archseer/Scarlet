@@ -42,7 +42,7 @@ module Scarlet
       end
     end
 
-    def self.handle_dcc(event)
+    def self.handle_dcc event
       case event.type
       when :SEND
         process_dcc_send(event)
@@ -60,14 +60,14 @@ module Scarlet
       size = size.to_i
 
       if port == 0 && token # Reverse Send, used for firewalled connections
-        Scarlet::DCC::Incoming::ReverseSend.new(event: event, filename: filename, size: size, token: token)
+        Scarlet::DCC::Incoming::ReverseSend.new event: event, filename: filename, size: size, token: token
       else # Send
-        Scarlet::DCC::Incoming::Send.new(event: event, filename: filename, size: size, ip: ip, port: port)
+        Scarlet::DCC::Incoming::Send.new event: event, filename: filename, size: size, ip: ip, port: port
       end
     end
 
     def self.send event, filename
-      Scarlet::DCC::Outgoing::Send.new(event, filename)
+      Scarlet::DCC::Outgoing::Send.new event, filename
     end
   end
 end
