@@ -5,6 +5,7 @@ gemspec
 gem 'eventmachine'
 gem 'mongo'
 gem 'bson_ext'
+gem 'yajl-ruby'
 gem 'mongo_mapper', git: 'git://github.com/jnunemaker/mongomapper.git'
 gem 'rufus-scheduler'
 gem 'activesupport'
