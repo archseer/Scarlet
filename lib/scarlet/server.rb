@@ -64,7 +64,12 @@ module Scarlet
       reset_vars
       EM.add_timer(3) do
         @state = :connecting
-        @connection.reconnect(config.address, config.port) rescue return EM.add_timer(3) { reconnect }
+        begin
+          @connection.reconnect(config.address, config.port)
+        rescue => ex
+          print_console ex.message
+          return EM.add_timer(3) { reconnect }
+        end
         @connection.post_init
       end
     end
