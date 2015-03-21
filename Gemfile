@@ -15,6 +15,8 @@ gem 'octokit', '~> 3.0'
 gem 'time-lord' # pretty output of 'x time ago'
 gem "em-http-request", git: 'git://github.com/igrigorik/em-http-request.git'
 
+gem 'calc'
+
 group :development, :test do
   gem 'rspec'
   gem 'yard'
