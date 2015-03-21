@@ -1,39 +1,58 @@
-# part <#channel> - ask bot to leave #channel
-hear /(?:leave|part)(?:\s(\#\S+)(?:\s(.+))?)?/i, :dev do
-  chan, reason = params[1]||channel, params[2]
-  send "PART #{chan} #{reason}"
+hear (/(?:leave|part)(?:\s(\#\S+)(?:\s(.+))?)?/i) do
+  clearance :dev
+  description 'Ask bot to leave #channel.'
+  usage 'part #<channel>'
+  on do
+    chan, reason = params[1]||channel, params[2]
+    send "PART #{chan} #{reason}"
+  end
 end
 
-# join <#channel>[,<#channel>,<#channel>] - ask bot to join #channel or channels
-hear /join\s(.+)/i, :dev do
-  send "JOIN #{params[1].gsub(' ',',')}"
+hear (/join\s(.+)/i) do
+  clearance :dev
+  description 'Ask bot to join #channel or channels.'
+  usage 'join <#channel>[,<#channel>,<#channel>]'
+  on do
+    send "JOIN #{params[1].gsub(' ',',')}"
+  end
 end
 
-# quit -
-hear /quit/i, :dev do
-  send "QUIT"
+hear (/quit/i) do
+  clearance :dev
+  description 'Asks the bot to leave the server.'
+  usage 'quit'
+  on do
+    send "QUIT"
+  end
 end
 
-# send <string> - send data to the server
-#Scarlet.hear /send\s(.+)/i, :dev do
-#  send params[1]
-#end
-
-# privmsg <#channel|user> <string> - msg to #channel or user
-hear /privmsg\s(\S+)\s(.+)/i, :dev do
-  send "PRIVMSG #{params[1]} #{params[2]}"
+hear (/privmsg\s(\S+)\s(.+)/i) do
+  clearance :dev
+  description 'Sends msg to #channel or user.'
+  usage 'privmsg <#channel | user> <string>'
+  on do
+    send "PRIVMSG #{params[1]} #{params[2]}"
+  end
 end
 
-# notice <#channel|user> <string> - send notice to @channel or user
-hear /notice\s(\S+)\s(.+)/i, :dev do
-  send "NOTICE #{params[1]} #{params[2]}"
+hear (/notice\s(\S+)\s(.+)/i) do
+  clearance :dev
+  description 'Sends notice <#channel|user> <string>.'
+  usage 'notice <#channel | user> <string>'
+  on do
+    send "NOTICE #{params[1]} #{params[2]}"
+  end
 end
 
-# cycle <#channel> - leave and rejoin #channel
-hear /cycle(?:\s(\S+))?/i, :dev do
-  if params[1]
-    send "CYCLE #{params[1]}"
-  else
-    server.channels.map(&:name).each { |n| send "CYCLE #{n}" }
+hear (/cycle(?:\s(\S+))?/i) do
+  clearance :dev
+  description 'Leave and rejoin #channel.'
+  usage 'cycle <#channel>'
+  on do
+    if params[1]
+      send "CYCLE #{params[1]}"
+    else
+      server.channels.map(&:name).each { |n| send "CYCLE #{n}" }
+    end
   end
 end

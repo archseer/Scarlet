@@ -17,10 +17,62 @@ module Scarlet
   end
   # This wraps our DSL for custom bot commands.
   class Command
+    class Listener
+      attr_accessor :clearance
+      attr_accessor :callback
+      attr_accessor :description
+      attr_accessor :usage
+
+      def initialize
+        @clearance = :dev
+        @callback = proc { }
+        @description = ''
+        @usage = ''
+      end
+
+      def help
+        "#@usage - #@description"
+      end
+    end
+
+    # Class used for building commands, normally a command construct is passed in.
+    class CommandBuilder
+      attr_reader :listener
+
+      def initialize(listener)
+        @listener = listener
+      end
+
+      # Sets the clearance level
+      #
+      # @param [Symbol] level
+      def clearance(level)
+        @listener.clearance = level
+      end
+
+      # Sets the description
+      #
+      # @param [String] text
+      def description(text)
+        @listener.description = text
+      end
+
+      # Sets the usage text
+      #
+      # @param [String] text
+      def usage(text)
+        @listener.usage = text
+      end
+
+      # Sets the callback
+      def on(&block)
+        @listener.callback = Callback.new(block)
+      end
+    end
+
     # Contains all of our listeners.
+    # @return [Hash<Regexp, Listener>]
     @@listeners = {}
-    # All of our help strings.
-    @@help = []
     # Any words we want to filter.
     @@filter = []
     # Contains a map of clearance symbols to their numeric equivalents.
@@ -28,46 +80,40 @@ module Scarlet
 
     class << self
       # Registers a new listener for bot commands.
+      #
       # @param [Regexp] regex The regex that should match when we want to trigger our callback.
-      # @param [Symbol] clearance The clearance level needed to use the command.
       # @param [Proc] block The block to execute when the command is used.
-      def hear(regex, clearance = :dev, &block)
+      def hear(regex, &block)
         regex = Regexp.new("^#{regex.source}$", regex.options)
-        @@listeners[regex] ||= {}
-        @@listeners[regex][:clearance] = clearance
-        @@listeners[regex][:callback] = Callback.new(block)
+        @@listeners[regex] = Listener.new.tap { |l| CommandBuilder.new(l).instance_eval(&block) }
       end
 
       # Loads (or reloads) commands from the /commands directory under the
       # +Scarlet.root+ path.
       def load_commands
         @@listeners.clear
-        @@help.clear
         Dir[File.join(Scarlet.root, 'commands/**/*.rb')].each do |path|
           CommandLoad.load_file path
-          parse_help path
         end
         return true
       end
 
-      # Parses the help comments from a file.
-      # @param [String] file The file from which it should parse help.
-      def parse_help(file)
-        File.readlines(file).each do |line|
-          next unless line.start_with? '#'
-          next if line.include? 'encoding'
-          next unless line.include? '-'
-          @@help << line[2..line.length].strip
+      def select_commands
+        @@listeners.each_value.select do |l|
+          yield l
         end
+      end
+
+      def match_commands(command)
+        select_commands { |c| command.match c.regex }
       end
 
       # Returns help matching the specified string. If no command is used, then
       # returns the entire list of help.
       # @param [String] command The keywords to search for.
-      def get_help command=nil
-        return @@help.sort unless command
-        regex = Regexp.new command, Regexp::IGNORECASE
-        @@help.select { |h| h.match regex }.sort
+      def get_help(command = nil)
+        return @@listeners.each_value.map(&:help) unless command
+        match_commands(command).map(&:help)
       end
     end
 
@@ -81,7 +127,9 @@ module Scarlet
 
       @@listeners.keys.each do |key|
         key.match(event.params.first) do |matches|
-          @@listeners[key][:callback].run event.dup, matches if check_access(event, @@listeners[key][:clearance])
+          if check_access(event, @@listeners[key].clearance)
+            @@listeners[key].callback.run event.dup, matches
+          end
         end
       end
     end
@@ -121,7 +169,7 @@ module Scarlet
     end
 
     # @return [Boolean] True if user is banned, else false.
-    def check_ban event
+    def check_ban(event)
       ban = Scarlet::Ban.first(:nick => event.sender.nick)
       if ban and ban.level > 0 and ban.servers.include?(event.server.config.address)
         event.reply "#{event.sender.nick} is banned and cannot use any commands."
@@ -135,7 +183,7 @@ module Scarlet
     class Callback
       # Create a new callback instance,
       # @param [Proc] block The block we want to call as a callback.
-      def initialize block
+      def initialize(block)
         @block = block
       end
 
@@ -144,17 +192,23 @@ module Scarlet
       # @param [Event] event The event we captured.
       # @param [MatchData] matches The matches we caught when we matched the
       #  callback to the event.
-      def run event, matches
+      def run(event, matches)
         @event = event
         @event.params = matches
-        self.instance_eval &@block
+        begin
+          self.instance_eval &@block
+        rescue => ex
+          puts ex.inspect
+          puts ex.backtrace.join("\n")
+          reply "Command Callback error: #{ex.inspect}"
+        end
       end
 
       delegate :msg, :notice, :reply, :action, :send, :send_cmd, to: :@event
 
       # DSL delegator, delegates calls to +@event+ to be able to directly use it's
       # attributes.
-      def method_missing method, *args
+      def method_missing(method, *args)
         return @event.__send__ method, *args if @event.respond_to? method
         super
       end

@@ -1,5 +1,4 @@
-# fact core - Returns a random quote from Portal 2's Fact core.
-hear /fact core/, :any do
+hear (/fact core/) do
 facts = [
 "The situation you are in is very dangerous.",
 "The likelihood of you dying within the next five minutes is eighty-seven point six one percent.",
@@ -101,5 +100,10 @@ facts = [
 "To make a photocopier, simply photocopy a mirror.",
 "Dreams are the subconscious mind's way of reminding people to go to school naked and have their teeth fall out."
 ]
-  reply facts[rand(facts.length - 1)]
+  clearance :any
+  description 'Returns a random quote from Portal 2\'s Fact core.'
+  usage 'fact core'
+  on do
+    reply facts.sample
+  end
 end

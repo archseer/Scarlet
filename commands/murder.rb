@@ -1,5 +1,4 @@
-# murder core - Quotes one of GLaDOS's murder quotes.
-hear /murda core/, :any do
+hear (/murda core/i) do
 quotes = [
 "What are you doing? Stop it! I... I... We are pleased that you made it through the final challenge where we pretended we were going to murder you.",
 "Remember when the platform was sliding into the fire pit and I said 'Goodbye' and you were like [no way] and then I was all 'we pretended we were going to murder you'? That was great!",
@@ -11,16 +10,34 @@ quotes = [
 "You know what my days used to be like? I just tested. Nobody murdered me. Or put me in a potato. Or fed me to birds. I had a pretty good life.",
 "So you can murder her."
 ]
-reply quotes.sample
+  clearance :any
+  description 'Quotes one of GLaDOS\'s murder quotes.'
+  usage 'murder core'
+  on do
+    reply quotes.sample
+  end
 end
 
-# murder - Returns a random kill scenario for the killing of random user.
-# murder <user> - Returns a random kill scenario for the killing of the specified user.
-hear /murder(?:\s(\S+))?/, :any do
-  quotes = [
-    "puts a bullet to %s head",
-    "snaps %s's neck",
-    "uppercuts %s"
-  ]
-  action quotes.sample % params.first
+murder_templates = [
+  "puts a bullet to %s head",
+  "snaps %s's neck",
+  "uppercuts %s"
+]
+
+hear (/murder\s+(\S+)/) do
+  clearance :any
+  description 'Returns a random kill scenario for the killing of specified user.'
+  usage 'murder <user>'
+  on do
+    action murder_templates.sample % params.first
+  end
 end
+
+#hear (/murder/) do
+#  clearance :any
+#  description 'Returns a random kill scenario for the killing of random user.'
+#  usage 'murder'
+#  on do
+#    action murder_templates.sample % users
+#  end
+#end
