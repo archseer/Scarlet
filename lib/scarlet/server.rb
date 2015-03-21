@@ -1,3 +1,6 @@
+require 'active_support/configurable'
+require 'rufus-scheduler'
+
 module Scarlet
   # This class is the meat of the bot, encapsulating the connection and
   # various event listeners that respond to server messages, as well as
@@ -9,8 +12,9 @@ module Scarlet
 
     # Initializes a new abstracted connection instance to an IRC server.
     # The actual EM connection instance gets set to +self.connection+.
+    #
     # @param [Hash] cfg A hash with configuration keys and values.
-    def initialize(cfg)
+    def initialize cfg
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick
       config.control_char ||= Scarlet.config.control_char
@@ -96,6 +100,7 @@ module Scarlet
     end
 
     # Sends the data over to the server.
+    #
     # @param [String] data The message to be sent.
     # @todo Split the command to be under 500 chars
     def send data
@@ -103,8 +108,16 @@ module Scarlet
       nil
     end
 
+    # Forces data into a buffer and slowly sends the data over time,
+    # this is used to avoid flooding
+    # TODO. throttle.
+    def throttle_send data
+      send data
+    end
+
     # Parses the recieved line from the server into an event, then it logs the
     # event and distributes the event over to handlers.
+    #
     # @param [String] line The line that was recieved from the server.
     def receive_line line
       parsed_line = Parser.parse_line line
@@ -114,20 +127,37 @@ module Scarlet
       Handler.handle_event event
     end
 
+    # Cuts up a message into chunks of 450 characters.
+    #
+    # @param [String] msg
+    # TODO chop by word, not by character.
+    def chop_msg msg
+      msg.split(/.{,450}/) do |m|
+        next if m.blank?
+        yield m
+      end
+    end
+
     # Sends a PRIVMG message. Logs the message to the log.
+    #
     # @param [String, Symbol] target The target recipient of the message.
     # @param [String] message The message to be sent.
     def msg target, message
-      send "PRIVMSG #{target} :#{message}"
-      write_log :privmsg, message, target
+      chop_msg message do |m|
+        throttle_send "PRIVMSG #{target} :#{m}"
+        write_log :privmsg, m, target
+      end
     end
 
     # Sends a NOTICE message to +target+. Logs the message to the log.
+    #
     # @param [String, Symbol] target The target recipient of the message.
     # @param [String] message The message to be sent.
     def notice target, message
-      send "NOTICE #{target} :#{message}"
-      write_log :notice, message, target
+      chop_msg message do |m|
+        throttle_send "NOTICE #{target} :#{m}"
+        write_log :notice, message, target
+      end
     end
 
     # Joins all the channels listed as arguments.

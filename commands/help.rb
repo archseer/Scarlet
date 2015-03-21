@@ -1,6 +1,3 @@
-# Help documentation
-# help - Displays all of the help commands that Scarlet knows.
-# help <query> - Displays all help commands that match <query>.
 hear (/help(?:\s*(?<query>.*))?$/i) do
   clearance :any
   description 'Displays the help for a command, if a command is given displays the help associated with that command'
