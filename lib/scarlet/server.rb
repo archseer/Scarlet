@@ -16,7 +16,7 @@ module Scarlet
       config.control_char ||= Scarlet.config.control_char
       config.freeze
 
-      @scheduler = Scheduler.new
+      @scheduler = Rufus::Scheduler.new
       @channels  = ServerChannels.new # channels
       @users     = Users.new          # users (seen) on the server
       @state     = :connecting

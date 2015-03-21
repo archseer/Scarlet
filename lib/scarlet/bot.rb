@@ -34,7 +34,7 @@ module Scarlet
     def shutdown
       @@servers.values.each do |server|
         server.disconnect
-        server.scheduler.remove_all
+        server.scheduler.unschedule_jobs
       end
     end
 
