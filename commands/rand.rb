@@ -41,10 +41,3 @@ hear (/update(?:\s(\S+))?/i) do
     notify "Notice sent."
   end
 end
-
-hear (/dcc/i) do
-  clearance :owner
-  on do
-    Scarlet::DCC.send @event, 'chellocat.jpg'
-  end
-end
