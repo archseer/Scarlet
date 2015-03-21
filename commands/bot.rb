@@ -1,6 +1,15 @@
+hear (/version/i) do
+  clearance :any
+  description 'Displays the version information.'
+  usage 'version'
+  on do
+    reply "Scarlet v#{Scarlet::Version::STRING}"
+  end
+end
+
 hear (/admin-load-commands/i) do
   clearance :dev
-  description 'Loads all available commands'
+  description 'Loads all available commands.'
   usage 'admin-load-commands'
   on do
     if Scarlet::Command.load_commands
@@ -13,7 +22,7 @@ end
 
 hear (/admin-load-command\s+(\w+)/i) do
   clearance :dev
-  description 'Loads a command set from the commands directory'
+  description 'Loads a command set from the commands directory.'
   usage 'admin-load-command <name>'
   on do
     filename = File.basename(params[0])
