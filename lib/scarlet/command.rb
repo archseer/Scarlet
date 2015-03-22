@@ -95,6 +95,10 @@ module Scarlet
     @@clearance = { any: 0, registered: 1, voice: 2, vip: 3, super_tester: 6, op: 7, dev: 8, owner: 9 }
 
     class << self
+      def filter
+        @@filter
+      end
+
       # Registers a new listener for bot commands.
       #
       # @param [Regexp] regex The regex that should match when we want to trigger our callback.
