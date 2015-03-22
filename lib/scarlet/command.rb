@@ -163,13 +163,14 @@ module Scarlet
 
       # Registers a new listener for bot commands.
       #
-      # @param [Regexp] regex The regex that should match when we want to trigger our callback.
+      # @param [Regexp] patterns The regex that should match when we want to trigger our callback.
       # @param [Proc] block The block to execute when the command is used.
-      def hear regex, &block
-        regex = Regexp.new("^#{regex.source}$", regex.options)
-        @@listeners[regex] = Listener.new.tap do |l|
-          Builder.new(l).instance_eval(&block)
-          l.regex = regex
+      def hear *patterns, &block
+        # make a prefab Listener, this will be duplicated for each pattern/regex
+        ls = Listener.new.tap { |l| Builder.new(l).instance_eval &block }
+        patterns.each do |regex|
+          regex = Regexp.new "^#{regex.source}$", regex.options
+          @@listeners[regex] = ls.dup.tap { |l| l.regex = regex }
         end
       end
 
@@ -294,6 +295,5 @@ module Scarlet
       end
       return false
     end
-
   end
 end
