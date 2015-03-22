@@ -22,12 +22,14 @@ module Scarlet
       attr_accessor :callback
       attr_accessor :description
       attr_accessor :usage
+      attr_accessor :regex
 
       def initialize
         @clearance = :dev
         @callback = nil
         @description = ''
         @usage = ''
+        @regex = nil
       end
 
       def help
@@ -99,7 +101,10 @@ module Scarlet
       # @param [Proc] block The block to execute when the command is used.
       def hear regex, &block
         regex = Regexp.new("^#{regex.source}$", regex.options)
-        @@listeners[regex] = Listener.new.tap { |l| CommandBuilder.new(l).instance_eval(&block) }
+        @@listeners[regex] = Listener.new.tap do |l|
+          CommandBuilder.new(l).instance_eval(&block)
+          l.regex = regex
+        end
       end
 
       # Loads a command file from the given path
@@ -240,7 +245,7 @@ module Scarlet
         @event.params = matches
         begin
           self.instance_eval &@block
-        rescue => ex
+        rescue Exception => ex
           puts ex.inspect
           puts ex.backtrace.join("\n")
           reply "Command Callback error: #{ex.inspect}"
