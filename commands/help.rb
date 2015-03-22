@@ -1,10 +1,16 @@
-hear (/help(?:\s*(?<query>.*))?$/i) do
+hear (/help(?:\s*(?<query>.*))/i) do
   clearance :any
   description 'Displays the help for a command, if a command is given displays the help associated with that command'
   usage 'help [<query>]'
   on do
-    Scarlet::Command.get_help(params[:query].presence).each do |line|
-      notify line
+    query = params[:query].presence
+    commands = Scarlet::Command.get_help(query)
+    if commands.blank?
+      reply "I'm sorry I didn't find a (#{query}) command that matched."
+    else
+      commands.each do |line|
+        notify line
+      end
     end
   end
 end
