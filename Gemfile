@@ -5,6 +5,7 @@ gemspec
 gem 'eventmachine'
 gem 'em-http-request', git: 'git://github.com/igrigorik/em-http-request.git'
 gem 'rufus-scheduler'
+gem 'multi_json'
 # Database
 gem 'mongo'
 gem 'bson_ext'

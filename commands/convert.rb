@@ -6,17 +6,23 @@ hear (/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) 
   clearance :any
   description 'Converts currency from one unit to another.'
   usage 'convert <value> <from_unit> [to] <to_unit>'
-  helpers Scarlet::HttpCommandHelper, Scarlet::JsonCommandHelper
+  helpers Scarlet::HttpCommandHelper
   on do
     q = { q: params[:value], from: params[:from], to: params[:to] }
-    http = http_request("http://rate-exchange.appspot.com/currency").get(query: q)
+    http = json_request("http://rate-exchange.appspot.com/currency").get(query: q)
     http.errback { reply 'Error!' }
     http.callback do
-      data = OpenStruct.new(parse_json http.response)
-      if err = data.err
-        reply "err: #{err}"
+      if http.response_header.http_status != 200
+        reply "request error: Application might be down."
       else
-        reply "#{params[:value]} #{data.from} = #{data.v} #{data.to} (rate: #{data.rate})"
+        data = OpenStruct.new(http.response)
+        if data.blank?
+          reply "no data returned"
+        elsif err = data.err
+          reply "err: #{err}"
+        else
+          reply "#{params[:value]} #{data.from} = #{data.v} #{data.to} (rate: #{data.rate})"
+        end
       end
     end
   end
