@@ -132,9 +132,31 @@ module Scarlet
     # @param [String] msg
     # TODO chop by word, not by character.
     def chop_msg msg
-      msg.split(/.{,450}/) do |m|
-        next if m.blank?
-        yield m
+      s = 0 # start point
+      i = 0 # increment
+      bp = -1 # breakpoint
+      loop do
+        # unless this character is a word character, treat it as a breakpoint
+        unless msg[s + i] =~ /\w/
+          bp = i
+        end
+        i += 1
+        # has the incrementor gone over the break limit?
+        if i >= 450
+          # if no breakpoint was set, set it as the start position + the current run
+          bp = s + i if bp == -1
+          yield msg[s..bp]
+          # set the start position as the last breakpoint
+          s = bp
+          # reset the breakpoint
+          bp = -1
+          # reset the incrementer
+          i = 0
+        # have we reached the end of the string?
+        elsif i >= msg.length
+          yield msg[s, msg.length]
+          break
+        end
       end
     end
 
