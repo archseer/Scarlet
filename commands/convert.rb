@@ -5,7 +5,7 @@ require 'ostruct'
 hear (/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) do
   clearance :any
   description 'Converts currency from one unit to another.'
-  usage 'convert <value> <from-unit> [to] <to-unit>'
+  usage 'convert <value> <from_unit> [to] <to_unit>'
   helpers Scarlet::HttpCommandHelper, Scarlet::JsonCommandHelper
   on do
     q = { q: params[:value], from: params[:from], to: params[:to] }

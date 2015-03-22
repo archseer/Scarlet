@@ -31,7 +31,7 @@ end
 
 hear (/bot unban (.+)/i) do
   clearance :dev
-  description 'Un-bans a user from using the bot.'
+  description 'Unbans a user from using the bot.'
   usage 'bot unban <user>'
   on do
     nicks = params[1].split " "
@@ -92,10 +92,10 @@ hear (/restart/i) do
   end
 end
 
-[['admin', [:+, :admin]], ['de-admin', [:-, :admin]],
- ['op'   , [:+, :op]]   , ['de-op'   , [:-, :op]],
- ['hop'  , [:+, :hop]]  , ['de-hop'  , [:-, :hop]],
- ['voice', [:+, :voice]], ['de-voice', [:-, :voice]]
+[['admin', [:+, :admin]], ['deadmin', [:-, :admin]],
+ ['op'   , [:+, :op]]   , ['deop'   , [:-, :op]],
+ ['hop'  , [:+, :hop]]  , ['dehop'  , [:-, :hop]],
+ ['voice', [:+, :voice]], ['devoice', [:-, :voice]]
 ].each do |str|
   name, cmd = *str
   hear (/#{name}\s(\S+)/i) do

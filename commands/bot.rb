@@ -7,7 +7,7 @@ hear (/version/i) do
   end
 end
 
-hear (/admin-load-commands/i) do
+hear (/admin load commands/i) do
   clearance :dev
   description 'Loads all available commands.'
   usage 'admin-load-commands'
@@ -20,7 +20,7 @@ hear (/admin-load-commands/i) do
   end
 end
 
-hear (/admin-load-command\s+(\w+)/i) do
+hear (/admin load command\s+(\w+)/i) do
   clearance :dev
   description 'Loads a command set from the commands directory.'
   usage 'admin-load-command <name>'
