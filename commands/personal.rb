@@ -41,21 +41,3 @@ hear (/register/i) do
     end
   end
 end
-
-hear (/set(?:\s+my)?\s+timezone\s+(.+)/i) do
-  clearance :registered
-  description 'self-explanatory; used with time command'
-  usage 'set timezone <timezone>'
-  on do
-    if nick = Scarlet::Nick.first(:nick => sender.nick)
-      if TZInfo::Timezone.all_identifiers.include? params[1]
-        nick.settings[:timezone] = params[1]
-        notify "Your current Time Zone is: %s" % nick.settings[:timezone]
-      else
-        notify "Invalid Time Zone: %s" % params[1]
-      end
-    else
-      notify "You cannot access account settings, are you logged in?"
-    end
-  end
-end
