@@ -12,7 +12,7 @@ quotes = [
 ]
   clearance :any
   description 'Quotes one of GLaDOS\'s murder quotes.'
-  usage 'murder core'
+  usage 'murda core'
   on do
     reply quotes.sample
   end
@@ -24,12 +24,12 @@ murder_templates = [
   "uppercuts %s"
 ]
 
-hear (/murder\s+(\S+)/) do
+hear (/murder\s+(?<nick>\S+)/) do
   clearance :any
   description 'Returns a random kill scenario for the killing of specified user.'
   usage 'murder <user>'
   on do
-    action murder_templates.sample % params.first
+    action murder_templates.sample % params[:nick]
   end
 end
 
