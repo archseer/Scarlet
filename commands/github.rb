@@ -1,9 +1,9 @@
 require 'octokit'
 
-hear (/github-user\s+(?<username>\S+)(?:\s+(?<fmt>.+))?/) do
+hear (/gh user\s+(?<username>\S+)(?:\s+(?<fmt>.+))?/) do
   clearance :registered
   description 'Prints user information, format is a valid ruby formatting string with keynames.'
-  usage 'github-user <username> <fmt>'
+  usage 'gh user <username> <fmt>'
   on do
     username = params[:username]
     if data = Octokit.user(username)
@@ -15,7 +15,7 @@ hear (/github-user\s+(?<username>\S+)(?:\s+(?<fmt>.+))?/) do
   end
 end
 
-hear (/github-issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/) do
+hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/) do
   clearance :registered
   description 'Prints out a github issue.'
   usage 'github-issue <repo> #<issue_number>'
