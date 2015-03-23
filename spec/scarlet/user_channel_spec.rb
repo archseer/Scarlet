@@ -10,17 +10,17 @@ describe Scarlet::Collection do
 
   describe '#where' do
     it 'gets an user array by an attribute' do
-      @users.where(name: @user.name).should eq [@user]
+      expect(@users.where(name: @user.name)).to eq [@user]
     end
 
     it 'gets an user array by name string' do
-      @users.where(@user.name).should eq [@user]
+      expect(@users.where(@user.name)).to eq [@user]
     end
   end
 
   describe '#get' do
     it 'gets the first user with the value' do
-      @users.get(@user.name).should eq @user
+      expect(@users.get(@user.name)).to eq @user
     end
   end
 
@@ -41,16 +41,15 @@ describe Scarlet::Collection do
 
   describe '#exist?' do
     it 'checks the existence of the user' do
-      @users.exist?(@user.name).should be_true
+      expect(@users.exist?(@user.name)).to eq true
     end
   end
-
 end
 
 describe Scarlet::Users do
   it 'should ensure a user' do
     @users = Scarlet::Users.new
-    @users.get_ensured('test').should be_an_instance_of Scarlet::User
+    expect(@users.get_ensured('test')).to be_an_instance_of Scarlet::User
   end
 end
 
@@ -94,7 +93,7 @@ describe 'Users and Channels' do
   it 'should remove channel from user' do
     @channels.remove @channel
 
-    @channels.exist?(@channel.name).should_not be_true
+    expect(@channels.exist?(@channel.name)).to eq false
     @user.channels.to_a.should_not include @channel
   end
 end
