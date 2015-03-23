@@ -26,21 +26,24 @@ hear (/weather in\s+(?<location>.+)(?:\s+units\s+(?<unit>\S+))?/i) do
           if request.response_header.http_status != 200
             reply "Getting forecast failed, please try again later or contact my owner for support."
           else
-            h = request.response
-            location = name.end_with?(',') ? name.chop : name
-            condition = h["condition"]["text"].downcase
-            condition_description = condition.end_with?("s") ? "there are" : "it is"
-            condition_description = "there is a" if condition.end_with?("shower")
-            condition_description = "there is" if condition.end_with?("rain")
-            h["atmosphere"]["visibility"] = "unknown" if h["atmosphere"]["visibility"].blank?
-            h["atmosphere"]["humidity"] = "unknown" if h["atmosphere"]["humidity"].blank?
-            r = []
-            r << "Currently in #{location} #{condition_description} #{condition}"
-            r << "#{h["condition"]["temperature"].to_i}°#{h["units"]["temperature"]},"
-            r << "winds from #{h["wind"]["direction"]} at #{h["wind"]["speed"].to_i} #{h["units"]["speed"]}."
-            r << "#{h["atmosphere"]["humidity"]}% humidity, #{h["atmosphere"]["visibility"]} #{h["units"]["distance"]} visibility"
-            r << "and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"].to_i} #{h["units"]["pressure"]}."
-            reply r.join(' ')
+            if h = request.response.value
+              location = name.end_with?(',') ? name.chop : name
+              condition = h["condition"]["text"].downcase
+              condition_description = condition.end_with?("s") ? "there are" : "it is"
+              condition_description = "there is a" if condition.end_with?("shower")
+              condition_description = "there is" if condition.end_with?("rain")
+              h["atmosphere"]["visibility"] = "unknown" if h["atmosphere"]["visibility"].blank?
+              h["atmosphere"]["humidity"] = "unknown" if h["atmosphere"]["humidity"].blank?
+              r = []
+              r << "Currently in #{location} #{condition_description} #{condition}"
+              r << "#{h["condition"]["temperature"].to_i}°#{h["units"]["temperature"]},"
+              r << "winds from #{h["wind"]["direction"]} at #{h["wind"]["speed"].to_i} #{h["units"]["speed"]}."
+              r << "#{h["atmosphere"]["humidity"]}% humidity, #{h["atmosphere"]["visibility"]} #{h["units"]["distance"]} visibility"
+              r << "and a #{h["atmosphere"]["rising"]} pressure of #{h["atmosphere"]["pressure"].to_i} #{h["units"]["pressure"]}."
+              reply r.join(' ')
+            else
+              reply 'Invalid response data.'
+            end
           end
         end
       else

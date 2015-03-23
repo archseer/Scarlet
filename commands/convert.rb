@@ -15,13 +15,15 @@ hear (/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) 
       if http.response_header.http_status != 200
         reply "request error: Application might be down."
       else
-        data = OpenStruct.new(http.response)
-        if data.blank?
-          reply "no data returned"
-        elsif err = data.err
-          reply "err: #{err}"
+        if v = http.response.value
+          data = OpenStruct.new(v)
+          if err = data.err
+            reply "err: #{err}"
+          else
+            reply "#{params[:value]} #{data.from} = #{data.v} #{data.to} (rate: #{data.rate})"
+          end
         else
-          reply "#{params[:value]} #{data.from} = #{data.v} #{data.to} (rate: #{data.rate})"
+          reply 'No response data'
         end
       end
     end

@@ -4,6 +4,7 @@ require 'scarlet/helpers/http_command_helper'
 
 all_hope_is_lost = lambda { |c| c.reply "You're on your own bud." }
 display_advice = lambda do |c, response|
+  return all_hope_is_lost.call c if response.blank?
   # usually from a /advice/search
   if slips = response['slips'].presence
     c.reply slips.sample['advice']
@@ -20,7 +21,7 @@ random_advice = lambda do |c|
   http = c.json_request("http://api.adviceslip.com/advice").get
   http.errback { reply 'Error' }
   http.callback do
-    display_advice.call c, http.response
+    display_advice.call c, http.response.value
   end
 end
 
@@ -36,10 +37,11 @@ hear (/what (?:do you|should I) do (?:when|about) (?<query>.*)/i),
     http = json_request("http://api.adviceslip.com/advice/search/#{query}").get
     http.errback { reply 'Error' }
     http.callback do
-      if http.response.blank?
-        random_advice.call self
+      value = http.response.value.presence
+      if value && !value.key?('message')
+        display_advice.call self, value
       else
-        display_advice.call self, http.response
+        random_advice.call self
       end
     end
   end
