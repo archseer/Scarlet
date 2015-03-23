@@ -11,5 +11,6 @@ argv = OptionParser.new do |opts|
 end.parse(ARGV.dup)
 
 MongoMapper.database = db
-Scarlet::Handler.plugin ScarletPlugin::LinkPrinter.new
+# displays title of HTML links
+Scarlet::Handler::Plugins.use ScarletPlugin::LinkPrinter.new
 Scarlet.run!

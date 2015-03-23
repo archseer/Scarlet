@@ -7,8 +7,15 @@ module Scarlet
     @@ctcp_listeners = Listeners.new
     @@plugins = Listeners.new
 
-    def self.plugin(plugin)
-      plugin.join(@@plugins)
+    module Plugins
+      # alias for Handler.use_plugin
+      def self.use plugin
+        Handler.use_plugin plugin
+      end
+    end
+
+    def self.use_plugin plugin
+      plugin.join @@plugins
     end
 
     # Adds a new event listener.
@@ -35,10 +42,21 @@ module Scarlet
       @@event_listeners.each_listener(event.command, &execute)
     end
 
+    # @param [Event] event
     def self.handle_ctcp(event)
       event = Scarlet::DCC::Event.new(event)
       execute = lambda { |block| event.server.instance_exec(event, &block) }
       @@ctcp_listeners.each_listener(event.command, &execute)
+    end
+
+    # Invokes all plugins under sym.
+    #
+    # @param [Symbol] sym
+    # @param [Event] event
+    def self.invoke_plugins sym, event
+      @@plugins.trigger sym do |cb|
+        event.server.instance_exec event.dup, &cb
+      end
     end
 
     ctcp :PING do |event|
@@ -71,8 +89,7 @@ module Scarlet
       if event.params.first =~ /\001.+\001/ # It's a CTCP message
         Handler.handle_ctcp(event)
       else
-        execute = lambda { |block| event.server.instance_exec(event.dup, &block) }
-        @@plugins.trigger :privmsg, &execute
+        Handler.invoke_plugins :privmsg, event
         # if we detect a command sequence, we remove the prefix and execute it.
         # it is prefixed with config.control_char or by mentioning the bot's current nickname
         if event.params.first =~ /^#{@current_nick}[:,]?\s*/i
@@ -97,6 +114,7 @@ module Scarlet
           print_console "#{@vHost} is now your hidden host (set by services.)", :light_magenta
         end
       end
+      Handler.invoke_plugins :notice, event
     end
 
     on :join do |event|
@@ -113,7 +131,6 @@ module Scarlet
       user.join @channels.get(event.channel)
 
       if @current_nick != event.sender.nick
-
         if !event.params.empty? && @cap_extensions['extended-join']
           # extended-join is enabled, which means that join returns two extra params,
           # NickServ account name and real name. This means, we don't need to query
@@ -130,8 +147,8 @@ module Scarlet
             check_ns_login event.sender.nick
           end
         end
-
       end
+      Handler.invoke_plugins :join, event
     end
 
     on :part do |event|
@@ -140,11 +157,13 @@ module Scarlet
       else
         event.sender.user.part @channels.get(event.channel)
       end
+      Handler.invoke_plugins :part, event
     end
 
     on :quit do |event|
       @users.remove(event.sender.user)
       event.sender.user.part_all
+      Handler.invoke_plugins :quit, event
     end
 
     on :nick do |event|
@@ -153,6 +172,7 @@ module Scarlet
         @current_nick = event.target
         print_console "You are now known as #{event.target}.", :light_yellow
       end
+      Handler.invoke_plugins :nick, event
     end
 
     on :kick do |event|
@@ -167,6 +187,7 @@ module Scarlet
         # remove the kicked user from channels[#channel] array
         @users.get(event.params.first).part(event.channel)
       end
+      Handler.invoke_plugins :kick, event
     end
 
     on :mode do |event|
@@ -223,7 +244,6 @@ module Scarlet
         event.params[1].split(' ').each {|extension| @cap_extensions[extension] = false}
         send "CAP END"
       end
-
     end
 
     on :authenticate do |event| # SASL AUTHENTICATE
