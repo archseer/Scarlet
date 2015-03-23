@@ -18,6 +18,7 @@ _yardoc
 doc/
 data/db
 var/
+vendor/
 Gemfile.lock
 
 config.yml
