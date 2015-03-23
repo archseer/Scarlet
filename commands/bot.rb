@@ -7,10 +7,10 @@ hear (/version/i) do
   end
 end
 
-hear (/admin load commands/i) do
+hear (/reload commands/i) do
   clearance :dev
   description 'Loads all available commands.'
-  usage 'admin-load-commands'
+  usage 'reload commands'
   on do
     if Scarlet::Command.load_commands
       notify "Commands loaded."
@@ -20,10 +20,10 @@ hear (/admin load commands/i) do
   end
 end
 
-hear (/admin load command\s+(\w+)/i) do
+hear (/reload command\s+(\w+)/i) do
   clearance :dev
   description 'Loads a command set from the commands directory.'
-  usage 'admin-load-command <name>'
+  usage 'reload command <name>'
   on do
     filename = File.basename(params[0])
     begin
