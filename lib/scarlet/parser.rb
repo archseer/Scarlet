@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash'
+
 # A parser class, wrapping the common tasks of parsing various IRC message types.
 module Scarlet
   class Parser
@@ -43,6 +45,7 @@ module Scarlet
       end
       hash
     end
+
     # converts val to int if it's made from digits only
     def self.convert_digit val
       val.match(/^[[:digit:]]+$/) ? val.to_i : val
