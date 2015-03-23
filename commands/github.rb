@@ -18,7 +18,8 @@ hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
         csha = commit[:sha]
         author_name = data[:author][:name]
         msg = data[:message]
-        reply "#{repo} #{csha[0...8]} #{author_name}: #{msg}"
+        url = commit[:html_url]
+        reply "#{repo} #{csha[0...8]} #{author_name}: #{msg} (#{url})"
       else
         reply "Commit #{sha} not found"
       end
