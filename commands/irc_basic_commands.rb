@@ -26,6 +26,15 @@ hear (/quit/i) do
   end
 end
 
+hear (/send\s+(.+)/) do
+  clearance :dev
+  description 'Sends provided string to server'
+  usage 'send <string>'
+  on do
+    send params[1]
+  end
+end
+
 hear (/privmsg\s(\S+)\s(.+)/i) do
   clearance :dev
   description 'Sends msg to #channel or user.'

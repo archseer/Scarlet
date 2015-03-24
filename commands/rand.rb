@@ -15,7 +15,8 @@ hear (/update(?:\s(\S+))?/i) do
   description 'Just to nag the crap out of Speed.'
   usage 'update [<name>]'
   on do
-    notice params[1]||"Speed", "%s demandes que tu mettre à jour moi!" % sender.nick
+    n = Scarlet::Nick.where(privileges: 9).first
+    notice params[1] || n.nick, "%s demandes que tu mettre à jour moi!" % sender.nick
     notify "Notice sent."
   end
 end

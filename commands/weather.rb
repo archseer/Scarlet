@@ -14,7 +14,7 @@ hear (/weather in\s+(?<location>.+)(?:\s+units\s+(?<unit>\S+))?/i) do
     http = xml_request('http://wxdata.weather.com/wxdata/search/search').get query: { 'where' => params[:location] }
     http.errback { reply "ERROR! Fatal mistake." }
     http.callback do
-      data = http.response
+      data = http.response.value
       locations = data.css('search loc')
       loc = locations.first
       if loc

@@ -15,7 +15,7 @@ hear (/show colors/) do
   usage 'show colors'
   on do
     for i in 0..15
-      reply "#{"%02d" % i}".align(10, :center).irc_color(0, i), true
+      reply "#{"%02d" % i}".center(10, ' ').irc_color(0, i)
     end
   end
 end
