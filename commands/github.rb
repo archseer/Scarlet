@@ -19,7 +19,7 @@ hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
         author_name = data[:author][:name]
         msg = data[:message]
         url = commit[:html_url]
-        reply "#{repo} #{csha[0...8]} #{author_name}: #{msg} (#{url})"
+        reply "#{repo} #{fmt.commit_sha(csha)} #{author_name}: #{msg} #{fmt.uri(url)}"
       else
         reply "Commit #{sha} not found"
       end
@@ -36,7 +36,7 @@ hear (/gh repo\s+(?<reponame>\S+)/) do
   on do
     reponame = params[:reponame]
     if repo = Octokit.repo(reponame).presence
-      msg =  "%<full_name>s: %<description>s (%<html_url>s)" % repo
+      msg =  "%<full_name>s: %<description>s #{fmt.uri(repo['html_url'])}" % repo
       msg = "@#{msg}" if repo['fork']
       reply msg
     else
@@ -45,15 +45,15 @@ hear (/gh repo\s+(?<reponame>\S+)/) do
   end
 end
 
-hear (/gh user\s+(?<username>\S+)(?:\s+(?<fmt>.+))?/i) do
+hear (/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
   clearance :registered
   description 'Prints user information, format is a valid ruby formatting string with keynames.'
   usage 'gh user <username> <fmt>'
   on do
     username = params[:username]
     if data = Octokit.user(username).presence
-      fmt = params[:fmt].presence || "%<login>s (%<html_url>s)"
-      reply (fmt % data)
+      fomt = params[:fomt].presence || "%<login>s #{fmt.uri(data['html_url'])}"
+      reply (fomt % data)
     else
       reply "User #{username} not found"
     end
@@ -68,7 +68,7 @@ hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
     reponame = params[:repo]
     issue = params[:issue].to_i
     if i = Octokit.issue(reponame, issue).presence
-      reply ("github/#{reponame}: %<title>s (%<html_url>s)" % i)
+      reply ("github/#{reponame}: %<title>s #{fmt.uri(i['html_url'])}" % i)
     else
       reply 'Repo or issue did not exist.'
     end
