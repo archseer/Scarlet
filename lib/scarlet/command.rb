@@ -1,5 +1,6 @@
 require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
+require 'scarlet/fmt'
 
 module Scarlet
   # This wraps our DSL for custom bot commands.
@@ -145,6 +146,11 @@ module Scarlet
       end
 
       delegate :msg, :notice, :reply, :action, :send, :send_cmd, to: :@event
+
+      # format module
+      def fmt
+        Scarlet::Fmt
+      end
 
       # DSL delegator, delegates calls to the helpers or +@event+ to be able to directly use their
       # attributes or methods.
