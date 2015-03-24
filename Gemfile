@@ -23,6 +23,8 @@ gem 'octokit', '~> 3.0'
 gem 'calc'
 
 group :development, :test do
+  gem 'testi', git: 'git://github.com/IceDragon200/testi.git'
+  gem 'lorem'
   gem 'rspec'
   gem 'yard'
   gem 'yard-delegate'
