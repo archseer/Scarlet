@@ -29,6 +29,22 @@ hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
   end
 end
 
+hear (/gh repo\s+(?<reponame>\S+)/) do
+  clearance :registered
+  description ''
+  usage 'gh repo <reponame>'
+  on do
+    reponame = params[:reponame]
+    if repo = Octokit.repo(reponame).presence
+      msg =  "%<full_name>s: %<description>s (%<html_url>s)" % repo
+      msg = "@#{msg}" if repo['fork']
+      reply msg
+    else
+      reply "No repo #{reponame}"
+    end
+  end
+end
+
 hear (/gh user\s+(?<username>\S+)(?:\s+(?<fmt>.+))?/i) do
   clearance :registered
   description 'Prints user information, format is a valid ruby formatting string with keynames.'
