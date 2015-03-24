@@ -43,7 +43,15 @@ module Scarlet
       end
 
       def help
-        "#@usage - #@description"
+        if @usage.presence && @description.presence
+          "#@usage - #@description"
+        elsif @usage.presence
+          "#@usage"
+        elsif @description.presence
+          "#@description"
+        else
+          ''
+        end
       end
 
       def match str
@@ -63,6 +71,16 @@ module Scarlet
         @listener = listener
       end
 
+      # Strips provided text string, it removes newlines and extra spaces,
+      # attemping to make the string as flat as possible
+      #
+      # @param [String] text
+      # @return [String] stripped string
+      def strip_text text
+        # remove new lines, crunch multiple spaces to single spaces
+        text.gsub(/[\n\s]+/, ' ').strip
+      end
+
       # Sets the clearance level
       #
       # @param [Symbol] level
@@ -74,14 +92,14 @@ module Scarlet
       #
       # @param [String] text
       def description text
-        @listener.description = text
+        @listener.description = strip_text text
       end
 
       # Sets the usage text
       #
       # @param [String] text
       def usage text
-        @listener.usage = text
+        @listener.usage = strip_text text
       end
 
       # Extends the callback context
@@ -221,7 +239,7 @@ module Scarlet
       # @param [String] command
       # @return [Array<Listener>]
       def match_commands command
-        select_commands { |c| command.match c.regex }
+        select_commands { |c| c.usage.start_with? command }
       end
 
       # Returns help matching the specified string. If no command is used, then
@@ -229,8 +247,16 @@ module Scarlet
       #
       # @param [String] command The keywords to search for.
       def get_help command = nil
-        return @@listeners.each_value.map(&:help) unless command
-        match_commands(command).map &:help
+        help = if c = command.presence
+          match_commands(c).map &:help
+        else
+          @@listeners.each_value.map &:help
+        end
+        # map each by #presence (exposing empty strings),
+        # remove all nil entries from presence,
+        # make each line unique,
+        # and finally sort the result.
+        help.map(&:presence).compact.uniq.sort
       end
     end
 
