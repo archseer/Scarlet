@@ -57,7 +57,7 @@ hear (/rename\s+(.+)/i) do
   description 'renames the bot to nick.'
   usage 'rename <nick>'
   on do
-    send_cmd :nick, nick: params[1].strip
+    send "nick #{params[1].strip}"
   end
 end
 

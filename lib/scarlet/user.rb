@@ -5,6 +5,7 @@ module Scarlet
   class User
     attr_accessor :name, :ns_login, :channels, :account_name
     alias :nick :name
+    alias :nick= :name=
 
     # @param [String] name The name of the user.
     def initialize name
