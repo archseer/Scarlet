@@ -1,4 +1,5 @@
 require 'active_support/configurable'
+require 'eventmachine'
 require 'rufus-scheduler'
 
 module Scarlet
@@ -28,6 +29,19 @@ module Scarlet
       connect!
     end
 
+    def buffer_loop
+      b = @buffer
+      EM.add_timer 1 do
+        b.pop do |d|
+          @connection.send_data d if @connection
+          # make sure we aren't currently disconnecting and that the buffer we have, is the same as the active one.
+          if @state != :disconnecting && b == @buffer
+            buffer_loop
+          end
+        end
+      end
+    end
+
     # Resets the variables to their default values. This gets triggered when the
     # instance gets created as well as any time the bot reconnects to the server.
     def reset_vars
@@ -36,10 +50,13 @@ module Scarlet
 
       @channels.clear
       @users.clear
+      @buffer.push '' if @buffer # to avoid locking the buffer_loop while waiting on a object
+      @buffer = EM::Queue.new
       @modes           = []     # bot account's modes (ix,..)
       @extensions      = {}     # what the server-side supports (PROTOCTL)
       @cap_extensions  = {}     # CAPability extensions (CAP REQ)
       @vHost           = nil    # vHost/cloak
+      buffer_loop
     end
 
     def send_sasl
@@ -60,7 +77,7 @@ module Scarlet
     # @note This method does nothing, once a connection exists. Use reconnect instead.
     def connect!
       return if @connection
-      @connection = EventMachine::connect(config.address, config.port, Connection, self)
+      @connection = EM.connect(config.address, config.port, Connection, self)
     end
 
     def reconnect
@@ -104,15 +121,7 @@ module Scarlet
     # @param [String] data The message to be sent.
     # @todo Split the command to be under 500 chars
     def send data
-      @connection.send_data data
-      nil
-    end
-
-    # Forces data into a buffer and slowly sends the data over time,
-    # this is used to avoid flooding
-    # TODO. throttle.
-    def throttle_send data
-      send data
+      @buffer << data
     end
 
     # Parses the recieved line from the server into an event, then it logs the
@@ -166,7 +175,7 @@ module Scarlet
     # @param [String] message The message to be sent.
     def msg target, message
       chop_msg message do |m|
-        throttle_send "PRIVMSG #{target} :#{m}"
+        send "PRIVMSG #{target} :#{m}"
         write_log :privmsg, m, target
       end
     end
@@ -177,7 +186,7 @@ module Scarlet
     # @param [String] message The message to be sent.
     def notice target, message
       chop_msg message do |m|
-        throttle_send "NOTICE #{target} :#{m}"
+        send "NOTICE #{target} :#{m}"
         write_log :notice, message, target
       end
     end
