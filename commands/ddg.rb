@@ -6,11 +6,15 @@ ddg = lambda do |b, search_term|
   http.callback do
     if data = http.response.value
       url = data['AbstractURL'].presence
-      heading = data['Heading']
+      heading = data['Heading'].presence
       abstract = data['Abstract'].presence
-      if url
-        b.reply "#{heading} #{b.fmt.uri(url)}"
-      else
+      redirect = data['Redirect'].presence
+      u = url || redirect
+      if u && heading
+        b.reply "#{heading} #{b.fmt.uri(u)}"
+      elsif u
+        b.reply b.fmt.uri(u)
+      elsif heading
         b.reply heading
       end
       b.reply abstract if abstract
