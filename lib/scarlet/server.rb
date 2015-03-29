@@ -19,6 +19,7 @@ module Scarlet
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick
       config.control_char ||= Scarlet.config.control_char
+      config.buffer_rate ||= 1
       config.freeze
 
       @scheduler = Rufus::Scheduler.new
@@ -31,7 +32,7 @@ module Scarlet
 
     def buffer_loop
       b = @buffer
-      EM.add_timer 1 do
+      EM.add_timer config.buffer_rate do
         b.pop do |d|
           @connection.send_data d if @connection
           # make sure we aren't currently disconnecting and that the buffer we have, is the same as the active one.
@@ -119,8 +120,14 @@ module Scarlet
     # Sends the data over to the server.
     #
     # @param [String] data The message to be sent.
-    # @todo Split the command to be under 500 chars
     def send data
+      @connection.send_data data
+    end
+
+    # Pushes data to the internal buffer for sending over a set period
+    #
+    # @param [String] data The message to be sent.
+    def throttle_send data
       @buffer << data
     end
 
@@ -151,7 +158,7 @@ module Scarlet
     # @param [String] message The message to be sent.
     def msg target, message
       chop_msg message do |m|
-        send "PRIVMSG #{target} :#{m}"
+        throttle_send "PRIVMSG #{target} :#{m}"
         write_log :privmsg, m, target
       end
     end
@@ -162,7 +169,7 @@ module Scarlet
     # @param [String] message The message to be sent.
     def notice target, message
       chop_msg message do |m|
-        send "NOTICE #{target} :#{m}"
+        throttle_send "NOTICE #{target} :#{m}"
         write_log :notice, message, target
       end
     end
@@ -188,9 +195,10 @@ module Scarlet
     # @param [String] target Whom the command has targeted.
     def write_log command, message, target
       return if target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
-      log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
-      log.channel = target if target.starts_with? "#"
-      log.save!
+      # disable logs
+      #log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
+      #log.channel = target if target.starts_with? "#"
+      #log.save!
     end
 
     # Prints a message to the console with a timestamp. Optionally color of the
