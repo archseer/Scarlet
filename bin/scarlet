@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'scarlet'
 require 'scarlet/plugins/link_printer'
+require 'scarlet/plugins/autoname'
 require 'optparse'
 
 db = 'scarlet'
@@ -13,4 +14,6 @@ end.parse(ARGV.dup)
 MongoMapper.database = db
 # displays title of HTML links
 Scarlet::Handler::Plugins.use ScarletPlugin::LinkPrinter.new
+# automatically reclaim nickname
+Scarlet::Handler::Plugins.use ScarletPlugin::Autoname.new
 Scarlet.run!
