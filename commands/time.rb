@@ -36,7 +36,7 @@ hear (/time(?:\s+(?<nick>\S+))?/i) do
         reply 'Cannot view time for "%s".' % params[1]
       end
     else
-      reply Time.now
+      reply Time.now.inspect
     end
   end
 end
