@@ -1,3 +1,5 @@
+require 'chronic'
+
 hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   clearance :registered
   description 'self-explanatory; used with time command'
@@ -20,8 +22,8 @@ end
 
 hear (/time(?:\s+(?<nick>\S+))?/i) do
   clearance :registered
-  description 'Prints the current owners time.'
-  usage 'time'
+  description 'Prints user time'
+  usage 'time [<nick>]'
   on do
     nick = params[:nick]
     if nick
@@ -36,7 +38,24 @@ hear (/time(?:\s+(?<nick>\S+))?/i) do
         reply 'Cannot view time for "%s".' % params[1]
       end
     else
-      reply Time.now.inspect
+      reply Scarlet::Fmt.time(Time.now)
+    end
+  end
+end
+
+hear (/timeq\s+(?<query>.+)/) do
+  clearance :any
+  description ''
+  usage 'timeq <query>'
+  on do
+    if query = params[:query].presence
+      if r = Chronic.parse(query)
+        reply Scarlet::Fmt.time(r)
+      else
+        reply 'Ask Doctor Who.'
+      end
+    else
+      reply 'Invalid time query string!'
     end
   end
 end

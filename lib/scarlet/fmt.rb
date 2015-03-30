@@ -45,5 +45,13 @@ module Scarlet
         end
       end
     end
+
+    # Formats a time object
+    #
+    # @param [Time] tme
+    # @return [String]
+    def self.time tme
+      tme.inspect
+    end
   end
 end

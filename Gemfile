@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gemspec
 # Main Platform
 gem 'eventmachine'
+gem 'em-throttled_queue'
 gem 'em-http-request', git: 'git://github.com/igrigorik/em-http-request.git'
 gem 'rufus-scheduler'
 gem 'multi_json' # needed for em-http-request
@@ -11,13 +12,14 @@ gem 'mongo'
 gem 'bson_ext'
 gem 'yajl-ruby' # awesomeness
 gem 'mongo_mapper', git: 'git://github.com/jnunemaker/mongomapper.git'
-#
+# All the awesome
 gem 'activesupport'
 # console
 gem 'colorize'
 # parsing
 gem 'nokogiri'
 # fun stuff
+gem 'chronic' # Natural language time parser
 gem 'time-lord' # pretty output of 'x time ago'
 gem 'octokit', '~> 3.0'
 gem 'calc'
