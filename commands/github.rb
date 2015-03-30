@@ -1,4 +1,23 @@
 require 'octokit'
+require 'scarlet/helpers/http_command_helper'
+
+hear (/gh status/) do
+  clearance :any
+  description 'Displays latest message from github.status'
+  usage 'gh status'
+  helpers Scarlet::HttpCommandHelper
+  on do
+    http = json_request('https://status.github.com/api/last-message.json').get
+    http.errback { reply 'ERR!' }
+    http.callback do
+      if data = http.response.value
+        reply "(#{data['created_on']}) [#{data['status']}] #{data['body']}"
+      else
+        reply 'Errrrrrrrrooooooooooooorrrr! (github status failed or something)'
+      end
+    end
+  end
+end
 
 hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
   clearance :registered
