@@ -149,7 +149,7 @@ module Scarlet
     # @param [String] msg
     # @yieldparam [String]
     def chop_msg msg, &block
-      Scarlet::Fmt.chop_msg msg, &block
+      Scarlet::Fmt.chop_msg Scarlet::Fmt.purify_msg(msg), &block
     end
 
     # Sends a PRIVMG message. Logs the message to the log.

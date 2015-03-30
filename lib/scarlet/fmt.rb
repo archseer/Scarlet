@@ -12,6 +12,14 @@ module Scarlet
       sha[0, 8].center(10, ' ').irc_color(1, 8)
     end
 
+    # Removes newlines and returns from the string
+    #
+    # @param [String] msg
+    # @return [String]
+    def self.purify_msg msg
+      msg.gsub(/[\r\n]/, '')
+    end
+
     # Chops string into chunks of 450 characters or less.
     #
     # @param [String] msg
