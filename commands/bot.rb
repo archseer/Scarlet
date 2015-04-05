@@ -7,6 +7,15 @@ hear (/version/i) do
   end
 end
 
+hear (/ruby version/i) do
+  clearance :any
+  description 'Displays current ruby version.'
+  usage 'ruby version'
+  on do
+    reply "#{RUBY_ENGINE} #{RUBY_VERSION}p#{RUBY_PATCHLEVEL} [#{RUBY_PLATFORM}]"
+  end
+end
+
 hear (/reload commands/i) do
   clearance :dev
   description 'Loads all available commands.'
@@ -34,3 +43,4 @@ hear (/reload command\s+(\w+)/i) do
     end
   end
 end
+
