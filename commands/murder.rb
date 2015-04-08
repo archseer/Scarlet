@@ -24,20 +24,19 @@ murder_templates = [
   "uppercuts %s"
 ]
 
-hear (/murder\s+(?<nick>\S+)/) do
+hear (/murder(?:\s+(?<nick>\S+))?/) do
   clearance :any
-  description 'Returns a random kill scenario for the killing of specified user.'
-  usage 'murder <user>'
+  description 'Returns a random kill scenario, if no username is given, chooses a random user in the channel.'
+  usage 'murder [<user>]'
   on do
-    action murder_templates.sample % params[:nick]
+    tmp = murder_templates.sample
+    nik = params[:nick].presence || begin
+      # a really fugly hack, I'd prefer to use Event#channel, and rename the existing #channel to #channel_name
+      nicks = server.channels.get(channel).users.map(&:nick)
+      nicks.delete(server.current_nick)
+      nicks.sample
+    end
+    action tmp % nik
   end
 end
 
-#hear (/murder/) do
-#  clearance :any
-#  description 'Returns a random kill scenario for the killing of random user.'
-#  usage 'murder'
-#  on do
-#    action murder_templates.sample % users
-#  end
-#end
