@@ -1,4 +1,4 @@
-hear (/(?:leave|part)(?:\s(\#\S+)(?:\s(.+))?)?/i) do
+hear (/(?:leave|part)(?:\s+(\#\S+)(?:\s+(.+))?)?/i) do
   clearance :dev
   description 'Ask bot to leave #channel.'
   usage 'part #<channel>'
@@ -8,7 +8,7 @@ hear (/(?:leave|part)(?:\s(\#\S+)(?:\s(.+))?)?/i) do
   end
 end
 
-hear (/join\s(.+)/i) do
+hear (/join\s+(.+)/i) do
   clearance :dev
   description 'Ask bot to join #channel or channels.'
   usage 'join <#channel>[,<#channel>,<#channel>]'
@@ -35,31 +35,40 @@ hear (/send\s+(.+)/) do
   end
 end
 
-hear (/privmsg\s(\S+)\s(.+)/i) do
+hear (/privmsg\s+(?<target>\S+)\s(?<message>.+)/i) do
   clearance :dev
   description 'Sends msg to #channel or user.'
   usage 'privmsg <#channel | user> <string>'
   on do
-    send "PRIVMSG #{params[1]} #{params[2]}"
+    server.msg params[:target], params[:message]
   end
 end
 
-hear (/notice\s(\S+)\s(.+)/i) do
+hear (/action\s+(?<target>\S+)\s+(?<message>.+)/) do
+  clearance :dev
+  description 'Sends an action <messafe> to the <channel>'
+  usage 'action <channel> <message>'
+  on do
+    server.msg params[:target], "\x01ACTION #{params[:message]}\x01"
+  end
+end
+
+hear (/notice\s+(?<target>\S+)\s(?<message>.+)/i) do
   clearance :dev
   description 'Sends notice <#channel|user> <string>.'
   usage 'notice <#channel | user> <string>'
   on do
-    send "NOTICE #{params[1]} #{params[2]}"
+    server.notice params[:target], params[:message]
   end
 end
 
-hear (/cycle(?:\s(\S+))?/i) do
+hear (/cycle(?:\s+(?<channel>\S+))?/i) do
   clearance :dev
   description 'Leave and rejoin #channel.'
   usage 'cycle <#channel>'
   on do
-    if params[1]
-      send "CYCLE #{params[1]}"
+    if ch = params[:channel].presence
+      send "CYCLE #{ch}"
     else
       server.channels.map(&:name).each { |n| send "CYCLE #{n}" }
     end
