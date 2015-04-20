@@ -26,7 +26,11 @@ hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
     repo = params[:repo]
     sha = params[:sha] # might be partial
     branch = params[:branch]
-    if commits = Octokit.commits(repo, branch.presence).presence
+    commits = begin
+      Octokit.commits(repo, branch.presence)
+    rescue Octokit::NotFound
+    end
+    if commits
       commit = if sha.presence
         commits.find { |c| c[:sha].start_with?(sha) }.presence
       else
@@ -54,7 +58,11 @@ hear (/gh repo\s+(?<reponame>\S+)/) do
   usage 'gh repo <reponame>'
   on do
     reponame = params[:reponame]
-    if repo = Octokit.repo(reponame).presence
+    repo = begin
+      Octokit.repo(reponame)
+    rescue Octokit::NotFound
+    end
+    if repo
       msg =  "%<full_name>s: %<description>s #{fmt.uri(repo['html_url'])}" % repo
       msg = "@#{msg}" if repo['fork']
       reply msg
@@ -70,7 +78,11 @@ hear (/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
   usage 'gh user <username> <fmt>'
   on do
     username = params[:username]
-    if data = Octokit.user(username).presence
+    data = begin
+      Octokit.user(username)
+    rescue Octokit::NotFound
+    end
+    if data
       fomt = params[:fomt].presence || "%<login>s #{fmt.uri(data['html_url'])}"
       reply (fomt % data)
     else
@@ -86,7 +98,11 @@ hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
   on do
     reponame = params[:repo]
     issue = params[:issue].to_i
-    if i = Octokit.issue(reponame, issue).presence
+    i = begin
+      Octokit.issue(reponame, issue)
+    rescue Octokit::NotFound
+    end
+    if i
       reply ("github/#{reponame}: %<title>s #{fmt.uri(i['html_url'])}" % i)
     else
       reply 'Repo or issue did not exist.'
