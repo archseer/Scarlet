@@ -109,3 +109,28 @@ hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
     end
   end
 end
+
+hear (/gh search repos\s+(?<terms>.+)/i) do
+  clearance :registered
+  description 'Searches github for reposistories using the provided search <terms>.'
+  usage 'gh search repos <terms>'
+  on do
+    terms = params[:terms]
+    result = Octokit.search_repositories(terms)
+    if (tc = result[:total_count]) > 0
+      if tc > 5
+        reply "Got #{tc} result (only showing first 5)"
+      else
+        reply "Got #{tc} #{tc > 1 ? 'results' : 'result'}"
+      end
+
+      [tc, 5].min.times do |i|
+        repo = result[:items][i]
+        next unless repo
+        reply "%<full_name>s: %<description>s #{fmt.uri(repo[:html_url])}" % repo
+      end
+    else
+      reply "Didn't find that mate."
+    end
+  end
+end
