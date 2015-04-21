@@ -3,7 +3,7 @@ require 'scarlet/helpers/http_command_helper'
 hear (/rubygems gem\s+(?<gemname>.+)/) do
   clearance :any
   description 'Displays information about a gem <gemname>.'
-  usage 'rubygems <gemname>'
+  usage 'rubygems gem <gemname>'
   helpers Scarlet::HttpCommandHelper
   on do
     http = json_request("https://rubygems.org/api/v1/gems/#{params[:gemname]}.json").get
