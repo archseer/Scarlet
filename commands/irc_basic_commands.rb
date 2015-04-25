@@ -35,10 +35,10 @@ hear (/send\s+(.+)/) do
   end
 end
 
-hear (/privmsg\s+(?<target>\S+)\s(?<message>.+)/i) do
+hear (/(privmsg|msg)\s+(?<target>\S+)\s(?<message>.+)/i) do
   clearance :dev
   description 'Sends msg to #channel or user.'
-  usage 'privmsg <#channel | user> <string>'
+  usage '(privmsg|msg) <#channel | user> <string>'
   on do
     server.msg params[:target], params[:message]
   end
