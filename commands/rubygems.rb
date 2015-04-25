@@ -11,7 +11,7 @@ hear (/rubygems gem\s+(?<gemname>.+)/) do
     http.callback do
       if r = http.response.value.presence
         r.symbolize_keys!
-        reply "[%<platform>s gem] %<name>s (%<version>s) : %<info>s" % r
+        reply "[%<platform>s gem] %<name>s (%<version>s) : %<info>s #{fmt.uri(r[:homepage_uri])}" % r
       else
         reply "No gem #{params[:gemname]}"
       end
