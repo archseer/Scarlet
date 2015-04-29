@@ -7,6 +7,8 @@ storage:
   dbPath: "data/db"
   journal:
     enabled: true
+  mmapv1:
+    smallFiles: true
 processManagement:
   fork: false
 net:
