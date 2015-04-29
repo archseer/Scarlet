@@ -8,10 +8,9 @@ gem 'em-http-request', git: 'git://github.com/igrigorik/em-http-request.git'
 gem 'rufus-scheduler'
 gem 'multi_json' # needed for em-http-request
 # Database
-gem 'mongo'
 gem 'bson_ext'
 gem 'yajl-ruby' # awesomeness
-gem 'mongo_mapper', git: 'git://github.com/jnunemaker/mongomapper.git'
+gem 'rom'
 # All the awesome
 gem 'activesupport'
 # console
