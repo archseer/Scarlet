@@ -3,14 +3,17 @@ require 'scarlet/helpers/http_helper'
 require 'uri'
 
 module ScarletPlugin
+  # Plugin for priting HTTP/S links
   class LinkPrinter
     include Scarlet::HttpHelper
     include Scarlet::Plugin
 
+    # @param [Symbol]
     def event_name
       :privmsg
     end
 
+    # @param [Scarlet::Event] event
     def invoke event
       event.params.first.match(/((?:http|https):\/\/[^ ]*)/) do |url|
         begin
@@ -18,7 +21,7 @@ module ScarletPlugin
           html_request(uri.to_s).get(redirects: 1).callback do |http|
             if html = http.response.value.presence
               if title = html.css('title').text.presence
-                event.reply "Title: #{title}"
+                event.reply "Title: #{title.strip}"
               end
             end
           end
