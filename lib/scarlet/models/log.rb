@@ -1,36 +1,65 @@
-require 'mongo_mapper'
+require 'thread'
+require 'scarlet/models/base'
+
 # basically stores the entire Event inside the DB.
 # port of Defusal's system
 module Scarlet
-  class Log
-    include MongoMapper::Document
-    key :nick,     String
-    key :channel,  String
-    key :command,  String
-    key :target,   String
-    key :message,  String
-    timestamps!
+  class Log < ModelBase
+    field :nick,     type: String, default: proc { '' }
+    field :channel,  type: String, default: proc { '' }
+    field :command,  type: String, default: proc { '' }
+    field :target,   type: String, default: proc { '' }
+    field :message,  type: String, default: proc { '' }
+
+    def self.pool
+      @pool ||= LogPool.new
+    end
+
+    # @param [Hash] data
+    def self.log(data)
+      pool.next.update(data).tap { |l| l.created_at = l.updated_at }
+    end
 
     # Create a new log entry from an event.
+    #
     # @param [Event] event The event we want to log.
     def self.write event
       return if !event.sender.nick || (event.sender.nick == "Global" or event.sender.nick =~ /Serv$/)
-      log = self.new(
+      log(
         nick: event.sender.nick,
         message: event.params.join(" "),
         channel: event.channel,
         command: event.command.upcase,
         target: event.target
       )
-      log.save!
     end
 
-    scope :in_channel, lambda { where(:channel.ne => "") } # ne -> not equals
-    scope :nick, lambda {|nick| where(:nick => nick) }
-    scope :channel, lambda {|channel| where(:channel => channel) }
-    scope :join, lambda { where(:command => 'JOIN') }
-    scope :privmsg, lambda { where(:command => 'PRIVMSG') }
-    scope :created_at, lambda {|created_at| where(:created_at => created_at) }
-    scope :message, lambda {|msg| where(:message => msg) }
+    #scope :in_channel, lambda { where(:channel.ne => "") } # ne -> not equals
+    #scope :nick, lambda {|nick| where(:nick => nick) }
+    #scope :channel, lambda {|channel| where(:channel => channel) }
+    #scope :join, lambda { where(:command => 'JOIN') }
+    #scope :privmsg, lambda { where(:command => 'PRIVMSG') }
+    #scope :created_at, lambda {|created_at| where(:created_at => created_at) }
+    #scope :message, lambda {|msg| where(:message => msg) }
+  end
+
+  #
+  class LogPool
+    def initialize
+      @index = 0
+      @log_m = Mutex.new
+      @pool ||= Array.new(100) do
+        Log.new
+      end
+    end
+
+    def next
+      obj = nil
+      @log_m.synchronize do
+        obj = @pool[@index]
+        @index = (@index + 1) % @pool.size
+      end
+      obj
+    end
   end
 end

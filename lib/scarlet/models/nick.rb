@@ -1,23 +1,26 @@
-require 'mongo_mapper'
+require 'scarlet/models/base'
+require 'data_model/validators/presence'
 
 module Scarlet
-  class Nick
-    include MongoMapper::Document
-    validates_presence_of :nick
-    key :nick,       String
-    key :aliases,    Array
-    # 0 - regular
-    # 1 - registered
-    # 2 - voice
-    # 3 - VIP
-    #...
-    # 6 - super tester
-    # 7 - op
-    # 8 - dev
-    # 9 - owner
-    key :privileges, Integer, default: 1
-    key :win_points, Integer, default: 0
-    key :settings,   Hash
-    timestamps!
+  # Privileges level
+  # 0 - regular
+  # 1 - registered
+  # 2 - voice
+  # 3 - VIP
+  #...
+  # 6 - super tester
+  # 7 - op
+  # 8 - dev
+  # 9 - owner
+  class Nick < ModelBase
+    field :nick,       type: String,  validate: { presence: {} }
+    field :aliases,    type: Array,   default: proc { Array.new }
+    field :privileges, type: Integer, default: 1
+    field :win_points, type: Integer, default: 0
+    field :settings,   type: Hash,    default: proc { Hash.new }
+
+    def self.owner
+      first(privileges: 9)
+    end
   end
 end

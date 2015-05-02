@@ -1,19 +1,16 @@
-require 'mongo_mapper'
+require 'scarlet/models/base'
 
 module Scarlet
-  class Ban
-    include MongoMapper::Document
-    validates_presence_of :nick
-    key :nick,        String
-    key :servers,     Array
-    key :by,          String
-    key :reason,      String
-    # Ban.level
-    # 0 - No Ban
-    # 1 - Suspension
-    # 2 - Bot Ban
-    # 3 - Ban (from Channel)
-    key :level,       Integer, default: 0
-    timestamps!
+  # Ban.level
+  # 0 - No Ban
+  # 1 - Suspension
+  # 2 - Bot Ban
+  # 3 - Ban (from Channel)
+  class Ban < ModelBase
+    field :nick,    type: String, validate: { presence: {} }
+    field :servers, type: Array,  default: proc { Array.new }
+    field :by,      type: String
+    field :reason,  type: String
+    field :level,   type: Integer, default: 0
   end
 end
