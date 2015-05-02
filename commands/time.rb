@@ -21,7 +21,7 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
 end
 
 hear (/time(?:\s+(?<nick>\S+))?/i) do
-  clearance :registered
+  clearance :any
   description 'Prints user time'
   usage 'time [<nick>]'
   on do

@@ -8,7 +8,7 @@ hear (/google\s+(.+)/) do
   usage 'google <terms>'
   helpers Scarlet::HttpCommandHelper, Scarlet::JsonCommandHelper
   on do
-    http = json_request('http://ajax.googleapis.com/ajax/services/search/web').get :query => {'v' => '1.0', 'q' => params[1]}
+    http = json_request('http://ajax.googleapis.com/ajax/services/search/web').get query: {'v' => '1.0', 'q' => params[1]}
     http.errback { reply "ERROR! Fatal mistake." }
     http.callback do
       if results = http.response.value

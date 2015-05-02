@@ -1,7 +1,7 @@
 require 'calc'
 
 hear (/calc\s+(?<problem>.+)/) do
-  clearance :registered
+  clearance :any
   usage 'calc <problem>'
   on do
     problem = params[:problem]

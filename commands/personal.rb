@@ -3,7 +3,7 @@ hear (/login/i) do
   description 'Logs the user into his bot account.'
   usage 'login'
   on do
-    if !Scarlet::Nick.where(:nick => sender.nick).empty?
+    if Scarlet::Nick.first(nick: sender.nick)
       if !sender.user.ns_login
         server.check_ns_login sender.nick
         notify "#{sender.nick}, you have been logged in successfuly."
@@ -33,8 +33,8 @@ hear (/register/i) do
   description 'Registers an account with the bot.'
   usage 'register'
   on do
-    if !Scarlet::Nick.first(:nick => sender.nick)
-      Scarlet::Nick.create(:nick => sender.nick)
+    if !Scarlet::Nick.first(nick: sender.nick)
+      Scarlet::Nick.create(nick: sender.nick)
       notify "Successfuly registered with the bot."
     else
       notify "ERROR: You are already registered!"
