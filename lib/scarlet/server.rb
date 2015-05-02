@@ -27,6 +27,7 @@ module Scarlet
       @channels  = ServerChannels.new # channels
       @users     = Users.new          # users (seen) on the server
       @state     = :connecting
+      @reconnects = 0
       reset_vars
       connect!
     end
@@ -85,14 +86,17 @@ module Scarlet
     def reconnect
       disconnect unless @state == :disconnecting
       reset_vars
-      EM.add_timer(3) do
+      @reconnects += 1
+      print_console "Waiting #{2**@reconnects} seconds to reconnect..."
+      EM.add_timer(2**reconnects) do
         @state = :connecting
         begin
           @connection.reconnect(config.address, config.port)
           @connection.post_init
+          @reconnects = 0
         rescue => ex
           print_console ex.message
-          EM.add_timer(3) { reconnect }
+          reconnect
         end
       end
     end
