@@ -1,5 +1,10 @@
 # Scarlet
 
+[![Build Status](https://travis-ci.org/archSeer/Scarlet.svg?branch=master)](https://travis-ci.org/archSeer/Scarlet)
+[![Test Coverage](https://codeclimate.com/github/archSeer/Scarlet/badges/coverage.svg)](https://codeclimate.com/github/archSeer/Scarlet)
+[![Inline docs](http://inch-ci.org/github/archSeer/Scarlet.svg?branch=master)](http://inch-ci.org/github/archSeer/Scarlet)
+[![Code Climate](https://codeclimate.com/github/archSeer/Scarlet/badges/gpa.svg)](https://codeclimate.com/github/archSeer/Scarlet)
+
 Scarlet is an IRC bot written in Ruby. It's main purpose is to serve as an IRC bot as well as a personal assistant.
 
 It is designed with multi-channel and multi-server support and offers [a very simple and verbose DSL interface to define new commands](https://github.com/archSeer/Scarlet/wiki/Scripts)

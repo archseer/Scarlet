@@ -1,0 +1,14 @@
+language: ruby
+#addons:
+#  code_climate:
+#    repo_token: I CANT NAB THIS BECAUSE REASONS
+rvm:
+- 2.1
+- 2.2
+- ruby-head
+before_install:
+- gem install bundle
+install:
+- bundle install
+script:
+- bundle exec rspec
