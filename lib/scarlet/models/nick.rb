@@ -1,6 +1,6 @@
 require 'scarlet/models/model_base'
 
-module Scarlet
+class Scarlet
   # Privileges level
   # 0 - regular
   # 1 - registered

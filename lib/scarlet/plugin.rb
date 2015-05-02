@@ -2,7 +2,7 @@ require 'active_support/concern'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/listeners'
 
-module Scarlet
+class Scarlet
   module Plugin
     extend ActiveSupport::Concern
 

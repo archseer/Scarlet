@@ -1,6 +1,6 @@
 require 'set'
 
-module Scarlet
+class Scarlet
   class Listeners
     def initialize
       @listeners = {}

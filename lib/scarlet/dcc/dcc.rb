@@ -1,4 +1,4 @@
-module Scarlet
+class Scarlet
   module DCC
     class Event
       attr_reader :sender, :server, :command, :params, :type

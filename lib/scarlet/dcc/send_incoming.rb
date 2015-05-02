@@ -1,7 +1,7 @@
 require 'socket'
 require 'ipaddr'
 
-module Scarlet
+class Scarlet
   module DCC
     module Incoming
       class Connection < EventMachine::Connection

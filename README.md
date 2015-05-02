@@ -96,7 +96,7 @@ Scarletoids are Scarlet bots, where the additional commands and responses are wr
 require_relative 'scarlet'
 MongoMapper.database = 'scarlet'
 
-module Scarlet
+class Scarlet
   on :privmsg do |event|
     event.reply 'Oh, a message!'
   end

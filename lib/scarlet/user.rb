@@ -1,6 +1,6 @@
 require 'scarlet/collection'
 
-module Scarlet
+class Scarlet
   # A representation of a user on the network.
   class User
     attr_accessor :name, :ns_login, :channels, :account_name

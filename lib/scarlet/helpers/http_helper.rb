@@ -5,7 +5,7 @@ require 'em-http/middleware/opt_html_response'
 require 'em-http/middleware/opt_json_response'
 require 'em-http/middleware/opt_xml_response'
 
-module Scarlet
+class Scarlet
   module HttpHelper
     # (see EventMachine::HttpRequest.new)
     def http_request *args, &block

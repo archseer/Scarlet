@@ -1,6 +1,6 @@
 require 'scarlet/collection'
 
-module Scarlet
+class Scarlet
   # A representation of a channel on the network.
   class Channel
     attr_accessor :topic, :bans, :users, :modes, :user_flags

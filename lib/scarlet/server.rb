@@ -2,7 +2,7 @@ require 'active_support/configurable'
 require 'eventmachine'
 require 'rufus-scheduler'
 
-module Scarlet
+class Scarlet
   # This class is the meat of the bot, encapsulating the connection and
   # various event listeners that respond to server messages, as well as
   # a list of users and channels the bot is connected to. All the magic

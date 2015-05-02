@@ -1,7 +1,7 @@
 require 'scarlet/plugin' 
 require 'scarlet/listeners'
 
-module Scarlet
+class Scarlet
   class Core
     include Scarlet::Plugin 
     # Contains all of our event listeners.

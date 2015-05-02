@@ -1,7 +1,7 @@
 require 'openssl'
 require 'base64'
 
-module Scarlet
+class Scarlet
   module SASL
     class Mechanism
     end
