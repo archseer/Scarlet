@@ -16,7 +16,10 @@ tmp
 .yardoc
 _yardoc
 doc/
-
+data/db
+var/
+vendor/
 Gemfile.lock
 
+coverage/
 config.yml

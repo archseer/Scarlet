@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+require 'scarlet'
+require 'scarlet/plugins/link_printer'
+require 'scarlet/plugins/autoname'
+require 'optparse'
+
+# displays title of HTML links
+Scarlet::Handler::Plugins.use ScarletPlugin::LinkPrinter.new
+# automatically reclaim nickname
+Scarlet::Handler::Plugins.use ScarletPlugin::Autoname.new
+Scarlet.run!

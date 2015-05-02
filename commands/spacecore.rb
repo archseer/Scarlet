@@ -1,4 +1,4 @@
-Scarlet.hear (/space core/) do
+hear (/space core/) do
 quotes = [
 "What's your favorite thing about space? Mine is space.",
 "Space going to space can't wait.",
@@ -112,5 +112,8 @@ quotes = [
 "YEEEHAAAAAW!",
 "Ah!"
 ]
-reply quotes[rand(quotes.length)]
+  clearance :any
+  on do
+    reply quotes[rand(quotes.length)]
+  end
 end

@@ -1,8 +1,7 @@
+#!/usr/bin/env ruby
 # Creates an owner for Scarlet.
-
 require 'mongo_mapper'
-module Scarlet; end
-require_relative '../models/nick'
+require 'scarlet/models/nick'
 
 MongoMapper.database = 'scarlet'
 
