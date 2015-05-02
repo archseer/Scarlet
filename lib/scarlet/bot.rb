@@ -23,6 +23,7 @@ module Scarlet
   def self.init
     Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
     Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
+    Scarlet.config.db.symbolize_keys! if Scarlet.config.db
   end
 
   class Bot
