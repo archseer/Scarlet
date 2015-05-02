@@ -9,8 +9,21 @@ class Scarlet
   # happens in this class.
   class Server
     include ActiveSupport::Configurable
-    attr_reader :scheduler, :channels, :users, :state, :extensions, :cap_extensions, :current_nick, :vHost
+
+    attr_reader :channels
+    attr_reader :scheduler
+    attr_reader :users
+    attr_accessor :cap_extensions
+    attr_accessor :current_nick
+    attr_accessor :extensions
+    attr_accessor :ircd
+    attr_accessor :modes
+    attr_accessor :parser
     attr_accessor :plugins
+    attr_accessor :sasl
+    attr_accessor :sasl_mechanisms
+    attr_accessor :state
+    attr_accessor :vHost
 
     # Initializes a new abstracted connection instance to an IRC server.
     # The actual EM connection instance gets set to +self.connection+.
