@@ -38,8 +38,7 @@ module Scarlet
       Scarlet.init
       # create servers
       Scarlet.config.servers.each do |name, cfg|
-        cfg[:server_name] = name
-        @servers[name] = Server.new cfg
+        @servers[name] = Server.new cfg.merge(server_name: name)
       end
       # for safety delete the servers list after it gets loaded
       Scarlet.config.delete :servers

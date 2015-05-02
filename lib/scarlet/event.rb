@@ -22,7 +22,7 @@ module Scarlet
       @command = command.downcase.to_sym
       @target = target
       @channel = target if target and target.start_with? '#'
-      @return_path = @channel ? @channel : @sender.nick
+      @return_path = @channel || @sender.nick
       @params = params
     end
 
