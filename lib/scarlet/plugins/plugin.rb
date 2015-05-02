@@ -1,7 +1,26 @@
 module Scarlet
   module Plugin
     # define @@listeners = Listeners.new in the included module
+  
+    # instance methods
 
+    # call listeners for evt
+    def trigger evt
+    end
+    
+    # emit a global event
+    def emit evt
+      #delegate_to event.server
+      event.server.emit evt
+    end
+    def event.server.emit
+      plugins.each do |plug|
+        plug.trigger evt
+      end
+    end
+    # class methods
+
+    # register listeners
     def on(command, *args, &block)
       @@listeners.on(command, *args, &block)
     end
