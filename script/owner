@@ -1,18 +1,23 @@
 #!/usr/bin/env ruby
 # Creates an owner for Scarlet.
-require 'mongo_mapper'
+require 'bundler/setup'
 require 'scarlet/models/nick'
+Scarlet.init
 
-MongoMapper.database = 'scarlet'
+name = ARGV.shift
 
-if Scarlet::Nick.count(:privileges => 9) > 0
-  puts "Owner already exists!"
+if nick = Scarlet::Nick.first(privileges: 9)
+  if name == nick.nick
+    puts "You (#{name}) are the owner..."
+  else
+    puts "#{nick.nick} is currently the owner!"
+  end
   exit
 end
 
-if nick = Scarlet::Nick.first(:nick => ARGV.shift)
-  nick.update_attributes!(:privileges => 9)
+if nick = Scarlet::Nick.first(nick: name)
+  nick.update(privileges: 9)
   puts "Successfuly set #{nick.nick} as owner."
 else
-  puts "No user with that name exists! Register first with Scarlet (use !register in the channel)."
+  puts "No user #{name} exists! Register first with Scarlet (use !register in the channel)."
 end
