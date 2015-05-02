@@ -1,30 +1,11 @@
+require 'scarlet/plugin' 
 require 'scarlet/listeners'
 
 module Scarlet
-  module Handler
+  class Core
+    include Scarlet::Plugin 
     # Contains all of our event listeners.
-    @@event_listeners = Listeners.new
     @@ctcp_listeners = Listeners.new
-    @@plugins = Listeners.new
-
-    module Plugins
-      # alias for Handler.use_plugin
-      def self.use plugin
-        Handler.use_plugin plugin
-      end
-    end
-
-    def self.use_plugin plugin
-      plugin.join @@plugins
-    end
-
-    # Adds a new event listener.
-    # @param [Symbol] command The command to listen for.
-    # @param [*Array] args A list of arguments.
-    # @param [Proc] block The block we want to execute when we catch the command.
-    def self.on(command, *args, &block)
-      @@event_listeners.on(command, *args, &block)
-    end
 
     # Adds a new ctcp listener.
     # @param [Symbol] command The command to listen for.
@@ -34,29 +15,11 @@ module Scarlet
       @@ctcp_listeners.on(command, *args, &block)
     end
 
-    # Passes the event on to any event listeners that are listening for this command.
-    # All events get passed to the +:all+ listener.
-    # @param [Event] event The event that was recieved.
-    def self.handle_event(event)
-      execute = lambda { |block| event.server.instance_exec(event.dup, &block) }
-      @@event_listeners.each_listener(event.command, &execute)
-    end
-
     # @param [Event] event
     def self.handle_ctcp(event)
       event = Scarlet::DCC::Event.new(event)
       execute = lambda { |block| event.server.instance_exec(event, &block) }
       @@ctcp_listeners.each_listener(event.command, &execute)
-    end
-
-    # Invokes all plugins under sym.
-    #
-    # @param [Symbol] sym
-    # @param [Event] event
-    def self.invoke_plugins sym, event
-      @@plugins.trigger sym do |cb|
-        event.server.instance_exec event.dup, &cb
-      end
     end
 
     ctcp :PING do |event|
@@ -87,9 +50,8 @@ module Scarlet
 
     on :privmsg do |event|
       if event.params.first =~ /\001.+\001/ # It's a CTCP message
-        Handler.handle_ctcp(event)
+        Core.handle_ctcp(event)
       else
-        Handler.invoke_plugins :privmsg, event
         # if we detect a command sequence, we remove the prefix and execute it.
         # it is prefixed with config.control_char or by mentioning the bot's current nickname
         if event.params.first =~ /^#{@current_nick}[:,]?\s*/i
@@ -114,7 +76,6 @@ module Scarlet
           print_console "#{@vHost} is now your hidden host (set by services.)", :light_magenta
         end
       end
-      Handler.invoke_plugins :notice, event
     end
 
     on :join do |event|
@@ -148,7 +109,6 @@ module Scarlet
           end
         end
       end
-      Handler.invoke_plugins :join, event
     end
 
     on :part do |event|
@@ -157,13 +117,11 @@ module Scarlet
       else
         event.sender.user.part @channels.get(event.channel)
       end
-      Handler.invoke_plugins :part, event
     end
 
     on :quit do |event|
       @users.remove(event.sender.user)
       event.sender.user.part_all
-      Handler.invoke_plugins :quit, event
     end
 
     on :nick do |event|
@@ -172,7 +130,6 @@ module Scarlet
         @current_nick = event.target
         print_console "You are now known as #{event.target}.", :light_yellow
       end
-      Handler.invoke_plugins :nick, event
     end
 
     on :kick do |event|
@@ -187,7 +144,6 @@ module Scarlet
         # remove the kicked user from channels[#channel] array
         @users.get(event.params.first).part(event.channel)
       end
-      Handler.invoke_plugins :kick, event
     end
 
     on :mode do |event|

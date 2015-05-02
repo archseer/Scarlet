@@ -10,6 +10,7 @@ module Scarlet
   class Server
     include ActiveSupport::Configurable
     attr_reader :scheduler, :channels, :users, :state, :extensions, :cap_extensions, :current_nick, :vHost
+    attr_accessor :plugins
 
     # Initializes a new abstracted connection instance to an IRC server.
     # The actual EM connection instance gets set to +self.connection+.
@@ -140,7 +141,9 @@ module Scarlet
       event = Event.new(self, parsed_line[:prefix], parsed_line[:command],
                         parsed_line[:target], parsed_line[:params])
       Log.write(event)
-      Handler.handle_event event
+      @plugins.each do |plug|
+        plug.handle event
+      end
     end
 
     # Cuts up a message into chunks of 450 characters, chunks are yieled, instead
