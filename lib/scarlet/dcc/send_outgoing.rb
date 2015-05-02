@@ -39,7 +39,7 @@ module Scarlet
           sockname = EM.get_sockname(@server)
           @port, @ip = Socket.unpack_sockaddr_in(sockname)
           # @ip can be local, so assign to global
-          @ip = Scarlet::DCC::IP
+          @ip = Scarlet::DCC.ip
 
           @ip = "127.0.0.1" # Debug, local sends
 

@@ -1,8 +1,5 @@
 module Scarlet
   module DCC
-    # Hack, get IP
-    IP = %x{curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+'}.delete("\n")
-
     class Event
       attr_reader :sender, :server, :command, :params, :type
       def initialize(event)
@@ -40,6 +37,11 @@ module Scarlet
       def ctcp message
         reply "\001#{message}\001"
       end
+    end
+
+    # Hack, get IP
+    def self.ip
+      @ip ||= %x{curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+'}.delete("\n")
     end
 
     def self.handle_dcc event
