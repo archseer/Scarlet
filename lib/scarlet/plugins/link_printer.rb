@@ -5,8 +5,8 @@ require 'uri'
 module Scarlet::Plugins
   # Plugin for priting HTTP(S) link titles.
   class LinkPrinter
-    include Scarlet::HttpHelper
     include Scarlet::Plugin
+    helper Scarlet::HttpHelper
 
     on :privmsg do |event|
       event.params.first.match(/((?:http|https):\/\/[^ ]*)/) do |url|

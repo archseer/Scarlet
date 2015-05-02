@@ -7,7 +7,7 @@ require 'optparse'
 
 Scarlet.setup do
   # displays title of HTML links
-  use Plugins::LinkPrinter
+  use Scarlet::Plugins::LinkPrinter
   # automatically reclaim nickname
-  use Plugins::Autoname
+  use Scarlet::Plugins::Autoname
 end.run

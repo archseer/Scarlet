@@ -3,8 +3,41 @@ require 'active_support/core_ext/module/delegation'
 require 'scarlet/listeners'
 
 class Scarlet
+  module Helpers
+    extend ActiveSupport::Concern
+
+    class_methods do
+      def helpers
+        @helpers ||= Module.new
+      end
+
+      def helper(*args, &block)
+        args.each do |mod|
+          helpers.module_eval { extend mod }
+        end
+
+        helpers.module_eval(&block) if block_given?
+      end
+    end
+  end
+
+  class Context
+    def initialize *objs
+      @objs = objs
+    end
+
+    def method_missing method, *args, &block
+      @objs.each do |obj|
+        next if !obj.respond_to? method
+        return obj.__send__ method, *args, &block
+      end
+      super
+    end
+  end
+
   module Plugin
     extend ActiveSupport::Concern
+    include Scarlet::Helpers
 
     included do
       # ~
@@ -20,8 +53,10 @@ class Scarlet
     # All events get passed to the +:all+ listener.
     # @param [Event] event The event that was recieved.
     def handle(event)
-      execute = lambda { |block| event.server.instance_exec(event.dup, &block) }
-      self.class.__listeners__.each_listener(event.command, &execute)
+      klass = self.class
+      puts event.params.inspect
+      execute = lambda { |block| Scarlet::Context.new(klass.helpers, event.server).instance_exec(event.dup, &block) }
+      klass.__listeners__.each_listener(event.command, &execute)
     end
 
     class_methods do
@@ -33,27 +68,6 @@ class Scarlet
     end
   end
 
-  module Helpers
-    extend ActiveSupport::Concern
-
-    class_methods do
-      def helpers
-        @helpers ||= Module.new
-      end
-    end
-
-    def helper(*args, &block)
-      args.each do |mod|
-        helpers.module_eval { extend mod }
-      end
-
-      helpers.module_eval(&block) if block_given?
-    end
-  end
-
-  class Context
-  end
- 
   # Plugin namespace
   module Plugins; end
 end
