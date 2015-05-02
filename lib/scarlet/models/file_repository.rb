@@ -87,6 +87,8 @@ class Scarlet
     class EntryMissing < IndexError
     end
 
+    attr_reader :storage
+
     def initialize(config = {})
       if config[:memory]
         @storage = StorageBase.new
