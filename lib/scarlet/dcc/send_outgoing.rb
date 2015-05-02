@@ -44,7 +44,7 @@ module Scarlet
           @ip = "127.0.0.1" # Debug, local sends
 
           ip = IPAddr.new(@ip).to_i
-          @event.ctcp "DCC SEND \"#{@filename}\" #{ip} #{@port} #{@size}"
+          @event.ctcp "DCC", "SEND \"#{@filename}\" #{ip} #{@port} #{@size}"
         end
       end
     end

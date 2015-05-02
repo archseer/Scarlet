@@ -42,14 +42,14 @@ module Scarlet
     end
 
     # Send a reply back as a ctcp message.
-    def ctcp(message)
-      reply "\001#{message}\001"
+    def ctcp(command, message)
+      notify "\001#{command} #{message}\001"
     end
 
     # Sends a described action back to where the event came from.
     # @param (see #reply)
     def action(message)
-      ctcp "ACTION #{message}"
+      ctcp :ACTION, message
     end
 
     # A representation of the message sender, created from the hostmask.

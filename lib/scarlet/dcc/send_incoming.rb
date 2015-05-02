@@ -55,7 +55,7 @@ module Scarlet
         end
 
         def resume
-          @event.ctcp "DCC RESUME \"#{@filename}\" #{@port} #{@pos}"
+          @event.ctcp "DCC", "RESUME \"#{@filename}\" #{@port} #{@pos}"
         end
       end
 
@@ -72,7 +72,7 @@ module Scarlet
 
           @ip = "127.0.0.1" # Debug, local sends
           ip = IPAddr.new(@ip).to_i
-          @event.ctcp "DCC SEND \"#{@filename}\" #{ip} #{@port} #{@size} #{@token}"
+          @event.ctcp "DCC", "SEND \"#{@filename}\" #{ip} #{@port} #{@size} #{@token}"
         end
       end
     end

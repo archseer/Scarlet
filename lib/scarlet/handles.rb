@@ -61,12 +61,12 @@ module Scarlet
 
     ctcp :PING do |event|
       puts "[ CTCP PING from #{event.sender.nick} ]"
-      event.notify "\001PING #{event.params.first}\001"
+      event.ctcp :PING, event.params.first
     end
 
     ctcp :VERSION do |event|
       puts "[ CTCP VERSION from #{event.sender.nick} ]"
-      event.notify "\001VERSION Scarlet v#{Scarlet::VERSION}\001"
+      event.ctcp :VERSION, "Scarlet v#{Scarlet::VERSION}"
     end
 
     ctcp :TIME do |event|
