@@ -21,4 +21,5 @@ var/
 vendor/
 Gemfile.lock
 
+coverage/
 config.yml
