@@ -6,11 +6,17 @@ require 'scarlet/models/model_base'
 # port of Defusal's system
 module Scarlet
   class Log < ModelBase
-    field :nick,     type: String, default: proc { '' }
-    field :channel,  type: String, default: proc { '' }
-    field :command,  type: String, default: proc { '' }
-    field :target,   type: String, default: proc { '' }
-    field :message,  type: String, default: proc { '' }
+    field :nick,     type: String,  default: proc { '' }
+    field :channel,  type: String,  default: proc { '' }
+    field :command,  type: Literal, default: proc { '' }
+    field :target,   type: String,  default: proc { '' }
+    field :message,  type: String,  default: proc { '' }
+
+    def self.repo_config
+      {
+        memory: true
+      }
+    end
 
     def self.pool
       @pool ||= LogPool.new
@@ -50,7 +56,7 @@ module Scarlet
       @index = 0
       @log_m = Mutex.new
       @pool ||= Array.new(100) do
-        Log.new
+        Log.create
       end
     end
 

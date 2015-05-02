@@ -13,12 +13,21 @@ module Scarlet
     field :updated_at,   type: Integer, default: proc { Time.now.to_i }
     field :destroyed_at, type: Integer, default: proc { -1 }
 
+    def self.repo_config
+      {}
+    end
+
     def self.repo
       @repo ||= begin
-        bsn = name.tableize
-        dirname = File.expand_path(Scarlet.config.db[:path], Scarlet.root)
-        filename = File.join(dirname, bsn + '.yml')
-        Repository.new(filename)
+        if repo_config[:memory]
+          Repository.new(repo_config)
+        else
+          bsn = name.tableize
+          dirname = File.expand_path(Scarlet.config.db.fetch(:path), Scarlet.root)
+          filename = File.join(dirname, bsn + '.yml')
+          FileUtils.mkdir_p(File.dirname(filename))
+          Repository.new(repo_config.merge(filename: filename))
+        end
       end
     end
 
@@ -73,7 +82,7 @@ module Scarlet
       self
     end
 
-    def self.create(data)
+    def self.create(data = {})
       record = new(data)
       repo.create record.id, record.to_h
       record

@@ -5,7 +5,7 @@ describe Scarlet::Repository do
   before :all do
     @tmp = Dir.mktmpdir
     @db_path = File.join(@tmp, "db.yml")
-    @db = described_class.new(@db_path)
+    @db = described_class.new(filename: @db_path)
   end
 
   after :all do
@@ -15,7 +15,7 @@ describe Scarlet::Repository do
   let(:repo) { @db }
 
   it 'initializes a repository' do
-    repo.filename
+    repo
   end
 
   it 'creates an entry' do

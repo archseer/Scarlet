@@ -3,25 +3,18 @@ require 'thread_safe'
 require 'yaml'
 
 module Scarlet
-  class FileStorage
-    # @!attribute filename
-    #   @return [String]
-    attr_accessor :filename
+  class StorageBase
     # @!attribute [r] data
     #   @return [Hash<String, Hash>]
     attr_reader :data
 
-    def initialize(filename)
-      @filename = filename
+    def initialize
       @transact_m = Mutex.new
       @data = ThreadSafe::Hash.new
-      load if File.exist?(@filename)
     end
 
     def load_unsafe
-      @data = Hash[YAML.load_file(@filename).map do |key, value|
-        [key, value.symbolize_keys]
-      end]
+      #
     end
 
     def load
@@ -31,7 +24,7 @@ module Scarlet
     end
 
     def save_unsafe
-      File.write @filename, @data.to_yaml
+      #
     end
 
     def save
@@ -65,6 +58,28 @@ module Scarlet
     end
   end
 
+  class FileStorage < StorageBase
+    # @!attribute filename
+    #   @return [String]
+    attr_accessor :filename
+
+    def initialize(filename)
+      super()
+      @filename = filename
+      load if File.exist?(@filename)
+    end
+
+    def load_unsafe
+      @data = Hash[YAML.load_file(@filename).map do |key, value|
+        [key, value.symbolize_keys]
+      end]
+    end
+
+    def save_unsafe
+      File.write @filename, @data.to_yaml
+    end
+  end
+
   class Repository
     class EntryExists < IndexError
     end
@@ -72,13 +87,14 @@ module Scarlet
     class EntryMissing < IndexError
     end
 
-    def initialize(filename)
-      @storage = FileStorage.new(filename)
-      @repo_m = Mutex.new
-    end
+    def initialize(config = {})
+      if config[:memory]
+        @storage = StorageBase.new
+      else
+        @storage = FileStorage.new(config.fetch(:filename))
+      end
 
-    def filename
-      @storage.filename
+      @repo_m = Mutex.new
     end
 
     private def store(id, data)
