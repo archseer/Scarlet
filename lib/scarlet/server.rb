@@ -195,10 +195,10 @@ module Scarlet
     # @param [String] target Whom the command has targeted.
     def write_log command, message, target
       return if target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
-      # disable logs
-      #log = Log.new(:nick => @current_nick, :message => message, :command => command.upcase, :target => target)
-      #log.channel = target if target.starts_with? "#"
-      #log.save!
+
+      channel = target.starts_with?("#") ? target : ''
+      Log.log(nick: @current_nick, message: message,
+              command: command.upcase, target: target, channel: channel)
     end
 
     # Prints a message to the console with a timestamp. Optionally color of the
