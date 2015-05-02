@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'scarlet/user'
 require 'scarlet/channel'
 
@@ -27,7 +28,7 @@ describe Scarlet::Collection do
   describe '#remove' do
     it 'removes the user from the collection' do
       @users.remove @user
-      @users.to_a.should_not include(@user)
+      expect(@users.to_a).not_to include(@user)
     end
   end
 
@@ -35,7 +36,7 @@ describe Scarlet::Collection do
     it 'adds the user to the collection' do
       user2 = Scarlet::User.new('test2')
       @users.add user2
-      @users.get(name: user2.name).should eq user2
+      expect(@users.get(name: user2.name)).to eq user2
     end
   end
 
@@ -66,16 +67,16 @@ describe 'Users and Channels' do
 
   it 'should join a channel' do
     @user.join @channel
-    @channel.users.to_a.should include @user
-    @user.channels.to_a.should include @channel
+    expect(@channel.users.to_a).to include @user
+    expect(@user.channels.to_a).to include @channel
   end
 
   it 'should part a channel' do
     @user.join @channel
     @user.part @channel
-    @user.channels.to_a.should_not include @channel
-    @channel.users.to_a.should_not include @user
-    @channel.user_flags.should_not have_key @user
+    expect(@user.channels.to_a).not_to include @channel
+    expect(@channel.users.to_a).not_to include @user
+    expect(@channel.user_flags).not_to have_key @user
   end
 
   it 'should part all channels' do
@@ -83,17 +84,17 @@ describe 'Users and Channels' do
     channel2 = Scarlet::Channel.new('#test2')
     @user.join channel2
     @user.part_all
-    @user.channels.to_a.should be_empty
-    @channel.users.to_a.should_not include @user
-    channel2.users.to_a.should_not include @user
-    @channel.user_flags.should_not have_key @user
-    channel2.user_flags.should_not have_key @user
+    expect(@user.channels.to_a).to be_empty
+    expect(@channel.users.to_a).not_to include @user
+    expect(channel2.users.to_a).not_to include @user
+    expect(@channel.user_flags).not_to have_key @user
+    expect(channel2.user_flags).not_to have_key @user
   end
 
   it 'should remove channel from user' do
     @channels.remove @channel
 
     expect(@channels.exist?(@channel.name)).to eq false
-    @user.channels.to_a.should_not include @channel
+    expect(@user.channels.to_a).not_to include @channel
   end
 end
