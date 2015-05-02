@@ -1,3 +1,5 @@
+require 'bundler/setup'
+
 require 'eventmachine'
 require 'scarlet/channel'
 require 'scarlet/collection'
