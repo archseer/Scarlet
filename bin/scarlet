@@ -4,14 +4,6 @@ require 'scarlet/plugins/link_printer'
 require 'scarlet/plugins/autoname'
 require 'optparse'
 
-db = 'scarlet'
-argv = OptionParser.new do |opts|
-  opts.on '', '--database NAME', String, 'Set the database to use for storing Scarlet\'s data' do |d|
-    db = d
-  end
-end.parse(ARGV.dup)
-
-MongoMapper.database = db
 # displays title of HTML links
 Scarlet::Handler::Plugins.use ScarletPlugin::LinkPrinter.new
 # automatically reclaim nickname
