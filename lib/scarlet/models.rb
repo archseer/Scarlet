@@ -1,4 +1,5 @@
-require 'mongo_mapper'
+require 'scarlet/models/file_repository'
+require 'scarlet/models/model_base'
 require 'scarlet/models/bans'
 require 'scarlet/models/log'
 require 'scarlet/models/nick'

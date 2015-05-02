@@ -1,5 +1,6 @@
 require 'thread'
-require 'scarlet/models/base'
+require 'scarlet/core_ext/literal'
+require 'scarlet/models/model_base'
 
 # basically stores the entire Event inside the DB.
 # port of Defusal's system

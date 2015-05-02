@@ -1,5 +1,4 @@
-require 'scarlet/models/base'
-require 'data_model/validators/presence'
+require 'scarlet/models/model_base'
 
 module Scarlet
   # Privileges level

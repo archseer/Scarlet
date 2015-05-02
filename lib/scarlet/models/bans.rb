@@ -1,4 +1,4 @@
-require 'scarlet/models/base'
+require 'scarlet/models/model_base'
 
 module Scarlet
   # Ban.level

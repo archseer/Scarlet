@@ -1,6 +1,7 @@
 require 'active_support/core_ext/string'
 require 'securerandom'
 require 'data_model/load'
+require 'data_model/validators/presence'
 require 'scarlet/models/file_repository'
 require 'scarlet/bot'
 
