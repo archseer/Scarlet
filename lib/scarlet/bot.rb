@@ -14,11 +14,17 @@ module Scarlet
 
     # Delegate to Handler, more expressive and allows DSL.
     delegate :on, :ctcp, to: 'Scarlet::Handler'
-
-    def run! &block
-      Bot.new.run &block
-    end
   end
+
+  def self.run! &block
+    Bot.new.run &block
+  end
+
+  def self.init
+    Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
+    Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
+  end
+
   class Bot
     def initialize
       @servers = {}
@@ -28,8 +34,7 @@ module Scarlet
     # If Scarlet was already started, it just returns.
     def start
       return unless @servers.empty?
-      Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
-      Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
+      Scarlet.init
       # create servers
       Scarlet.config.servers.each do |name, cfg|
         cfg[:server_name] = name
