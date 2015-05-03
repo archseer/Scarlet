@@ -3,7 +3,7 @@ require 'active_support/core_ext/module/delegation'
 # Event is a class that represents a parsed event recieved from the server.
 # It contains the basic information of the sender of the event, where it was
 # sent from, and what was sent.
-module Scarlet
+class Scarlet
   class Event
     attr_accessor :server, :sender, :command, :params, :target, :channel, :return_path
 

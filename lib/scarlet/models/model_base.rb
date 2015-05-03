@@ -5,7 +5,7 @@ require 'data_model/validators/presence'
 require 'scarlet/models/file_repository'
 require 'scarlet/bot'
 
-module Scarlet
+class Scarlet
   # Base model class for all other models in Scarlet
   class ModelBase < Moon::DataModel::Metal
     field :id,           type: String,  default: proc { SecureRandom.uuid }

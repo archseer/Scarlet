@@ -2,14 +2,28 @@ require 'active_support/configurable'
 require 'eventmachine'
 require 'rufus-scheduler'
 
-module Scarlet
+class Scarlet
   # This class is the meat of the bot, encapsulating the connection and
   # various event listeners that respond to server messages, as well as
   # a list of users and channels the bot is connected to. All the magic
   # happens in this class.
   class Server
     include ActiveSupport::Configurable
-    attr_reader :scheduler, :channels, :users, :state, :extensions, :cap_extensions, :current_nick, :vHost
+
+    attr_reader :channels
+    attr_reader :scheduler
+    attr_reader :users
+    attr_accessor :cap_extensions
+    attr_accessor :current_nick
+    attr_accessor :extensions
+    attr_accessor :ircd
+    attr_accessor :modes
+    attr_accessor :parser
+    attr_accessor :plugins
+    attr_accessor :sasl
+    attr_accessor :sasl_mechanisms
+    attr_accessor :state
+    attr_accessor :vHost
 
     # Initializes a new abstracted connection instance to an IRC server.
     # The actual EM connection instance gets set to +self.connection+.
@@ -26,6 +40,7 @@ module Scarlet
       @channels  = ServerChannels.new # channels
       @users     = Users.new          # users (seen) on the server
       @state     = :connecting
+      @reconnects = 0
       reset_vars
       connect!
     end
@@ -84,14 +99,17 @@ module Scarlet
     def reconnect
       disconnect unless @state == :disconnecting
       reset_vars
-      EM.add_timer(3) do
+      @reconnects += 1
+      print_console "Waiting #{2**@reconnects} seconds to reconnect..."
+      EM.add_timer(2**reconnects) do
         @state = :connecting
         begin
           @connection.reconnect(config.address, config.port)
           @connection.post_init
+          @reconnects = 0
         rescue => ex
           print_console ex.message
-          EM.add_timer(3) { reconnect }
+          reconnect
         end
       end
     end
@@ -140,7 +158,9 @@ module Scarlet
       event = Event.new(self, parsed_line[:prefix], parsed_line[:command],
                         parsed_line[:target], parsed_line[:params])
       Log.write(event)
-      Handler.handle_event event
+      @plugins.each do |plug|
+        plug.handle event
+      end
     end
 
     # Cuts up a message into chunks of 450 characters, chunks are yieled, instead

@@ -1,7 +1,7 @@
 require 'active_support/core_ext/hash'
 
 # A parser class, wrapping the common tasks of parsing various IRC message types.
-module Scarlet
+class Scarlet
   class Parser
     # Contains a map of the de facto user mode list.
     @@base_mode_list = {

@@ -2,7 +2,7 @@ require 'thread'
 require 'thread_safe'
 require 'yaml'
 
-module Scarlet
+class Scarlet
   class StorageBase
     # @!attribute [r] data
     #   @return [Hash<String, Hash>]

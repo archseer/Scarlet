@@ -1,6 +1,6 @@
 require 'scarlet/helpers/http_helper'
 
-module Scarlet
+class Scarlet
   module HttpCommandHelper
     extend HttpHelper
   end

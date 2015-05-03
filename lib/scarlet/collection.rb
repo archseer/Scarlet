@@ -1,4 +1,4 @@
-module Scarlet
+class Scarlet
   # Represents a collection of objects that can be querried.
   class Collection
     include Enumerable

@@ -1,20 +1,14 @@
-require 'scarlet/plugins/plugin'
+require 'scarlet/plugin'
 require 'scarlet/helpers/http_helper'
 require 'uri'
 
-module ScarletPlugin
-  # Plugin for priting HTTP/S links
+module Scarlet::Plugins
+  # Plugin for priting HTTP(S) link titles.
   class LinkPrinter
-    include Scarlet::HttpHelper
     include Scarlet::Plugin
+    helper Scarlet::HttpHelper
 
-    # @param [Symbol]
-    def event_name
-      :privmsg
-    end
-
-    # @param [Scarlet::Event] event
-    def invoke event
+    on :privmsg do |event|
       event.params.first.match(/((?:http|https):\/\/[^ ]*)/) do |url|
         begin
           uri = URI(url[0])

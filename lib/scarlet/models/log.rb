@@ -4,7 +4,7 @@ require 'scarlet/models/model_base'
 
 # basically stores the entire Event inside the DB.
 # port of Defusal's system
-module Scarlet
+class Scarlet
   class Log < ModelBase
     field :nick,     type: String,  default: proc { '' }
     field :channel,  type: String,  default: proc { '' }

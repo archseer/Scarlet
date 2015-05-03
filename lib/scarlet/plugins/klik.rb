@@ -1,4 +1,4 @@
-module Scarlet
+class Scarlet
   module Klik
     def self.klik
       @klik ||= [Time.now, Time.now]

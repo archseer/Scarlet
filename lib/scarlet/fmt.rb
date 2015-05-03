@@ -1,4 +1,4 @@
-module Scarlet
+class Scarlet
   module Fmt
     # Formats a given uri suitable for the irc
     def self.uri(u)

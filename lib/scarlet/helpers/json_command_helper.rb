@@ -1,6 +1,6 @@
 require 'yajl'
 
-module Scarlet
+class Scarlet
   module JsonCommandHelper
     def self.parse_json str
       Yajl::Parser.parse str

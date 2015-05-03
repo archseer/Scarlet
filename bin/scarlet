@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
+$:.unshift File.expand_path("../../lib", __FILE__)
 require 'scarlet'
 require 'scarlet/plugins/link_printer'
 require 'scarlet/plugins/autoname'
 require 'optparse'
 
-# displays title of HTML links
-Scarlet::Handler::Plugins.use ScarletPlugin::LinkPrinter.new
-# automatically reclaim nickname
-Scarlet::Handler::Plugins.use ScarletPlugin::Autoname.new
-Scarlet.run!
+Scarlet.setup do
+  # displays title of HTML links
+  use Scarlet::Plugins::LinkPrinter
+  # automatically reclaim nickname
+  use Scarlet::Plugins::Autoname
+end.run

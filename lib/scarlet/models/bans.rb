@@ -1,6 +1,6 @@
 require 'scarlet/models/model_base'
 
-module Scarlet
+class Scarlet
   # Ban.level
   # 0 - No Ban
   # 1 - Suspension

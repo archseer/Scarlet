@@ -1,14 +1,10 @@
-require 'scarlet/plugins/plugin'
+require 'scarlet/plugin'
 
-module ScarletPlugin
+module Scarlet::Plugins
   class Autoname
     include Scarlet::Plugin
 
-    def event_name
-      :quit
-    end
-
-    def invoke event
+    on :quit do |event|
       my_nick = event.server.config.nick
       current_nick = event.server.current_nick
       sender_nick = event.sender.nick
