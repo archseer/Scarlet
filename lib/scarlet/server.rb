@@ -1,6 +1,7 @@
 require 'active_support/configurable'
 require 'eventmachine'
 require 'rufus-scheduler'
+require 'scarlet/logger'
 
 class Scarlet
   # This class is the meat of the bot, encapsulating the connection and
@@ -9,6 +10,7 @@ class Scarlet
   # happens in this class.
   class Server
     include ActiveSupport::Configurable
+    include Scarlet::Loggable
 
     attr_reader :channels
     attr_reader :scheduler
@@ -77,7 +79,7 @@ class Scarlet
 
     def send_sasl
       if @sasl = @sasl_mechanisms.shift
-        puts "[SASL] Authentication attempt with #{@sasl.mechanism_name}".light_blue
+        logger.info "[SASL] Authentication attempt with #{@sasl.mechanism_name}"
         send "AUTHENTICATE #{@sasl.mechanism_name}"
       else
         send 'CAP END'
@@ -100,7 +102,7 @@ class Scarlet
       disconnect unless @state == :disconnecting
       reset_vars
       @reconnects += 1
-      print_console "Waiting #{2**@reconnects} seconds to reconnect..."
+      logger.info "Waiting #{2**@reconnects} seconds to reconnect..."
       EM.add_timer(2**reconnects) do
         @state = :connecting
         begin
@@ -108,7 +110,7 @@ class Scarlet
           @connection.post_init
           @reconnects = 0
         rescue => ex
-          print_console ex.message
+          logger.error ex.message
           reconnect
         end
       end
@@ -130,7 +132,7 @@ class Scarlet
       reset_vars
 
       if not @state == :disconnecting
-        print_error "Connection to server lost. Reconnecting..."
+        logger.error "Connection to server lost. Reconnecting..."
         reconnect
       end
     end
@@ -219,27 +221,6 @@ class Scarlet
       channel = target.starts_with?("#") ? target : ''
       Log.log(nick: @current_nick, message: message,
               command: command.upcase, target: target, channel: channel)
-    end
-
-    # Prints a message to the console with a timestamp. Optionally color of the
-    # message can be passed in as a symbol. If debug is set to false in the config,
-    # no messages will be logged.
-    # @param [String] message The message to be written to the console.
-    # @param [Symbol] color The color of the message.
-    def print_console message, color = nil
-      return unless Scarlet.config.debug
-      msg = Parser.parse_esc_codes message
-      msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
-      puts color ? msg.colorize(color) : msg
-    end
-
-    # Prints a message in the same format as +#print_console+. Message will be
-    # output to console, regardless of the debug value in the config.
-    # @param [String] message The message to be written to the console.
-    def print_error message
-      msg = Parser.parse_esc_codes message
-      msg = "[#{Time.now.strftime("%H:%M")}] #{msg}"
-      puts msg.colorize(:light_red)
     end
 
     # Sends a login check to NickServ, to check whether user(s) are logged in.

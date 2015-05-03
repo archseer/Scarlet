@@ -3,8 +3,8 @@ require 'colorize'
 require 'active_support/configurable'
 require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
-
 require 'scarlet/plugins/command'
+require 'scarlet/logger'
 
 # Our main module, namespacing all of our classes. It is used as a singleton,
 # offering a limited few of methods to start or stop Scarlet.
@@ -82,7 +82,7 @@ class Scarlet
   # Start the EM reactor loop and start Scarlet.
   def run
     return if EM.reactor_running? # Don't start the reactor if it's running!
-    puts ">> Scarlet v#{Scarlet::VERSION} (development)".light_green
+    logger.info ">> Scarlet v#{Scarlet::VERSION} (development)".light_green
 
     EventMachine.run do
       yield if block_given?

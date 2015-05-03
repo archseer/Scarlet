@@ -1,6 +1,7 @@
 require 'active_support/concern'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/listeners'
+require 'scarlet/logger'
 
 class Scarlet
   module Helpers
@@ -38,6 +39,7 @@ class Scarlet
   module Plugin
     extend ActiveSupport::Concern
     include Scarlet::Helpers
+    include Scarlet::Loggable
 
     included do
       # ~

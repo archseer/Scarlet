@@ -1,6 +1,7 @@
 require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/fmt'
+require 'scarlet/logger'
 
 class Scarlet
   # This wraps our DSL for custom bot commands.
@@ -112,6 +113,8 @@ class Scarlet
     # A callback instance, which contains a callback command that we can save for
     # later and run it at a later time, when the event listener tied to it matches.
     class Callback
+      include Scarlet::Loggable
+
       # Create a new callback instance,
       #
       # @param [Proc] block The block we want to call as a callback.
@@ -132,8 +135,8 @@ class Scarlet
         begin
           instance_eval &@block
         rescue => ex
-          puts ex.inspect
-          puts ex.backtrace.join("\n")
+          logger.error ex.inspect
+          logger.error ex.backtrace.join("\n")
           reply "Command Callback error: #{ex.inspect}"
         end
       end
