@@ -70,7 +70,8 @@ class Scarlet
     end
 
     def load_unsafe
-      @data = Hash[YAML.load_file(@filename).map do |key, value|
+      d = YAML.load_file(@filename) || {}
+      @data = Hash[d.map do |key, value|
         [key, value.symbolize_keys]
       end]
     end
