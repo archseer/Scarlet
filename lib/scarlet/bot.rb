@@ -4,6 +4,8 @@ require 'active_support/configurable'
 require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
 
+require 'scarlet/plugins/command'
+
 # Our main module, namespacing all of our classes. It is used as a singleton,
 # offering a limited few of methods to start or stop Scarlet.
 class Scarlet
@@ -21,6 +23,7 @@ class Scarlet
     @servers = {}
     @plugins = []
     use Scarlet::Core
+    use Scarlet::Plugins::Command
   end
 
   def self.setup &block
@@ -51,7 +54,6 @@ class Scarlet
     end
     # for safety delete the servers list after it gets loaded
     Scarlet.config.delete :servers
-    Command.load_commands
   end
 
   # Shuts down Scarlet. Disconnects from all servers and removes any scheduled tasks.
