@@ -54,7 +54,6 @@ class Scarlet
     # @param [Event] event The event that was recieved.
     def handle(event)
       klass = self.class
-      puts event.params.inspect
       execute = lambda { |block| Scarlet::Context.new(self, klass.helpers, event.server).instance_exec(event.dup, &block) }
       klass.__listeners__.each_listener(event.command, &execute)
     end
