@@ -6,11 +6,13 @@ require 'scarlet/models/model_base'
 # port of Defusal's system
 class Scarlet
   class Log < ModelBase
-    field :nick,     type: String,  default: nil
-    field :channel,  type: String,  default: nil
-    field :command,  type: Literal, default: nil
-    field :target,   type: String,  default: nil
-    field :message,  type: String,  default: nil
+    field_setting allow_nil: true, default: proc { '' } do
+      field :nick,     type: String
+      field :channel,  type: String
+      field :command,  type: Literal
+      field :target,   type: String
+      field :message,  type: String
+    end
 
     def self.repo_config
       {
