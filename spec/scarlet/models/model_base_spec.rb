@@ -11,8 +11,6 @@ end
 
 describe Scarlet::ModelBase do
   before :all do
-    Scarlet.init
-    Scarlet.config.db[:path] = fixture_pathname('db/models')
     FileUtils.mkdir_p Scarlet.config.db[:path]
   end
 

@@ -7,3 +7,7 @@ def fixture_pathname(filename)
 end
 
 SimpleCov.start
+require 'scarlet'
+
+Scarlet.config.db ||= {}
+Scarlet.config.db[:path] = fixture_pathname('db/models')
