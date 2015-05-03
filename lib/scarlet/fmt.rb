@@ -59,7 +59,7 @@ class Scarlet
     # @param [Time] tme
     # @return [String]
     def self.time tme
-      tme.inspect
+      tme.strftime("%T, %A %B %d %Y")
     end
   end
 end

@@ -46,5 +46,12 @@ describe Scarlet::Fmt do
       expect(enum.to_a.size).to eq(2)
     end
   end
+
+  context '.time' do
+    it 'formats a Time object' do
+      tme = Time.at(1430676148)
+      expect(described_class.time(tme)).to eq('13:02:28, Sunday May 03 2015')
+    end
+  end
 end
 
