@@ -55,7 +55,7 @@ class Scarlet
     def handle(event)
       klass = self.class
       puts event.params.inspect
-      execute = lambda { |block| Scarlet::Context.new(klass.helpers, event.server).instance_exec(event.dup, &block) }
+      execute = lambda { |block| Scarlet::Context.new(self, klass.helpers, event.server).instance_exec(event.dup, &block) }
       klass.__listeners__.each_listener(event.command, &execute)
     end
 
