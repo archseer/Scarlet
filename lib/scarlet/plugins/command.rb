@@ -34,11 +34,11 @@ module Scarlet::Plugins
     # @param [Regexp] patterns The regex that should match when we want to trigger our callback.
     # @param [Proc] block The block to execute when the command is used.
     def hear *patterns, &block
-      # make a prefab Listener, this will be duplicated for each pattern/regex
+      # make a prefab Listener
       ls = Scarlet::Command::Listener.new.tap { |l| Scarlet::Command::Builder.new(l).instance_eval &block }
       patterns.each do |regex|
         regex = Regexp.new "^#{regex.source}$", regex.options
-        @listeners[regex] = ls.dup.tap { |l| l.regex = regex }
+        @listeners[regex] = ls
       end
     end
 

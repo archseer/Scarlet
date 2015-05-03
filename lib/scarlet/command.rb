@@ -28,8 +28,6 @@ class Scarlet
       attr_accessor :description
       # @return [String] short usage template
       attr_accessor :usage
-      # @return [Regexp] pattern to match the command
-      attr_accessor :regex
       # @return [Array<Module>] helpers to extend the callback
       attr_accessor :helpers
 
@@ -52,10 +50,6 @@ class Scarlet
         else
           ''
         end
-      end
-
-      def match str
-        str.match @regex
       end
 
       def invoke event, matches
