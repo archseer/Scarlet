@@ -17,7 +17,7 @@ class Scarlet
     # @param [String] msg
     # @return [String]
     def self.purify_msg msg
-      msg.gsub(/[\r\n]/, '')
+      msg.gsub(/[\r\n]+/, ' ')
     end
 
     # Chops string into chunks of 450 characters or less.
