@@ -33,7 +33,6 @@ gem 'octokit', '~> 3.0'
 gem 'calc'
 
 group :development, :test do
-  gem 'testi', github: 'IceDragon200/testi'
   gem 'lorem'
   gem 'simplecov'
   gem 'codeclimate-test-reporter'
