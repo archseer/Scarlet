@@ -4,7 +4,7 @@ hear (/win(?:\s(\S+))?/i) do
   usage 'win <name>'
   on do
     given = !!params[1]
-    nick = Scarlet::Nick.first(:nick => params[1])
+    nick = Scarlet::Nick.first(nick: params[1])
     same = nick ? sender.nick.downcase == nick.nick.downcase : false
     if nick and !same
       nick.win_points += 1
@@ -15,7 +15,7 @@ hear (/win(?:\s(\S+))?/i) do
     elsif same
       reply "You can't give yourself a win!"
     else
-      wins = Scarlet::Nick.first(:nick=> sender.nick).win_points
+      wins = Scarlet::Nick.first(nick: sender.nick).win_points
       reply "#{sender.nick} has #{wins} #{"win point".pluralize(wins)}."
     end
   end

@@ -1,5 +1,5 @@
 hear (/commit message/i) do
-  clearance :registered
+  clearance :any
   description 'Displays a random commit message.'
   usage 'commit-message'
   on do

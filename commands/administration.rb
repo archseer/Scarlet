@@ -5,11 +5,11 @@ hear (/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\: (?<reason>.+))?/i) do
   on do
     nicks = params[2].split(" ").compact
     list = []
-    sender_nik = Scarlet::Nick.first(:nick => sender.nick)
+    sender_nik = Scarlet::Nick.first(nick: sender.nick)
     nicks.each do |nick_str|
       #notify "%s is currently not present on this network"
-      ban = Scarlet::Ban.first_or_create(:nick => nick_str)
-      nck = Scarlet::Nick.first(:nick => nick_str)
+      ban = Scarlet::Ban.first_or_create(nick: nick_str)
+      nck = Scarlet::Nick.first(nick: nick_str)
       if ban && (nck ? nck.privileges : 0) < sender_nik.privileges
         ban.level = params[:lvl].to_i
         ban.by = sender.nick
@@ -35,11 +35,11 @@ hear (/bot unban (.+)/i) do
   usage 'bot unban <user>'
   on do
     nicks = params[1].split " "
-    sender_nik = Scarlet::Nick.first(:nick => sender.nick)
+    sender_nik = Scarlet::Nick.first(nick: sender.nick)
     list = []
     nicks.each do |nick_str|
       next if sender_nik.nick.upcase == nick_str.upcase
-      if ban = Scarlet::Ban.first(:nick => nick_str)
+      if ban = Scarlet::Ban.first(nick: nick_str)
         ban.level = 0
         ban.by = sender.nick
         ban.reason = ""
