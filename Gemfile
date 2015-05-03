@@ -36,6 +36,7 @@ group :development, :test do
   gem 'testi', github: 'IceDragon200/testi'
   gem 'lorem'
   gem 'simplecov'
+  gem 'codeclimate-test-reporter'
   gem 'rspec'
   gem 'yard'
   gem 'yard-delegate'
