@@ -1,7 +1,19 @@
+require 'spec_helper'
 require 'lorem'
 require 'scarlet/fmt'
+require 'uri'
 
 describe Scarlet::Fmt do
+  context '.uri' do
+    it 'formats a uri given a String' do
+
+    end
+
+    it 'formats a uri given a URI' do
+
+    end
+  end
+
   context '.chop_msg' do
     it 'yields one chunk if there is less than 450 characters' do
       chars = Lorem::Base.new('chars', 400).output
