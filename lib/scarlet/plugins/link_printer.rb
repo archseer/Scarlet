@@ -20,9 +20,9 @@ module Scarlet::Plugins
             end
           end
         rescue Exception => ex
-          STDERR.puts 'LinkPrinter error:'
-          STDERR.puts ex.inspect
-          STDERR.puts ex.backtrace.join("\n")
+          logger.error 'LinkPrinter error:'
+          logger.error ex.inspect
+          logger.error ex.backtrace.join("\n")
         end
       end
     end

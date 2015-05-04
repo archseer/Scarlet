@@ -23,12 +23,12 @@ class Scarlet
     end
 
     ctcp :PING do |event|
-      puts "[ CTCP PING from #{event.sender.nick} ]"
+      logger.info "[ CTCP PING from #{event.sender.nick} ]"
       event.ctcp :PING, event.params.first
     end
 
     ctcp :VERSION do |event|
-      puts "[ CTCP VERSION from #{event.sender.nick} ]"
+      logger.info "[ CTCP VERSION from #{event.sender.nick} ]"
       event.ctcp :VERSION, "Scarlet v#{Scarlet::VERSION}"
     end
 
@@ -45,7 +45,7 @@ class Scarlet
     end
 
     on :pong do |event|
-      event.server.print_console "[ Ping reply from #{event.sender.host} ]" if Scarlet.config.display_ping
+      logger.info "[ Ping reply from #{event.sender.host} ]"
     end
 
     on :privmsg do |event|
@@ -61,7 +61,7 @@ class Scarlet
       elsif event.sender.nick == "HostServ"
         event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) do |host|
           event.server.vHost = host[1]
-          event.server.print_console "#{event.server.vHost} is now your hidden host (set by services.)", :light_magenta
+          logger.info "#{event.server.vHost} is now your hidden host (set by services.)"
         end
       end
     end
@@ -73,7 +73,7 @@ class Scarlet
       if event.server.current_nick == event.sender.nick
         event.server.channels.add Channel.new(event.channel)
         event.server.send "MODE #{event.channel}"
-        event.server.print_console "Joined channel #{event.channel}.", :light_yellow
+        logger.info "--> #{event.channel}"
       end
 
       user = event.server.users.get_ensured(event.sender.nick)
@@ -102,6 +102,7 @@ class Scarlet
     on :part do |event|
       if event.sender.nick == event.server.current_nick
         event.server.channels.remove event.server.channels.get(event.channel) # remove chan if bot parted
+        logger.info "<-- #{event.channel}"
       else
         event.sender.user.part event.server.channels.get(event.channel)
       end
@@ -116,7 +117,7 @@ class Scarlet
       event.sender.user.nick = event.target
       if event.sender.nick == event.server.current_nick
         event.server.current_nick = event.target
-        event.server.print_console "You are now known as #{event.target}.", :light_yellow
+        logger.info "You are now known as #{event.target}."
       end
     end
 
@@ -124,7 +125,7 @@ class Scarlet
       messg  = "#{event.sender.nick} has kicked #{event.params.first} from #{event.target}"
       messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick # reason for kick, if given
       messg += "."
-      event.server.print_console messg, :light_red
+      logger.warn messg
       # we process this the same way as a part.
       if event.params.first == event.server.current_nick
         event.server.channels.remove(event.channel) # if scarlet was kicked, delete that chan's array.
@@ -159,9 +160,9 @@ class Scarlet
 
     on :error do |event|
       if event.target.start_with? "Closing Link"
-        puts "Disconnection from #{config.address} successful.".blue
+        logger.info "Disconnection from #{config.address} successful."
       else
-        event.server.print_error "ERROR: #{event.params.join(' ')}"
+        logger.error "ERROR: #{event.params.join(' ')}"
       end
     end
 
@@ -255,7 +256,7 @@ class Scarlet
           end
         end
       else
-        event.server.print_console "WHOX TODO -- params: #{event.params.inspect};", :yellow
+        logger.warn "WHOX TODO -- params: #{event.params.inspect};"
       end
 
     end
@@ -290,7 +291,7 @@ class Scarlet
 
     on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
       event.server.vHost = event.params.first
-      event.server.print_console event.params.join(' '), :light_magenta
+      logger.info event.params.join(' ')
     end
 
     on :'433' do |event| # ERR_NICKNAMEINUSE - Nickname is already in use
@@ -305,7 +306,7 @@ class Scarlet
     end
 
     on :'904' do |event| # SASL mechanism failed
-      puts "[SASL] Auth with #{event.server.sasl.mechanism_name} failed".light_red
+      logger.error "[SASL] Auth with #{event.server.sasl.mechanism_name} failed"
       event.server.send_sasl
     end
 
@@ -321,7 +322,7 @@ class Scarlet
         # Ignore.
       when /4\d\d/ # Error message range
         unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
-          event.server.print_error event.params.join(' ')
+          logger.error event.params.join(' ')
         end
       end
     end

@@ -18,7 +18,7 @@ class Scarlet::Connection < EM::Connection
   end
 
   def ssl_handshake_completed
-    puts ">> TLS/SSL is ENABLED for #{@server.name}".green
+    Scarlet.logger.info ">> TLS/SSL is ENABLED for #{@server.name}".green
   end
 
   def handshake
