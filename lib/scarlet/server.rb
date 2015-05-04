@@ -230,10 +230,11 @@ class Scarlet
       # 16 nicknames at once.
       #  a) on STATUS send groups of up to 16 nicknames.
       #  b) on ACC, we have no such luck, send each message separately.
-      if @ircd =~ /unreal|hybrid/i # synIRC (unreal), Rizon (hybrid)
+      case @ircd
+      when /unreal|hybrid/i # synIRC (unreal), Rizon (hybrid)
         nicks.each_slice(16) { |group| msg "NickServ", "STATUS #{group.join(' ')}" }
-      elsif @ircd =~ /ircd-seven/i # freenode (ircd-seven)
-        nicks.each { |nickname| msg "NickServ", "ACC #{nick}" }
+      when  /ircd-seven/i # freenode (ircd-seven)
+        nicks.each { |nick| msg "NickServ", "ACC #{nick}" }
       else
         raise "Unknown IRCd #{@ircd}!"
       end
