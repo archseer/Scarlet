@@ -1,3 +1,5 @@
+require 'set'
+
 class Array
   # Removes values from array exactly once.
   # @param [*Array] values A list of values to subtract

@@ -1,3 +1,4 @@
+# Alias module for String and Symbols
 module Literal
 end
 
