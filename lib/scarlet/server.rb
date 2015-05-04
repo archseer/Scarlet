@@ -227,22 +227,5 @@ class Scarlet
       Log.log(nick: @current_nick, message: message,
               command: command.upcase, target: target, channel: channel)
     end
-
-    # Sends a login check to NickServ, to check whether user(s) are logged in.
-    # @param [Array] nicks The nicks to check.
-    def check_ns_login *nicks
-      # According to the docs, those servers that use STATUS may query up to
-      # 16 nicknames at once.
-      #  a) on STATUS send groups of up to 16 nicknames.
-      #  b) on ACC, we have no such luck, send each message separately.
-      case @ircd
-      when /unreal|hybrid/i # synIRC (unreal), Rizon (hybrid)
-        nicks.each_slice(16) { |group| msg "NickServ", "STATUS #{group.join(' ')}" }
-      when  /ircd-seven/i # freenode (ircd-seven)
-        nicks.each { |nick| msg "NickServ", "ACC #{nick}" }
-      else
-        raise "Unknown IRCd #{@ircd}!"
-      end
-    end
   end
 end
