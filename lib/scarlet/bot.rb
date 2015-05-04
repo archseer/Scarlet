@@ -39,7 +39,7 @@ class Scarlet
   end
 
   def setup(&block)
-    yield
+    self.instance_exec(&block)
     self
   end
 
