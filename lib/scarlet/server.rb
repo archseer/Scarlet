@@ -103,7 +103,7 @@ class Scarlet
       reset_vars
       @reconnects += 1
       logger.info "Waiting #{2**@reconnects} seconds to reconnect..."
-      EM.add_timer(2**reconnects) do
+      EM.add_timer(2 ** @reconnects) do
         @state = :connecting
         begin
           @connection.reconnect(config.address, config.port)
