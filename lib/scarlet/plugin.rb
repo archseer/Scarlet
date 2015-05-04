@@ -56,7 +56,15 @@ class Scarlet
     # @param [Event] event The event that was recieved.
     def handle(event)
       klass = self.class
-      execute = lambda { |block| Scarlet::Context.new(self, klass.helpers, event.server).instance_exec(event.dup, &block) }
+      execute = lambda do |block|
+        begin
+          cxt = Scarlet::Context.new(self, klass.helpers, event.server)
+          cxt.instance_exec(event.dup, &block)
+        rescue Exception => ex
+          logger.error ex.inspect
+          logger.error ex.backtrace.join("\n")
+        end
+      end
       klass.__listeners__.each_listener(event.command, &execute)
     end
 

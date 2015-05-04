@@ -10,19 +10,13 @@ module Scarlet::Plugins
 
     on :privmsg do |event|
       event.params.first.match(/((?:http|https):\/\/[^ ]*)/) do |url|
-        begin
-          uri = URI(url[0])
-          html_request(uri.to_s).get(redirects: 1).callback do |http|
-            if html = http.response.value.presence
-              if title = html.css('title').text.presence
-                event.reply "Title: #{title.strip}"
-              end
+        uri = URI(url[0])
+        html_request(uri.to_s).get(redirects: 1).callback do |http|
+          if html = http.response.value.presence
+            if title = html.css('title').text.presence
+              event.reply "Title: #{title.strip}"
             end
           end
-        rescue Exception => ex
-          logger.error 'LinkPrinter error:'
-          logger.error ex.inspect
-          logger.error ex.backtrace.join("\n")
         end
       end
     end
