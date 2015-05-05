@@ -1,11 +1,11 @@
 require 'spec_helper'
 require 'scarlet/models/file_repository'
 
-describe Scarlet::Repository do
+describe Moon::Repository do
   before :all do
     @tmp = Dir.mktmpdir
     @db_path = File.join(@tmp, "db.yml")
-    @db = described_class.new(filename: @db_path)
+    @db = described_class.new(Moon::Storage::YAMLStorage.new(@db_path))
   end
 
   after :all do
@@ -23,7 +23,7 @@ describe Scarlet::Repository do
   end
 
   it 'should fail to create an entry with the same id' do
-    expect { repo.create('1', { id: '1', name: 'Second!' }) }.to raise_error(Scarlet::Repository::EntryExists)
+    expect { repo.create('1', { id: '1', name: 'Second!' }) }.to raise_error(described_class::EntryExists)
   end
 
   it 'creates an entry if it doesn\'t exist' do
@@ -32,12 +32,12 @@ describe Scarlet::Repository do
     repo.touch('3', { id: '3', name: 'Third!' })
   end
 
-  it 'gets an existing entry' do
-    expect(repo.get('1')).to eq(id: '1', name: 'First!')
+  it 'fetches an existing entry' do
+    expect(repo.fetch('1')).to eq(id: '1', name: 'First!')
   end
 
-  it 'fails to get an non-existant entry' do
-    expect { repo.get('super') }.to raise_error(IndexError)
+  it 'fails to fetch a non-existant entry' do
+    expect { repo.fetch('super') }.to raise_error(IndexError)
   end
 
   it 'queries for entries' do
@@ -50,7 +50,7 @@ describe Scarlet::Repository do
   end
 
   it 'fails to update an non-existant entry' do
-    expect { repo.update('4', name: 'Forth, yes the language') }.to raise_error(Scarlet::Repository::EntryMissing)
+    expect { repo.update('4', name: 'Forth, yes the language') }.to raise_error(described_class::EntryMissing)
   end
 
   it 'deletes an entry' do
