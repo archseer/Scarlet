@@ -1,0 +1,15 @@
+description "Da best irc bot"
+author "Blaž Hrastnik"
+
+start on runlevel [2345]
+stop on runlevel [016]
+
+respawn
+
+setuid scarlet
+setgid scarlet
+
+console output
+
+chdir /home/scarlet/Scarlet
+exec chruby-exec 2.2.2 -- bin/daemon
