@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'scarlet/models/file_repository'
 
-describe Scarlet::FileStorage do
+describe Moon::Storage::YAMLStorage do
   after :all do
     FileUtils.rm_rf fixture_pathname('db_tmp.yml')
   end

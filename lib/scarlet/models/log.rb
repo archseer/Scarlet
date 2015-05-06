@@ -15,9 +15,7 @@ class Scarlet
     end
 
     def self.repo_config
-      {
-        memory: true
-      }
+      super.merge(memory: true)
     end
 
     def self.pool
