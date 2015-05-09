@@ -4,11 +4,11 @@ hear (/help(?:\s*(?<query>.*))/i) do
   usage 'help [<query>]'
   on do
     query = params[:query].presence
-    commands = Scarlet::Command.get_help(query)
-    if commands.blank?
+    helps = event.data[:commands].get_help(query)
+    if helps.blank?
       reply "I'm sorry I didn't find a (#{query}) command that matched."
     else
-      commands.each do |line|
+      helps.each do |line|
         notify line
       end
     end

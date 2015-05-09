@@ -21,7 +21,7 @@ hear (/reload commands/i) do
   description 'Loads all available commands.'
   usage 'reload commands'
   on do
-    if Scarlet::Command.load_commands
+    if event.data[:commands].load_commands
       notify "Commands loaded."
     else
       notify "Command loading failed."
@@ -36,7 +36,7 @@ hear (/reload command\s+(\w+)/i) do
   on do
     filename = File.basename(params[0])
     begin
-      Scarlet::Command.load_command_rel(filename)
+      event.data[:commands].load_command_rel(filename)
       notify "Command #{filename} loaded."
     rescue => ex
       notify "Command #{filename} load error: #{ex.inspect}"
