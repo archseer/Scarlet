@@ -2,14 +2,14 @@ require 'chronic'
 
 hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   clearance :registered
-  description 'self-explanatory; used with time command'
+  description 'Sets your timezone. (used with "time for" command)'
   usage 'set timezone <timezone>'
   on do
     timezone = params[:timezone]
     if nick = Scarlet::Nick.first(nick: sender.nick)
       if TZInfo::Timezone.all_identifiers.include?(timezone)
         nick.settings[:timezone] = timezone
-        nick.save!
+        nick.save
         notify "Your current Time Zone is: %s" % nick.settings[:timezone]
       else
         notify "Invalid Time Zone: %s" % timezone
@@ -20,42 +20,58 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   end
 end
 
-hear (/time(?:\s+(?<nick>\S+))?/i) do
+hear (/time for\s+(?<nick>\S+)/i) do
   clearance :any
-  description 'Prints user time'
-  usage 'time [<nick>]'
+  description 'Displays the time for s specified user by nick.'
+  usage 'time for <nick>'
   on do
-    nick = params[:nick]
-    if nick
-      nck = params[1].gsub(/-me/i, sender.nick)
-      if nick = Scarlet::Nick.first(:nick => nck)
-        if zone_str = nick.settings[:timezone]
-          reply Time.now.in_time_zone(zone_str)
-        else
-          reply 'Your timezone is not set: Use !set timezone <your_timezone_string>'
-        end
+    nickname = params[:nick].gsub(/\:me/i, sender.nick)
+    if nick = Scarlet::Nick.first(nick: nickname)
+      if zone_str = nick.settings[:timezone]
+        reply Scarlet::Fmt.time(Time.now.in_time_zone(zone_str))
       else
-        reply 'Cannot view time for "%s".' % params[1]
+        notify "#{nick.nick} has not set his or her timezone."
       end
     else
-      reply Scarlet::Fmt.time(Time.now)
+      notify 'Cannot view time for "%s".' % params[1]
     end
   end
 end
 
-hear (/timeq\s+(?<query>.+)/) do
+hear (/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) do
   clearance :any
-  description ''
-  usage 'timeq <query>'
+  description 'Calculates time using natural language parsing and optionally a timezone.'
+  usage 'time query <query> [:in <timezone>]'
   on do
-    if query = params[:query].presence
-      if r = Chronic.parse(query)
-        reply Scarlet::Fmt.time(r)
+    if query = (params[:query] || params[:query_tz]).presence
+      tz = params[:timezone].presence
+      r = Chronic.parse(query)
+      if r && tz
+        reply "#{query} in #{tz} is #{Scarlet::Fmt.time(r.in_time_zone(tz))}"
+      elsif r
+        reply "#{query} is #{Scarlet::Fmt.time(r)}"
       else
         reply 'Ask Doctor Who.'
       end
     else
-      reply 'Invalid time query string!'
+      notify 'Invalid time query string!'
+    end
+  end
+end
+
+hear (/time(\s+in\s+(?<timezone>.+))?/) do
+  clearance :any
+  description 'Returns the time for a specified timezone, else returns the bot\'s local time'
+  usage 'time [in <timezone>]'
+  on do
+    if (tz_name = params[:timezone].presence)
+      if tz = Time.find_zone(tz_name)
+        reply Scarlet::Fmt.time(Time.now.in_time_zone(tz))
+      else
+        notify "Could not find timezone #{tz_name}"
+      end
+    else
+      reply Scarlet::Fmt.time(Time.now.in_time_zone(tz))
     end
   end
 end
