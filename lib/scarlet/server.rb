@@ -2,6 +2,11 @@ require 'active_support/configurable'
 require 'eventmachine'
 require 'rufus-scheduler'
 require 'scarlet/logger'
+require 'scarlet/connection'
+require 'scarlet/event'
+require 'scarlet/parser'
+require 'scarlet/models/log'
+require 'scarlet/fmt'
 
 class Scarlet
   # This class is the meat of the bot, encapsulating the connection and
