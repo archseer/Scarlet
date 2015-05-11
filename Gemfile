@@ -13,6 +13,7 @@ gem 'yajl-ruby' # awesomeness
 
 # Database
 gem 'thread_safe'
+gem 'moon-safe_copy',    github: 'polyfox/moon-safe_copy'
 gem 'moon-prototype',    github: 'polyfox/moon-prototype'
 gem 'moon-serializable', github: 'polyfox/moon-serializable'
 gem 'moon-data_model',   github: 'polyfox/moon-data_model'
