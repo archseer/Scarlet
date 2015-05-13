@@ -115,6 +115,9 @@ class Scarlet
     class Callback
       include Scarlet::Loggable
 
+      # @return [Scarlet::Event]
+      attr_reader :event
+
       # Create a new callback instance,
       #
       # @param [Proc] block The block we want to call as a callback.

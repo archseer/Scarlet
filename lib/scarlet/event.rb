@@ -5,7 +5,7 @@ require 'active_support/core_ext/module/delegation'
 # sent from, and what was sent.
 class Scarlet
   class Event
-    attr_accessor :server, :sender, :command, :params, :target, :channel, :return_path
+    attr_accessor :server, :sender, :command, :params, :target, :channel, :return_path, :data
 
     # Creates a new event that can then be distributed to the listeners.
     # @param [Server] server The server from which the event was sent.
@@ -24,6 +24,7 @@ class Scarlet
       @channel = target if target and target.start_with? '#'
       @return_path = @channel || @sender.nick
       @params = params
+      @data = {}
     end
 
     # Delegated back to +@server+.

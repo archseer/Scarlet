@@ -89,7 +89,7 @@ module Scarlet::Plugins
     # @param [String] command
     # @return [Array<Listener>]
     def match_commands command
-      select_commands { |c| c.usage.start_with? command }
+      select_commands { |c| c.usage.include? command }
     end
 
     # Returns help matching the specified string. If no command is used, then
@@ -121,7 +121,8 @@ module Scarlet::Plugins
       @listeners.keys.each do |key|
         key.match event.params.first do |matches|
           if check_access(event, @listeners[key].clearance)
-            @listeners[key].invoke event.dup, matches
+            ev = event.dup.tap { |ev| ev.data[:commands] = self }
+            @listeners[key].invoke ev, matches
           end
         end
       end
