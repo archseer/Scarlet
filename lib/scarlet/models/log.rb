@@ -41,13 +41,13 @@ class Scarlet
       )
     end
 
-    #scope :in_channel, lambda { where(:channel.ne => "") } # ne -> not equals
-    #scope :nick, lambda {|nick| where(:nick => nick) }
-    #scope :channel, lambda {|channel| where(:channel => channel) }
-    #scope :join, lambda { where(:command => 'JOIN') }
-    #scope :privmsg, lambda { where(:command => 'PRIVMSG') }
-    #scope :created_at, lambda {|created_at| where(:created_at => created_at) }
-    #scope :message, lambda {|msg| where(:message => msg) }
+    scope :in_channel, lambda { where_with_block { |d| d[:channel] != '' } }
+    scope :nick,       lambda {|nick| where(:nick => nick) }
+    scope :channel,    lambda {|channel| where(:channel => channel) }
+    scope :join,       lambda { where(:command => 'JOIN') }
+    scope :privmsg,    lambda { where(:command => 'PRIVMSG') }
+    scope :created_at, lambda {|created_at| where(:created_at => created_at) }
+    scope :message,    lambda {|msg| where(:message => msg) }
   end
 
   #
@@ -55,7 +55,7 @@ class Scarlet
     def initialize
       @index = 0
       @log_m = Mutex.new
-      @pool ||= Array.new(100) do
+      @pool ||= Array.new(256) do
         Log.create
       end
     end

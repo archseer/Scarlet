@@ -1,4 +1,4 @@
-hear (/recall(?:\s(\d+))?/) do
+hear (/recall(?:\s+(\d+))?/) do
   clearance :registered
   description 'Returns the last n messages, default is 5, limit is 5.'
   usage 'recall [<count>]'
@@ -6,10 +6,10 @@ hear (/recall(?:\s(\d+))?/) do
     if channel
       recall_depth = ([[(params[1] || 5).to_i, 5].min, 1].max) + 1
       logs = Scarlet::Log.channel(channel)
-        .privmsg
-        .sort(:created_at.desc)
+        .select { |o| o.command.to_s == 'PRIVMSG' }
+        .sort { |a, b| b.updated_at <=> a.updated_at }
         .limit(recall_depth)
-        .all
+        .to_a
         .reverse
       # because we use limit, that limits to the first n elements.
       # if we want to get the last n, we need to reverse order, then limit then reverse again
