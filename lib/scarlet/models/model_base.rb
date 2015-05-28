@@ -4,6 +4,8 @@ require 'data_model/load'
 require 'data_model/validators/presence'
 require 'scarlet/models/file_repository'
 require 'scarlet/bot'
+require 'scarlet/core_ext/moon-record'
+require 'scarlet/core_ext/enumerable'
 
 class Scarlet
   # Base model class for all other models in Scarlet
@@ -47,6 +49,12 @@ class Scarlet
 
     def pre_destroy
       self.destroyed_at = Time.now.to_i
+    end
+
+    def self.scope(method_name, cb)
+      define_singleton_method method_name do |*a|
+        cb.call(*a)
+      end
     end
   end
 end

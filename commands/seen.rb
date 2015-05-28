@@ -5,17 +5,21 @@ hear (/seen (?<nick>\S+)/i) do
   description 'When was the last time you saw nick?'
   usage 'seen <nick>'
   on do
-    log = Scarlet::Log.nick(params[:nick]).sort(:created_at.desc).first
+    log = Scarlet::Log.nick(params[:nick]).sort_by(&:updated_at).last
     unless log
       reply "Sorry, I have never seen #{params[:nick]}."
       next
     end
 
-    message = "#{log.nick} was last seen #{log.created_at.ago.to_words}"
+    message = "#{log.nick} was last seen #{Time.at(log.updated_at).ago.to_words}"
     case log.command.downcase.to_sym
     when :privmsg
       message << " in #{log.target}" unless log.target.downcase == channel
-      message << " saying '#{log.message}'."
+      if log.message =~ /\u0001ACTION (.+)\u0001/
+        message << " doing '/me #{$1}'."
+      else
+        message << " saying '#{log.message}'."
+      end
     when :nick
       message << " changing nickname to '#{log.target}'."
     when :join
