@@ -1,25 +1,67 @@
 require 'scarlet/helpers/http_command_helper'
 
-ddg = lambda do |b, search_term|
-  http = b.json_request('https://api.duckduckgo.com').get query: { q: search_term, format: 'json' }
-  http.errback { b.reply 'Error!' }
+# @param [Hash<String, String>] data
+# @yieldparam [String] line
+format_abstract = lambda do |data|
+  heading = data['Heading'].presence
+  url = data['AbstractURL'].presence || data['Redirect'].presence
+  head = ''
+  head << heading << ' ' if heading
+  head << ctx.fmt.uri(url) if url
+  yield head if head.present?
+  if text = data['AbstractText'].presence
+    if source = data['AbstractSource'].presence
+      yield source + "; " + text
+    else
+      yield text
+    end
+  end
+end
+
+# @param [Hash<String, String>] data
+# @yieldparam [String] line
+format_answer = lambda do |data|
+  yield data['AnswerType'] + "; " + data['Answer']
+end
+
+# @param [Hash<String, String>] data
+# @yieldparam [String] line
+format_definition = lambda do |data|
+  url = data['DefinitionURL'].presence || data['Redirect'].presence
+  head = ''
+  head << ctx.fmt.uri(url) if url
+  yield head if head.present?
+  if text = data['Definition'].presence
+    if source = data['DefinitionSource'].presence
+      yield source + "; " + text
+    else
+      yield text
+    end
+  end
+end
+
+# @param [Object] ctx
+# @param [String] search_terms
+ddg = lambda do |ctx, search_terms|
+  q = CGI.escape(search_terms)
+  query = { q: q, format: 'json', no_html: 1 }
+  http = ctx.json_request('https://api.duckduckgo.com').get query: query
+  http.errback { ctx.reply 'Error!' }
   http.callback do
     if data = http.response.value
-      url = data['AbstractURL'].presence
-      heading = data['Heading'].presence
-      abstract = data['Abstract'].presence
-      redirect = data['Redirect'].presence
-      u = url || redirect
-      if u && heading
-        b.reply "#{heading} #{b.fmt.uri(u)}"
-      elsif u
-        b.reply b.fmt.uri(u)
-      elsif heading
-        b.reply heading
+      func = if data['Abstract'].present?
+        format_abstract
+      elsif data['Answer'].present?
+        format_answer
+      elsif data['Definition'].present?
+        format_definition
+      else
+        ctx.reply 'Quack! No results!'
+        nil
       end
-      b.reply abstract if abstract
+      func.call(data) { |line| ctx.reply line } if func
     else
-      b.reply 'Invalid response data'
+      ctx.reply 'Invalid response data'
     end
   end
 end
