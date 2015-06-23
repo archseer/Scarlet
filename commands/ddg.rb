@@ -2,7 +2,7 @@ require 'scarlet/helpers/http_command_helper'
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_abstract = lambda do |data, &block|
+format_abstract = lambda do |ctx, data, &block|
   heading = data['Heading'].presence
   url = data['AbstractURL'].presence || data['Redirect'].presence
   head = ''
@@ -20,13 +20,13 @@ end
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_answer = lambda do |data, &block|
+format_answer = lambda do |ctx, data, &block|
   block.call data['AnswerType'] + "; " + data['Answer']
 end
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_definition = lambda do |data, &block|
+format_definition = lambda do |ctx, data, &block|
   url = data['DefinitionURL'].presence || data['Redirect'].presence
   head = ''
   head << ctx.fmt.uri(url) if url
@@ -59,7 +59,7 @@ ddg = lambda do |ctx, search_terms|
         ctx.reply 'Quack! No results!'
         nil
       end
-      func.call(data) { |line| ctx.reply line } if func
+      func.call(ctx, data) { |line| ctx.reply line } if func
     else
       ctx.reply 'Invalid response data'
     end
