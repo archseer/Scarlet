@@ -3,7 +3,7 @@ require 'chronic'
 hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   clearance :registered
   description 'Sets your timezone. (used with "time for" command)'
-  usage 'set timezone <timezone>'
+  usage 'set [my] timezone <timezone>'
   on do
     timezone = params[:timezone]
     if nick = Scarlet::Nick.first(nick: sender.nick)
