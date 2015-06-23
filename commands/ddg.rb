@@ -2,40 +2,40 @@ require 'scarlet/helpers/http_command_helper'
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_abstract = lambda do |data|
+format_abstract = lambda do |data, &block|
   heading = data['Heading'].presence
   url = data['AbstractURL'].presence || data['Redirect'].presence
   head = ''
   head << heading << ' ' if heading
   head << ctx.fmt.uri(url) if url
-  yield head if head.present?
+  block.call head if head.present?
   if text = data['AbstractText'].presence
     if source = data['AbstractSource'].presence
-      yield source + "; " + text
+      block.call source + "; " + text
     else
-      yield text
+      block.call text
     end
   end
 end
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_answer = lambda do |data|
-  yield data['AnswerType'] + "; " + data['Answer']
+format_answer = lambda do |data, &block|
+  block.call data['AnswerType'] + "; " + data['Answer']
 end
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_definition = lambda do |data|
+format_definition = lambda do |data, &block|
   url = data['DefinitionURL'].presence || data['Redirect'].presence
   head = ''
   head << ctx.fmt.uri(url) if url
-  yield head if head.present?
+  block.call head if head.present?
   if text = data['Definition'].presence
     if source = data['DefinitionSource'].presence
-      yield source + "; " + text
+      block.call source + "; " + text
     else
-      yield text
+      block.call text
     end
   end
 end
