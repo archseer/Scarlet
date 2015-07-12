@@ -136,7 +136,7 @@ class Scarlet
         @event = event
         @event.params = matches
         begin
-          instance_eval &@block
+          instance_exec self, &@block
         rescue => ex
           logger.error ex.inspect
           logger.error ex.backtrace.join("\n")
