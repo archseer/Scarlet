@@ -1,6 +1,18 @@
 require 'chronic'
 
+msg_timezone_not_set = "%<nick>s has not set his or her timezone"
 msg_timezone_not_found = "Could not find timezone %<timezone>s"
+
+with_nick = proc do |&block|
+  proc do
+    nickname = params[:nick].gsub(/\:me/i, sender.nick)
+    if nick = Scarlet::Nick.first(nick: nickname)
+      instance_exec(nick, &block)
+    else
+      reply "Cannot find Nick #{nickname}"
+    end
+  end
+end
 
 find_timezone = proc do |timezone|
   Time.find_zone timezone
@@ -26,22 +38,44 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   end
 end
 
-hear (/time for\s+(?<nick>\S+)/i) do
+hear (/timezone\? (?<timezone>.+)/i) do
   clearance :any
-  description 'Displays the time for s specified user by nick.'
-  usage 'time for <nick>'
+  description 'Checks if the given timezone is valid.'
+  usage 'timezone? <timezone>'
   on do
-    nickname = params[:nick].gsub(/\:me/i, sender.nick)
-    if nick = Scarlet::Nick.first(nick: nickname)
-      if zone_str = nick.settings[:timezone]
-        reply Scarlet::Fmt.time(Time.now.in_time_zone(zone_str))
-      else
-        notify "#{nick.nick} has not set his or her timezone."
-      end
+    timezone = params[:timezone]
+    if find_timezone.call(timezone)
+      reply "Yup, there is a %s timezone" % timezone
     else
-      notify 'Cannot view time for "%s".' % params[1]
+      reply "No such timezone %s" % timezone
     end
   end
+end
+
+hear (/timezone for\s+(?<nick>\S+)/i) do
+  clearance :any
+  description 'Displays the timezone for a specified user.'
+  usage 'timezone for <nick>'
+  on(with_nick.call do |nick|
+    if zone_str = nick.settings[:timezone]
+      reply "Timezone for #{nick.nick} is #{zone_str}"
+    else
+      reply (msg_timezone_not_set % { nick: nick.nick })
+    end
+  end)
+end
+
+hear (/time for\s+(?<nick>\S+)/i) do
+  clearance :any
+  description 'Displays the time for a specified user.'
+  usage 'time for <nick>'
+  on(with_nick.call do |nick|
+    if zone_str = nick.settings[:timezone]
+      reply Scarlet::Fmt.time(Time.now.in_time_zone(zone_str))
+    else
+      reply(msg_timezone_not_set % { nick: nick.nick })
+    end
+  end)
 end
 
 hear (/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) do
@@ -60,7 +94,7 @@ hear (/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) 
         reply 'Ask Doctor Who.'
       end
     else
-      notify 'Invalid time query string!'
+      reply 'Invalid time query string!'
     end
   end
 end
