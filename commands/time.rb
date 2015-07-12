@@ -1,5 +1,11 @@
 require 'chronic'
 
+msg_timezone_not_found = "Could not find timezone %<timezone>s"
+
+find_timezone = proc do |timezone|
+  Time.find_zone timezone
+end
+
 hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   clearance :registered
   description 'Sets your timezone. (used with "time for" command)'
@@ -7,7 +13,7 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   on do
     timezone = params[:timezone]
     if nick = Scarlet::Nick.first(nick: sender.nick)
-      if TZInfo::Timezone.all_identifiers.include?(timezone)
+      if find_timezone.call(timezone)
         nick.settings[:timezone] = timezone
         nick.save
         notify "Your current Time Zone is: %s" % nick.settings[:timezone]
@@ -64,14 +70,14 @@ hear (/time(\s+in\s+(?<timezone>.+))?/) do
   description 'Returns the time for a specified timezone, else returns the bot\'s local time'
   usage 'time [in <timezone>]'
   on do
-    if (tz_name = params[:timezone].presence)
-      if tz = Time.find_zone(tz_name)
+    if (timezone = params[:timezone].presence)
+      if tz = find_timezone.call(timezone)
         reply Scarlet::Fmt.time(Time.now.in_time_zone(tz))
       else
-        notify "Could not find timezone #{tz_name}"
+        reply(msg_timezone_not_found % { timezone: timezone })
       end
     else
-      reply Scarlet::Fmt.time(Time.now.in_time_zone(tz))
+      reply Scarlet::Fmt.time(Time.now.in_time_zone(timezone))
     end
   end
 end
