@@ -105,8 +105,8 @@ class Scarlet
       end
 
       # Sets the callback
-      def on &block
-        @listener.callback = block
+      def on func = nil, &block
+        @listener.callback = func || block
       end
     end
 
