@@ -10,7 +10,7 @@ quotes = [
 "You know what my days used to be like? I just tested. Nobody murdered me. Or put me in a potato. Or fed me to birds. I had a pretty good life.",
 "So you can murder her."
 ]
-  clearance :any
+  clearance nil
   description 'Quotes one of GLaDOS\'s murder quotes.'
   usage 'murda core'
   on do
@@ -25,7 +25,7 @@ murder_templates = [
 ]
 
 hear (/murder(?:\s+(?<nick>\S+))?/) do
-  clearance :any
+  clearance nil
   description 'Returns a random kill scenario, if no username is given, chooses a random user in the channel.'
   usage 'murder [<user>]'
   on do

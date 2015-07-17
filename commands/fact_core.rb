@@ -100,7 +100,7 @@ facts = [
 "To make a photocopier, simply photocopy a mirror.",
 "Dreams are the subconscious mind's way of reminding people to go to school naked and have their teeth fall out."
 ]
-  clearance :any
+  clearance nil
   description 'Returns a random quote from Portal 2\'s Fact core.'
   usage 'fact core'
   on do

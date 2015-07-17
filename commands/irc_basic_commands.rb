@@ -1,5 +1,5 @@
 hear (/(?:leave|part)(?:\s+(\#\S+)(?:\s+(.+))?)?/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Ask bot to leave #channel.'
   usage 'part #<channel>'
   on do
@@ -9,7 +9,7 @@ hear (/(?:leave|part)(?:\s+(\#\S+)(?:\s+(.+))?)?/i) do
 end
 
 hear (/join\s+(.+)/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Ask bot to join #channel or channels.'
   usage 'join <#channel>[,<#channel>,<#channel>]'
   on do
@@ -18,7 +18,7 @@ hear (/join\s+(.+)/i) do
 end
 
 hear (/quit/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Asks the bot to leave the server.'
   usage 'quit'
   on do
@@ -27,7 +27,7 @@ hear (/quit/i) do
 end
 
 hear (/send\s+(.+)/) do
-  clearance :dev
+  clearance &:dev?
   description 'Sends provided string to server'
   usage 'send <string>'
   on do
@@ -36,7 +36,7 @@ hear (/send\s+(.+)/) do
 end
 
 hear (/(privmsg|msg)\s+(?<target>\S+)\s(?<message>.+)/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Sends msg to #channel or user.'
   usage '(privmsg|msg) <#channel | user> <string>'
   on do
@@ -45,7 +45,7 @@ hear (/(privmsg|msg)\s+(?<target>\S+)\s(?<message>.+)/i) do
 end
 
 hear (/action\s+(?<target>\S+)\s+(?<message>.+)/) do
-  clearance :dev
+  clearance &:dev?
   description 'Sends an action <messafe> to the <channel>'
   usage 'action <channel> <message>'
   on do
@@ -54,7 +54,7 @@ hear (/action\s+(?<target>\S+)\s+(?<message>.+)/) do
 end
 
 hear (/notice\s+(?<target>\S+)\s(?<message>.+)/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Sends notice <#channel|user> <string>.'
   usage 'notice <#channel | user> <string>'
   on do
@@ -63,7 +63,7 @@ hear (/notice\s+(?<target>\S+)\s(?<message>.+)/i) do
 end
 
 hear (/cycle(?:\s+(?<channel>\S+))?/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Leave and rejoin #channel.'
   usage 'cycle <#channel>'
   on do

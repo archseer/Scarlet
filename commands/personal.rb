@@ -1,5 +1,5 @@
 hear (/login/i) do
-  clearance :any
+  clearance nil
   description 'Logs the user into his bot account.'
   usage 'login'
   on do
@@ -17,7 +17,7 @@ hear (/login/i) do
 end
 
 hear (/logout/i) do
-  clearance :registered
+  clearance &:registered?
   description 'Logs the user out from his bot account.'
   usage 'logout'
   on do
@@ -29,7 +29,7 @@ hear (/logout/i) do
 end
 
 hear (/register/i) do
-  clearance :any
+  clearance nil
   description 'Registers an account with the bot.'
   usage 'register'
   on do

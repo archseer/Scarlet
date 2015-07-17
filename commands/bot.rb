@@ -1,5 +1,5 @@
 hear (/version/i) do
-  clearance :any
+  clearance nil
   description 'Displays the version information.'
   usage 'version'
   on do
@@ -8,7 +8,7 @@ hear (/version/i) do
 end
 
 hear (/ruby version/i) do
-  clearance :any
+  clearance nil
   description 'Displays current ruby version.'
   usage 'ruby version'
   on do
@@ -17,7 +17,7 @@ hear (/ruby version/i) do
 end
 
 hear (/reload commands/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Loads all available commands.'
   usage 'reload commands'
   on do
@@ -30,7 +30,7 @@ hear (/reload commands/i) do
 end
 
 hear (/reload command\s+(\w+)/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Loads a command set from the commands directory.'
   usage 'reload command <name>'
   on do

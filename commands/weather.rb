@@ -2,7 +2,7 @@
 require 'scarlet/helpers/http_command_helper'
 
 hear (/weather in\s+(?<location>.+)(?:\s+units\s+(?<unit>\S+))?/i) do
-  clearance :any
+  clearance nil
   description 'Displays the current weather stats for <location> in <units>.'
   usage 'weather in <location> units <unit>'
   helpers Scarlet::HttpCommandHelper

@@ -22,8 +22,6 @@ module Scarlet::Plugins
       @listeners = {}
       # Any words we want to filter.
       @filter = []
-      # Contains a map of clearance symbols to their numeric equivalents.
-      @clearance = { any: 0, registered: 1, voice: 2, vip: 3, super_tester: 6, op: 7, dev: 8, owner: 9 }
 
       @loader = Scarlet::Command::Loader.new(self)
       load_commands
@@ -140,18 +138,18 @@ module Scarlet::Plugins
 
     # Checks whether the user actually has access to the command and can use it.
     # @param [Event] event The event that was recieved.
-    # @param [Symbol] privilege The privilege level required for the command.
+    # @param [Array<String>] groups The groups required for the command.
     # @return [Boolean] True if access is allowed, else false.
-    def check_access event, privilege
+    def check_access event, clearance
       nick = Scarlet::Nick.first nick: event.sender.nick
       return false if check_ban(event) # if the user is banned
-      return true if privilege == :any # if it doesn't need clearance (:any)
+      return true unless clearance
 
       if event.server.users.get(event.sender.nick).ns_login # check login
         if !nick # check that user is registered
           event.reply "Registration not found, please register."
           return false
-        elsif nick.privileges < @clearance[privilege]
+        elsif !clearance.call(nick)
           event.reply "Your security clearance does not grant access."
           return false
         end

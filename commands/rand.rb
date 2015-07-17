@@ -1,7 +1,7 @@
 ﻿require 'scarlet/plugins/klik'
 
 hear (/klik/i) do
-  clearance :registered
+  clearance &:registered?
   description 'Displays how many seconds have elapsed between the last klik.'
   usage 'klik'
   on do
@@ -10,8 +10,8 @@ hear (/klik/i) do
   end
 end
 
-hear (/update(?:\s(\S+))?/i) do
-  clearance :dev
+hear (/update(?:\s+(\S+))?/i) do
+  clearance &:dev?
   description 'Just to nag the crap out of Speed.'
   usage 'update [<name>]'
   on do

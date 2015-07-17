@@ -1,5 +1,20 @@
-hear (/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\: (?<reason>.+))?/i) do
-  clearance :dev
+can_ban = lambda do |banner, target|
+  # owners can ban anyone
+  return true if banner.owner?
+  # moderators and above can ban users without an account
+  return true if banner.mod? && !target
+  # devs can only ban admins and below
+  return true if banner.dev? && !target.dev?
+  # admins can only ban moderators and below
+  return true if banner.admin? && !target.admin?
+  # moderators can only other users
+  return true if banner.mod? && !target.mod?
+  return false
+end
+can_unban = can_ban
+
+hear (/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\s*\:\s+(?<reason>.+))?/i) do
+  clearance &:mod?
   description 'Bans a user from using the bot.'
   usage 'bot ban <user>'
   on do
@@ -29,8 +44,8 @@ hear (/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\: (?<reason>.+))?/i) do
   end
 end
 
-hear (/bot unban (.+)/i) do
-  clearance :dev
+hear (/bot unban (?<nicks>.+)/i) do
+  clearance &:mod?
   description 'Unbans a user from using the bot.'
   usage 'bot unban <user>'
   on do
@@ -53,7 +68,7 @@ hear (/bot unban (.+)/i) do
 end
 
 hear (/rename\s+(.+)/i) do
-  clearance :dev
+  clearance &:dev?
   description 'renames the bot to nick.'
   usage 'rename <nick>'
   on do
@@ -62,7 +77,7 @@ hear (/rename\s+(.+)/i) do
 end
 
 hear (/filter (.+)/i) do
-  clearance :dev
+  clearance &:dev?
   description %Q(Bans a specific command phrase.
 This could be either a single word, or a spaced phrase.
 If it's a phrase, it looks for the entire phrase and NOT just
@@ -74,7 +89,7 @@ individual words.)
 end
 
 hear (/unfilter (.+)/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Unbans a specific command phrase.'
   usage 'unfilter <phrase>'
   on do
@@ -83,7 +98,7 @@ hear (/unfilter (.+)/i) do
 end
 
 hear (/restart/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Restarts the bot.'
   usage 'restart'
   on do
@@ -99,7 +114,7 @@ end
 ].each do |str|
   name, cmd = *str
   hear (/#{name}\s(\S+)/i) do
-    clearance :dev
+    clearance &:dev?
     description 'Nick status control.'
     usage "#{name} <nick>"
     on do
@@ -115,7 +130,7 @@ end
 end
 
 hear (/kick\s+(?<nick>\S+)(?<channel>\s+\#\S+)?(?:\s+(?<reason>.+))?/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Kicks nick from channel, if no channel is given, kicks from the sender channel.'
   usage 'kick <nick> [<channel>] [<reason>]'
   on do
@@ -124,7 +139,7 @@ hear (/kick\s+(?<nick>\S+)(?<channel>\s+\#\S+)?(?:\s+(?<reason>.+))?/i) do
 end
 
 hear (/kickban\s+(\S+)/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Kickbans nick from channel'
   usage 'kickban <nick>'
   on do
@@ -133,7 +148,7 @@ hear (/kickban\s+(\S+)/i) do
 end
 
 hear (/invite\s(\S+)(?:\s(\S+))?/i) do
-  clearance :dev
+  clearance &:dev?
   description 'Invites nick to channel'
   usage 'invite <nick>'
   on do
