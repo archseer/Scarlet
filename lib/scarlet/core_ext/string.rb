@@ -12,4 +12,11 @@ class String
   def irc_color fg, bg
     "\x03#{"%02d" % fg},#{"%02d" % bg}#{self}\x03"
   end
+
+  # Splits the string by spaces and returns an Array
+  #
+  # @return [Array<String>]
+  def words
+    split(/\s+/).map(&:presence).compact
+  end
 end
