@@ -50,8 +50,7 @@ describe Scarlet::Fmt do
   context '.time' do
     it 'formats a Time object' do
       tme = Time.at(1430676148)
-      expect(described_class.time(tme)).to match(/\d{2}:\d{2}:\d{2}, \w+ \w+ \d{2} \d{4}/)
+      expect(described_class.time(tme)).to match(/\d{2}:\d{2}:\d{2} \w+, \w+, \w+ \d{2}, \d{4}/)
     end
   end
 end
-
