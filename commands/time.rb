@@ -3,17 +3,6 @@ require 'chronic'
 msg_timezone_not_set = "%<nick>s has not set his or her timezone"
 msg_timezone_not_found = "Could not find timezone %<timezone>s"
 
-with_nick = proc do |&block|
-  proc do
-    nickname = params[:nick].gsub(/\:me/i, sender.nick)
-    if nick = Scarlet::Nick.first(nick: nickname)
-      instance_exec(nick, &block)
-    else
-      reply "Cannot find Nick #{nickname}"
-    end
-  end
-end
-
 find_timezone = proc do |timezone|
   Time.find_zone timezone
 end
@@ -24,7 +13,7 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   usage 'set [my] timezone <timezone>'
   on do
     timezone = params[:timezone]
-    if nick = Scarlet::Nick.first(nick: sender.nick)
+    with_nick sender.nick do |nick|
       if find_timezone.call(timezone)
         nick.settings[:timezone] = timezone
         nick.save
@@ -32,8 +21,6 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
       else
         notify "Invalid Time Zone: %s" % timezone
       end
-    else
-      notify "You cannot access account settings, are you logged in?"
     end
   end
 end
