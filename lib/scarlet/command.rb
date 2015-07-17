@@ -72,7 +72,7 @@ class Scarlet
       #
       # @param [String] text
       # @return [String] stripped string
-      def strip_text text
+      private def strip_text text
         # remove new lines, crunch multiple spaces to single spaces
         text.gsub(/[\n\s]+/, ' ').strip
       end
