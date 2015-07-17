@@ -2,6 +2,7 @@ require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/fmt'
 require 'scarlet/logger'
+require 'scarlet/helpers/nick_helper'
 
 class Scarlet
   # This wraps our DSL for custom bot commands.
@@ -118,6 +119,7 @@ class Scarlet
     # later and run it at a later time, when the event listener tied to it matches.
     class Callback
       include Scarlet::Loggable
+      include NickHelper
 
       # @return [Scarlet::Event]
       attr_reader :event
