@@ -117,10 +117,11 @@ module Scarlet::Plugins
       end
 
       @listeners.keys.each do |key|
+        listener = @listeners[key]
         key.match event.params.first do |matches|
-          if check_access(event, @listeners[key].clearance)
+          if check_access(event, listener.clearance)
             ev = event.dup.tap { |ev| ev.data[:commands] = self }
-            @listeners[key].invoke ev, matches
+            listener.invoke ev, matches
           end
         end
       end
