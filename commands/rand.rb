@@ -11,7 +11,7 @@ hear (/klik/i) do
 end
 
 hear (/update(?:\s+(\S+))?/i) do
-  clearance &:dev?
+  clearance &:sudo?
   description 'Just to nag the crap out of Speed.'
   usage 'update [<name>]'
   on do

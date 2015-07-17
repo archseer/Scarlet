@@ -1,15 +1,18 @@
 hear (/user group (?<cmd>add|remove) (?<nick>\S+) (?<groups>.+)/i) do
-  clearance &:admin?
+  clearance &:sudo?
   description 'Adds user to the given groups'
   usage 'user group (add|remove) <nick> <groups>'
   on do
     admin = sender_nick
     groups = params[:groups].words.uniq
+    if groups.delete('owner')
+      reply "You may not set the owner group!"
+    end
     cmd = params[:cmd]
     with_nick do |nick|
-      unless admin.owner?
-        if nick.admin?
-          reply "You cannot modify another admin's groups"
+      unless admin.root?
+        if nick.sudo?
+          reply "You cannot modify another sudo's groups"
           throw :skip
         elsif same_nick?(admin, nick)
           reply "You cannot modify your own groups"
@@ -21,6 +24,8 @@ hear (/user group (?<cmd>add|remove) (?<nick>\S+) (?<groups>.+)/i) do
         nick.groups |= groups
       when 'remove'
         nick.groups -= groups
+      else
+        raise RuntimeError, "Somthing funky is going on here."
       end
       nick.save
       reply "User #{nick.nick} groups: #{nick.groups}"

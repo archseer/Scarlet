@@ -6,7 +6,7 @@ class Scarlet
     field :nick,       type: String,  validate: { presence: {} }
     field :aliases,    type: Array,   default: proc { Array.new }
     # owner > dev > admin > mod > (every other user)
-    field :groups,     type: Array,   default: proc { ['registered'] }
+    field :groups,     type: Array,   default: proc { ['user'] }
     field :win_points, type: Integer, default: 0
     field :settings,   type: Hash,    default: proc { Hash.new }
 
@@ -19,28 +19,20 @@ class Scarlet
     end
     alias :group? :groups?
 
-    def owner?
-      group?('owner')
+    def root?
+      group?('root')
     end
 
-    def dev?
-      owner? || group?('dev')
-    end
-
-    def admin?
-      dev? || group?('admin')
-    end
-
-    def mod?
-      admin? || group?('mod')
+    def sudo?
+      root? || group?('sudo')
     end
 
     def eval?
-      dev? || group?('eval')
+      root? || group?('eval')
     end
 
     def registered?
-      mod? || group?('registered')
+      root? || group?('user')
     end
 
     def self.owner

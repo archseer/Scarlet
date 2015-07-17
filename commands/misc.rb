@@ -10,7 +10,7 @@ hear (/give me\s+(.+)/) do
 end
 
 hear (/show colors/) do
-  clearance &:dev?
+  clearance &:sudo?
   description 'Draws the entire IRC color pallete.'
   usage 'show colors'
   on do

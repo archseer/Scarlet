@@ -139,7 +139,7 @@ module Scarlet::Plugins
 
     # Checks whether the user actually has access to the command and can use it.
     # @param [Event] event The event that was recieved.
-    # @param [Array<String>] groups The groups required for the command.
+    # @param [Proc] clearance  proc to determine if the use passes clearance
     # @return [Boolean] True if access is allowed, else false.
     def check_access event, clearance
       nick = Scarlet::Nick.first nick: event.sender.nick

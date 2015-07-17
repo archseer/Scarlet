@@ -6,7 +6,7 @@ Scarlet.init
 
 name = ARGV.shift
 
-if nick = Scarlet::Nick.first(privileges: 9)
+if nick = Scarlet::Nick.owner
   if name == nick.nick
     puts "You (#{name}) are the owner..."
   else
@@ -16,7 +16,8 @@ if nick = Scarlet::Nick.first(privileges: 9)
 end
 
 if nick = Scarlet::Nick.first(nick: name)
-  nick.update(privileges: 9)
+  nick.groups << 'root'
+  nick.save
   puts "Successfuly set #{nick.nick} as owner."
 else
   puts "No user #{name} exists! Register first with Scarlet (use !register in the channel)."

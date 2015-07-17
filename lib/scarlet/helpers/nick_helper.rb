@@ -27,13 +27,9 @@ class Scarlet
     # @param [String] nn  nickname to look for, if nil, will expect a params[:nick]
     # @yieldparam [Nick] nick
     def with_nick(nn = nil, &block)
-      options = {
-        msgfmt: 'Cannot find Nick %s'
-      }
-      if nn.is_a?(Hash)
-        options = nn
-        nn = options[:nick]
-      end
+      (options, nn = nn, nn[:nick]) if nn.is_a?(Hash)
+      options ||= {}
+      options[:msgfmt] ||= 'Cannot find Nick %s'
       nickname = handle_special_nick(nn || params[:nick])
       if nick = Scarlet::Nick.first(nick: nickname)
         catch :skip do
