@@ -2,7 +2,7 @@ require 'octokit'
 require 'scarlet/helpers/http_command_helper'
 
 hear (/gh status/) do
-  clearance :any
+  clearance nil
   description 'Displays latest message from github.status'
   usage 'gh status'
   helpers Scarlet::HttpCommandHelper
@@ -20,7 +20,7 @@ hear (/gh status/) do
 end
 
 hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
-  clearance :registered
+  clearance &:registered?
   usage 'gh commit <repo> [<sha>]'
   on do
     repo = params[:repo]
@@ -53,7 +53,7 @@ hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
 end
 
 hear (/gh repo\s+(?<reponame>\S+)/) do
-  clearance :registered
+  clearance &:registered?
   description ''
   usage 'gh repo <reponame>'
   on do
@@ -73,7 +73,7 @@ hear (/gh repo\s+(?<reponame>\S+)/) do
 end
 
 hear (/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
-  clearance :registered
+  clearance &:registered?
   description 'Prints user information, format is a valid ruby formatting string with keynames.'
   usage 'gh user <username> <fmt>'
   on do
@@ -92,7 +92,7 @@ hear (/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
 end
 
 hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
-  clearance :registered
+  clearance &:registered?
   description 'Prints out a github issue.'
   usage 'gh issue <repo> #<issue_number>'
   on do
@@ -111,7 +111,7 @@ hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
 end
 
 hear (/gh search repos\s+(?<terms>.+)/i) do
-  clearance :registered
+  clearance &:registered?
   description 'Searches github for reposistories using the provided search <terms>.'
   usage 'gh search repos <terms>'
   on do

@@ -1,7 +1,7 @@
 # encoding: utf-8
 # Do it. For science.
 hear (/give me\s+(.+)/) do
-  clearance :any
+  clearance nil
   description 'Responds with an action, "giving" the user the requested item.'
   usage 'give me <item>'
   on do
@@ -10,7 +10,7 @@ hear (/give me\s+(.+)/) do
 end
 
 hear (/show colors/) do
-  clearance :dev
+  clearance &:sudo?
   description 'Draws the entire IRC color pallete.'
   usage 'show colors'
   on do
@@ -21,7 +21,7 @@ hear (/show colors/) do
 end
 
 hear (/poke\s+(.+)/) do
-  clearance :registered
+  clearance &:registered?
   description 'Sends a notice to <nick>, saying you poked him.'
   usage 'poke <nick>'
   on do

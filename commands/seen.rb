@@ -1,7 +1,7 @@
 require 'time-lord'
 
 hear (/seen (?<nick>\S+)/i) do
-  clearance :registered
+  clearance &:registered?
   description 'When was the last time you saw nick?'
   usage 'seen <nick>'
   on do

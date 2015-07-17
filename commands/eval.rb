@@ -1,5 +1,5 @@
 hear (/eval\s+(.+)/) do
-  clearance :dev
+  clearance &:eval?
   description 'Evals a provided string has ruby'
   usage 'eval <string>'
   on do

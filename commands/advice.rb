@@ -29,7 +29,7 @@ hear (/what (?:do you|should I) do (?:when|about) (?<query>.*)/i),
   (/how do you handle (?<query>.*)/i),
   (/some advice about (?<query>.*)/i),
   (/think about (?<query>.*)/i) do
-  clearance :any
+  clearance nil
   description 'Ask about the wonders of the world!'
   helpers Scarlet::HttpCommandHelper
   on do
@@ -48,7 +48,7 @@ hear (/what (?:do you|should I) do (?:when|about) (?<query>.*)/i),
 end
 
 hear (/advice/i) do
-  clearance :any
+  clearance nil
   description 'Ask for random advice.'
   usage 'advice'
   helpers Scarlet::HttpCommandHelper

@@ -3,7 +3,7 @@ require 'scarlet/helpers/http_command_helper'
 require 'scarlet/helpers/json_command_helper'
 
 hear (/google\s+(.+)/) do
-  clearance :any
+  clearance nil
   description 'Harness the power of google!'
   usage 'google <terms>'
   helpers Scarlet::HttpCommandHelper, Scarlet::JsonCommandHelper
@@ -22,7 +22,7 @@ hear (/google\s+(.+)/) do
 end
 
 hear (/lmgtfy\s+(.+)/) do
-  clearance :any
+  clearance nil
   description 'Lemme google that for you.'
   usage 'lmgtfy <request>'
   on do

@@ -1,5 +1,5 @@
 hear (/dcc/i) do
-  clearance :owner
+  clearance &:root?
   on do
     Scarlet::DCC.send @event, 'chellocat.jpg'
   end

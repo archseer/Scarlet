@@ -3,28 +3,17 @@ require 'chronic'
 msg_timezone_not_set = "%<nick>s has not set his or her timezone"
 msg_timezone_not_found = "Could not find timezone %<timezone>s"
 
-with_nick = proc do |&block|
-  proc do
-    nickname = params[:nick].gsub(/\:me/i, sender.nick)
-    if nick = Scarlet::Nick.first(nick: nickname)
-      instance_exec(nick, &block)
-    else
-      reply "Cannot find Nick #{nickname}"
-    end
-  end
-end
-
 find_timezone = proc do |timezone|
   Time.find_zone timezone
 end
 
 hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
-  clearance :registered
+  clearance &:registered?
   description 'Sets your timezone. (used with "time for" command)'
   usage 'set [my] timezone <timezone>'
   on do
     timezone = params[:timezone]
-    if nick = Scarlet::Nick.first(nick: sender.nick)
+    with_nick sender.nick do |nick|
       if find_timezone.call(timezone)
         nick.settings[:timezone] = timezone
         nick.save
@@ -32,14 +21,12 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
       else
         notify "Invalid Time Zone: %s" % timezone
       end
-    else
-      notify "You cannot access account settings, are you logged in?"
     end
   end
 end
 
 hear (/timezone\? (?<timezone>.+)/i) do
-  clearance :any
+  clearance nil
   description 'Checks if the given timezone is valid.'
   usage 'timezone? <timezone>'
   on do
@@ -53,33 +40,37 @@ hear (/timezone\? (?<timezone>.+)/i) do
 end
 
 hear (/timezone for\s+(?<nick>\S+)/i) do
-  clearance :any
+  clearance nil
   description 'Displays the timezone for a specified user.'
   usage 'timezone for <nick>'
-  on(with_nick.call do |nick|
-    if zone_str = nick.settings[:timezone]
-      reply "Timezone for #{nick.nick} is #{zone_str}"
-    else
-      reply (msg_timezone_not_set % { nick: nick.nick })
+  on do
+    with_nick do |nick|
+      if zone_str = nick.settings[:timezone]
+        reply "Timezone for #{nick.nick} is #{zone_str}"
+      else
+        reply (msg_timezone_not_set % { nick: nick.nick })
+      end
     end
-  end)
+  end
 end
 
 hear (/time for\s+(?<nick>\S+)/i) do
-  clearance :any
+  clearance nil
   description 'Displays the time for a specified user.'
   usage 'time for <nick>'
-  on(with_nick.call do |nick|
-    if zone_str = nick.settings[:timezone]
-      reply Scarlet::Fmt.time(Time.now.in_time_zone(zone_str))
-    else
-      reply(msg_timezone_not_set % { nick: nick.nick })
+  on do
+    with_nick do |nick|
+      if zone_str = nick.settings[:timezone]
+        reply Scarlet::Fmt.time(Time.now.in_time_zone(zone_str))
+      else
+        reply(msg_timezone_not_set % { nick: nick.nick })
+      end
     end
-  end)
+  end
 end
 
 hear (/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) do
-  clearance :any
+  clearance nil
   description 'Calculates time using natural language parsing and optionally a timezone.'
   usage 'time query <query> [:in <timezone>]'
   on do
@@ -100,7 +91,7 @@ hear (/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) 
 end
 
 hear (/time(\s+in\s+(?<timezone>.+))?/) do
-  clearance :any
+  clearance nil
   description 'Returns the time for a specified timezone, else returns the bot\'s local time'
   usage 'time [in <timezone>]'
   on do

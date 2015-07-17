@@ -6,6 +6,7 @@
   :destroyed_at: -1
   :nick: RspecGuy
   :aliases: []
-  :privileges: 9
+  :groups:
+    - 'owner'
   :win_points: 0
   :settings: {}

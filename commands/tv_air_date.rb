@@ -1,5 +1,5 @@
 hear (/when does next (.+?)(?: episode)? air\??/) do
-  clearance :registered
+  clearance &:registered?
   description 'Searches for the next air date of <show>.'
   usage 'when does next <show> episode air?'
   on do

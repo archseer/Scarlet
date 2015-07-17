@@ -1,5 +1,5 @@
 hear (/ping/i) do
-  clearance :any
+  clearance nil
   description 'Pings the bot, should respond with PONG!'
   usage 'ping'
   on do
@@ -8,7 +8,7 @@ hear (/ping/i) do
 end
 
 hear (/pong/i) do
-  clearance :any
+  clearance nil
   description 'Pongs the bot, should respond with PING!'
   usage 'pong'
   on do

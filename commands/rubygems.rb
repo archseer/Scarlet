@@ -1,7 +1,7 @@
 require 'scarlet/helpers/http_command_helper'
 
 hear (/rubygems gem\s+(?<gemname>.+)/) do
-  clearance :any
+  clearance nil
   description 'Displays information about a gem <gemname>.'
   usage 'rubygems gem <gemname>'
   helpers Scarlet::HttpCommandHelper
@@ -20,7 +20,7 @@ hear (/rubygems gem\s+(?<gemname>.+)/) do
 end
 
 hear (/rubygems search\s+(?<name>.+)/) do
-  clearance :any
+  clearance nil
   description 'Searchs for gems with <name>'
   usage 'rubygems search <name>'
   helpers Scarlet::HttpCommandHelper

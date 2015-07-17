@@ -112,7 +112,9 @@ quotes = [
 "YEEEHAAAAAW!",
 "Ah!"
 ]
-  clearance :any
+  clearance nil
+  description 'Says a random quote from space core!'
+  usage 'space core'
   on do
     reply quotes[rand(quotes.length)]
   end

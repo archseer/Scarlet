@@ -67,7 +67,7 @@ ddg = lambda do |ctx, search_terms|
 end
 
 hear (/ddg\s+(?<search_term>.+)/) do
-  clearance :any
+  clearance nil
   description 'Search for something using DuckDuckGo.'
   usage 'ddg <search_term>'
   helpers Scarlet::HttpCommandHelper
