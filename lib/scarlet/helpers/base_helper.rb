@@ -7,7 +7,7 @@ class Scarlet
     # @param [String] msg
     # @yieldparam [String]
     def chop_msg msg, &block
-      Scarlet::Fmt.chop_msg Scarlet::Fmt.purify_msg(msg), &block
+      fmt.chop_msg fmt.purify_msg(msg), &block
     end
 
     # Sends a PRIVMG message. Logs the message to the log.
@@ -44,6 +44,29 @@ class Scarlet
     # @param [*Array] channels A list of channels to join.
     def join *channels
       @event.server.send "JOIN #{channels.join(',')}"
+    end
+
+    # Sends a reply back to where the event came from (a user or a channel).
+    # @param [String] message The message to send back.
+    def reply(message)
+      msg @event.return_path, message
+    end
+
+    # Sends a NOTICE reply back to the sender (a user).
+    # @param [String] message The message to send back.
+    def notify(message)
+      notice @event.sender.nick, message
+    end
+
+    # Send a reply back as a ctcp message.
+    def ctcp(command, message)
+      notify "\001#{command} #{message}\001"
+    end
+
+    # Sends a described action back to where the event came from.
+    # @param (see #reply)
+    def action(message)
+      reply "\001ACTION #{message}\001"
     end
 
     # format module

@@ -152,7 +152,7 @@ class Scarlet
         end
       end
 
-      delegate :msg, :notice, :reply, :action, :send, :send_cmd, to: :@event
+      delegate :msg, :notice, :reply, :action, :send, to: :@event
 
       def error_reply(msg)
         reply msg
