@@ -41,7 +41,7 @@ class Scarlet
     end
 
     on :ping do |event|
-      event.server.send "PONG :#{event.target}"
+      send "PONG :#{event.target}"
     end
 
     on :pong do |event|
@@ -151,7 +151,7 @@ class Scarlet
         if event.server.state == :connecting
           # get an array of extensions we want and that server supports
           ext = (%w[multi-prefix account-notify extended-join sasl] & event.server.cap_extensions.keys)
-          event.server.send "CAP REQ :#{ext.join(' ')}"
+          send "CAP REQ :#{ext.join(' ')}"
         end
       when 'ACK'
         event.params[1].split(' ').each {|extension| event.server.cap_extensions[extension] = true }
@@ -159,16 +159,16 @@ class Scarlet
         if event.server.cap_extensions['sasl'] && config.sasl
           event.server.send_sasl
         else
-          event.server.send "CAP END"
+          send "CAP END"
         end
       when 'NAK'
         event.params[1].split(' ').each {|extension| event.server.cap_extensions[extension] = false}
-        event.server.send "CAP END"
+        send "CAP END"
       end
     end
 
     on :authenticate do |event| # SASL AUTHENTICATE
-      event.server.send "AUTHENTICATE #{event.server.sasl.generate(config.nick, config.nickserv_password, event.target)}"
+      send "AUTHENTICATE #{event.server.sasl.generate(config.nick, config.nickserv_password, event.target)}"
     end
 
     on :'001' do |event| # RPL_WELCOME - First message sent after client registration.
@@ -214,11 +214,11 @@ class Scarlet
       # create a new parser that uses the list of possible modes on this network.
       event.server.parser = Parser.new(event.server.extensions[:prefix])
       # set up CAP extension multi-prefix the legacy way if it doesn't support CAP
-      event.server.send "PROTOCTL NAMESX" if event.server.extensions[:namesx]
+      send "PROTOCTL NAMESX" if event.server.extensions[:namesx]
     end
 
     on :'376' do |event| # END of MOTD command. Join channel(s)! (if any)
-      event.server.join *event.server.config.channels unless event.server.config.channels.empty?
+      join *event.server.config.channels unless event.server.config.channels.empty?
     end
 
     on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
@@ -229,12 +229,12 @@ class Scarlet
     on :'433' do |event| # ERR_NICKNAMEINUSE - Nickname is already in use
       # dumb retry, append "Bot" to nick and resend NICK
       event.server.current_nick += 'Bot' and
-        event.server.send "NICK #{event.server.current_nick}"
+        send "NICK #{event.server.current_nick}"
     end
 
     on :'903' do |event| # SASL authentification successful
       puts "[SASL] Auth with #{event.server.sasl.mechanism_name} successful".light_green
-      event.server.send "CAP END"
+      send "CAP END"
     end
 
     on :'904' do |event| # SASL mechanism failed

@@ -10,6 +10,11 @@ class Scarlet
       fmt.chop_msg fmt.purify_msg(msg), &block
     end
 
+    # Send data via the server.
+    def send(*args)
+      @event.server.send *args
+    end
+
     # Sends a PRIVMG message. Logs the message to the log.
     #
     # @param [String, Symbol] target The target recipient of the message.
@@ -43,7 +48,7 @@ class Scarlet
     #
     # @param [*Array] channels A list of channels to join.
     def join *channels
-      @event.server.send "JOIN #{channels.join(',')}"
+      send "JOIN #{channels.join(',')}"
     end
 
     # Sends a reply back to where the event came from (a user or a channel).
