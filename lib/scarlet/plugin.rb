@@ -2,6 +2,7 @@ require 'active_support/concern'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/listeners'
 require 'scarlet/logger'
+require 'scarlet/helpers/base_helper'
 
 class Scarlet
   module Helpers
