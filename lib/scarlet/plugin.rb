@@ -43,6 +43,7 @@ class Scarlet
 
     included do
       # ~
+      helper Scarlet::BaseHelper
     end
 
     def emit(event)
