@@ -8,7 +8,5 @@ rvm:
 - 2.1
 - 2.2
 - ruby-head
-install:
-- bundle install
 script:
 - bundle exec rspec
