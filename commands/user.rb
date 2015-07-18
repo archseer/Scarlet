@@ -38,7 +38,7 @@ hear (/user groups(?:\s+(?<nick>\S+))?/i) do
   description 'Displays which groups the user belongs to'
   usage 'user groups [<nick>]'
   on do
-    with_nick do |nick|
+    with_nick params[:nick] || sender.nick do |nick|
       reply nick.groups.join(" ")
     end
   end
@@ -49,7 +49,7 @@ hear (/user status(?:\s+(?<nick>\S+))?/i) do
   description 'Displays whether the user is logged in or not'
   usage 'user status [<nick>]'
   on do
-    with_nick do |nick|
+    with_nick params[:nick] || sender.nick do |nick|
       user = event.server.users.get(nick.nick)
       if user.ns_login
         reply "#{nick.nick} is logged in"
