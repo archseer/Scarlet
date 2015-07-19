@@ -68,8 +68,7 @@ class Scarlet
       klass = self.class
       execute = lambda do |block|
         begin
-          puts klass.helpers.singleton_methods
-          cxt = Scarlet::Context.new(event, klass.helpers, self, event.server)
+          cxt = Scarlet::Context.new(event.dup, klass.helpers, self, event.server)
           cxt.exec(&block)
         rescue Exception => ex
           logger.error ex.inspect
