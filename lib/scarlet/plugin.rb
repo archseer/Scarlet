@@ -15,7 +15,7 @@ class Scarlet
 
       def helper(*args, &block)
         args.each do |mod|
-          helpers.module_eval { extend mod }
+          helpers.module_eval { include mod }
         end
 
         helpers.module_eval(&block) if block_given?
@@ -24,9 +24,16 @@ class Scarlet
   end
 
   class Context
-    def initialize event, *objs
+    attr_accessor :event
+
+    def initialize event, helpers, *objs
       @event = event
+      extend(helpers)
       @objs = objs
+    end
+
+    def exec(&block)
+      instance_exec(@event, &block)
     end
 
     def method_missing method, *args, &block
@@ -61,8 +68,9 @@ class Scarlet
       klass = self.class
       execute = lambda do |block|
         begin
-          cxt = Scarlet::Context.new(event, self, klass.helpers, event.server)
-          cxt.instance_exec(event.dup, &block)
+          puts klass.helpers.singleton_methods
+          cxt = Scarlet::Context.new(event, klass.helpers, self, event.server)
+          cxt.exec(&block)
         rescue Exception => ex
           logger.error ex.inspect
           logger.error ex.backtrace.join("\n")
