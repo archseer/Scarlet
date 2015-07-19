@@ -24,7 +24,8 @@ class Scarlet
   end
 
   class Context
-    def initialize *objs
+    def initialize event, *objs
+      @event = event
       @objs = objs
     end
 
@@ -60,7 +61,7 @@ class Scarlet
       klass = self.class
       execute = lambda do |block|
         begin
-          cxt = Scarlet::Context.new(self, klass.helpers, event.server)
+          cxt = Scarlet::Context.new(event, self, klass.helpers, event.server)
           cxt.instance_exec(event.dup, &block)
         rescue Exception => ex
           logger.error ex.inspect
