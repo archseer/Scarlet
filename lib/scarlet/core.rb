@@ -53,12 +53,7 @@ class Scarlet
     end
 
     on :notice do |event|
-      # handle NickServ login checks
-      if event.sender.nick == "NickServ"
-        if ns_params = event.params.first.match(/STATUS\s(?<nick>\S+)\s(?<digit>\d)$|(?<nick>\S+)\sACC\s(?<digit>\d)$/i)
-          event.server.users.get(ns_params[:nick]).ns_login = true if ns_params[:digit] == "3"
-        end
-      elsif event.sender.nick == "HostServ"
+      if event.sender.nick == "HostServ"
         event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) do |host|
           event.server.vHost = host[1]
           logger.info "#{event.server.vHost} is now your hidden host (set by services.)"
@@ -78,25 +73,6 @@ class Scarlet
 
       user = event.server.users.get_ensured(event.sender.nick)
       user.join event.server.channels.get(event.channel)
-
-      if event.server.current_nick != event.sender.nick
-        if !event.params.empty? && event.server.cap_extensions['extended-join']
-          # extended-join is enabled, which means that join returns two extra params,
-          # NickServ account name and real name. This means, we don't need to query
-          # NickServ about the user's login status.
-          user.ns_login = true
-          user.account_name = event.params[0]
-        else
-          # No luck, we need to manually query for a login check.
-          # a) if WHOX is available, query with WHOX.
-          # b) if still no luck, query NickServ.
-          if event.server.cap_extensions['whox']
-            event.server.send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
-          else
-            event.server.check_ns_login event.sender.nick
-          end
-        end
-      end
     end
 
     on :part do |event|
@@ -195,16 +171,6 @@ class Scarlet
       event.server.send "AUTHENTICATE #{event.server.sasl.generate(config.nick, config.password, event.target)}"
     end
 
-    on :account do |event|
-      # This is a capability extension for tracking user NickServ logins and logouts
-      # event.target is the accountname, * if there is none. This must get executed
-      # either way, because either the user logged in, or he logged out. (a change)
-      if user = event.sender.user
-        user.ns_login = event.target != "*" ? true : false
-        user.account_name = event.target != "*" ? event.target : nil
-      end
-    end
-
     on :'001' do |event| # RPL_WELCOME - First message sent after client registration.
       event.server.state = :connected
       # login only if a password was supplied and SASL wasn't used
@@ -240,41 +206,6 @@ class Scarlet
         channel = event.server.channels.get(event.params[1])
         user.join channel
         channel.user_flags[user] = flags
-      end
-    end
-
-    on :'354' do |event| # WHOX response
-      # There's many different outputs, depending on flags. Right now, we'll just
-      # parse those which include 42 (our login checks)
-
-      if event.params.first == '42'
-        # 0 - 42, 1 - channel, 2 - nick, 3 - account name (0 if none)
-        if event.params[3] != '0'
-          if user = event.server.users.get(event.params[2])
-            user.ns_login = true
-            user.account_name = event.params[3]
-          end
-        end
-      else
-        logger.warn "WHOX TODO -- params: #{event.params.inspect};"
-      end
-
-    end
-
-    on :'366' do |event| # end of /NAMES list
-      # After we got our NAMES list, we want to check their NickServ login stat.
-      # event.params.first <== channel
-
-      # if WHOX is enabled, we can use the 'a' flag to get user's account names
-      # if the user has an account name, he is logged in. This is the prefered
-      # way to check logins on bot join, as it only needs one message.
-      #
-      # WHOX - http://hg.quakenet.org/snircd/file/37c9c7460603/doc/readme.who
-
-      if event.server.extensions[:whox]
-        event.server.send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
-      else
-        event.server.check_ns_login event.server.channels.get(event.params.first).users.map(&:name)
       end
     end
 
