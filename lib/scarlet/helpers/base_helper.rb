@@ -48,6 +48,7 @@ class Scarlet
     #
     # @param [*Array] channels A list of channels to join.
     def join *channels
+      return if channels.empty?
       send "JOIN #{channels.join(',')}"
     end
 
