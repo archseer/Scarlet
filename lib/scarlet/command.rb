@@ -40,7 +40,7 @@ class Scarlet
         @description = ''
         @usage = ''
         @regex = nil
-        @helpers = []
+        @helpers = [Scarlet::BaseHelper]
       end
 
       def help

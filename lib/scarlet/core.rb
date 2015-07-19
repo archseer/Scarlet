@@ -197,7 +197,6 @@ class Scarlet
       event.server.channels.get(event.params.first).topic = event.params[1]
     end
 
-
     on :'353' do |event| # NAMES list
       # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
       # param[1] -> chan, param[2] - users
