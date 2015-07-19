@@ -11,8 +11,8 @@ class Scarlet
     end
 
     # Send data via the server.
-    def send(*args)
-      @event.server.send *args
+    def send_data(data)
+      @event.server.send data
     end
 
     # Sends a PRIVMG message. Logs the message to the log.
@@ -49,7 +49,7 @@ class Scarlet
     # @param [*Array] channels A list of channels to join.
     def join *channels
       return if channels.empty?
-      send "JOIN #{channels.join(',')}"
+      send_data "JOIN #{channels.join(',')}"
     end
 
     # Sends a reply back to where the event came from (a user or a channel).
