@@ -12,7 +12,7 @@ class Scarlet
 
     # Send data via the server.
     def send_data(data)
-      @event.server.send data
+      event.server.send data
     end
 
     # Sends a PRIVMG message. Logs the message to the log.
@@ -21,7 +21,7 @@ class Scarlet
     # @param [String] message The message to be sent.
     def msg target, message
       chop_msg message do |m|
-        @event.server.throttle_send "PRIVMSG #{target} :#{m}"
+        event.server.throttle_send "PRIVMSG #{target} :#{m}"
         write_log :privmsg, m, target
       end
     end
@@ -32,7 +32,7 @@ class Scarlet
     # @param [String] message The message to be sent.
     def notice target, message
       chop_msg message do |m|
-        @event.server.throttle_send "NOTICE #{target} :#{m}"
+        event.server.throttle_send "NOTICE #{target} :#{m}"
         write_log :notice, message, target
       end
     end
@@ -55,13 +55,13 @@ class Scarlet
     # Sends a reply back to where the event came from (a user or a channel).
     # @param [String] message The message to send back.
     def reply(message)
-      msg @event.return_path, message
+      msg event.return_path, message
     end
 
     # Sends a NOTICE reply back to the sender (a user).
     # @param [String] message The message to send back.
     def notify(message)
-      notice @event.sender.nick, message
+      notice event.sender.nick, message
     end
 
     # Send a reply back as a ctcp message.
