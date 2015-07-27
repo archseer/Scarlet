@@ -13,6 +13,7 @@ class Scarlet
     include Moon::Record
 
     field :id,           type: String,  default: proc { SecureRandom.uuid }
+    field :short_id,     type: String,  default: nil
     field :created_at,   type: Integer, default: proc { Time.now.to_i }
     field :updated_at,   type: Integer, default: proc { Time.now.to_i }
     field :destroyed_at, type: Integer, default: proc { -1 }
@@ -37,6 +38,11 @@ class Scarlet
 
     def self.prepare_repository
       FileUtils.mkdir_p(File.dirname(repository_filename))
+    end
+
+    def post_initialize
+      super
+      self.short_id = id[0, 8]
     end
 
     def pre_update
