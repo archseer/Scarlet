@@ -1,4 +1,4 @@
-﻿require 'scarlet/plugins/klik'
+﻿require 'scarlet/commands/klik'
 
 hear (/klik/i) do
   clearance &:registered?
