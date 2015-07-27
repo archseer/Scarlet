@@ -7,9 +7,14 @@ class Scarlet
       "( #{u} )"
     end
 
+    # Formats a given id, such as a sha256 or uuid
+    def self.id(id)
+      id.center(id.size + 2, ' ').irc_color(1, 8)
+    end
+
     # Formats a Github sha value
     def self.commit_sha(sha)
-      sha[0, 8].center(10, ' ').irc_color(1, 8)
+      id sha[0, 8]
     end
 
     # Removes newlines and returns from the string
