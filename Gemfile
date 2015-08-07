@@ -8,6 +8,7 @@ gem 'em-throttled_queue'
 gem 'em-http-request', github: 'igrigorik/em-http-request'
 gem 'rufus-scheduler'
 gem 'multi_json' # needed for em-http-request
+gem 'bson', '>= 3.0.4'
 gem 'bson_ext'
 gem 'yajl-ruby' # awesomeness
 
@@ -20,7 +21,7 @@ gem 'moon-data_model',   github: 'polyfox/moon-data_model'
 gem 'moon-repository',   github: 'polyfox/moon-repository'
 
 # All the awesome
-gem 'activesupport'
+gem 'activesupport', '>= 4.2.2'
 
 # console
 gem 'colorize'
