@@ -28,12 +28,12 @@ class Scarlet
     use Scarlet::Plugins::Command
   end
 
-  def self.setup &block
-    new.setup &block
+  def self.setup(&block)
+    new.setup(&block)
   end
 
-  def self.run &block
-    new.run &block
+  def self.run(&block)
+    new.run(&block)
   end
 
   def use plugin

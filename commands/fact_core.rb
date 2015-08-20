@@ -1,4 +1,4 @@
-hear (/fact core/) do
+hear(/fact core/) do
 facts = [
 "The situation you are in is very dangerous.",
 "The likelihood of you dying within the next five minutes is eighty-seven point six one percent.",

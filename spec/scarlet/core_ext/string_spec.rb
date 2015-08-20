@@ -4,7 +4,7 @@ require 'scarlet/core_ext/string'
 describe String do
   context '#word_wrap' do
     it 'wraps a string around the given width' do
-      str = %Q(Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Vivamus vitae risus vitae lorem iaculis placerat. Aliquam sit amet felis. Etiam congue.)
+      str = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Vivamus vitae risus vitae lorem iaculis placerat. Aliquam sit amet felis. Etiam congue."
       actual = str.word_wrap(40)
       expect(actual).to eq "Lorem ipsum dolor sit amet, consectetuer\nadipiscing elit. Vivamus vitae risus\nvitae lorem iaculis placerat. Aliquam\nsit amet felis. Etiam congue.\n"
     end

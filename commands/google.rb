@@ -2,7 +2,7 @@ require 'cgi'
 require 'scarlet/helpers/http_command_helper'
 require 'scarlet/helpers/json_command_helper'
 
-hear (/google\s+(.+)/) do
+hear(/(g|google)\s+(.+)/) do
   clearance nil
   description 'Harness the power of google!'
   usage 'google <terms>'
@@ -21,7 +21,7 @@ hear (/google\s+(.+)/) do
   end
 end
 
-hear (/lmgtfy\s+(.+)/) do
+hear(/lmgtfy\s+(.+)/) do
   clearance nil
   description 'Lemme google that for you.'
   usage 'lmgtfy <request>'

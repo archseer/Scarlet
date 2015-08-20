@@ -10,8 +10,8 @@ class Scarlet
     # Enumerate trough all items on the list.
     #
     # @yield [Object] Gives the object to the block.
-    def each &block
-      @collection.each &block
+    def each(&block)
+      @collection.each(&block)
     end
 
     # Gets the queried objects from the collection.

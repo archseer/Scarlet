@@ -1,7 +1,7 @@
 require 'octokit'
 require 'scarlet/helpers/http_command_helper'
 
-hear (/gh status/) do
+hear(/gh status/) do
   clearance nil
   description 'Displays latest message from github.status'
   usage 'gh status'
@@ -19,8 +19,8 @@ hear (/gh status/) do
   end
 end
 
-hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
-  clearance &:registered?
+hear(/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
+  clearance(&:registered?)
   usage 'gh commit <repo> [<sha>]'
   on do
     repo = params[:repo]
@@ -52,8 +52,8 @@ hear (/gh commit\s+(?<repo>\S+)(?:\s+:(?<branch>\S+))?(?:\s+(?<sha>\S+))?/i) do
   end
 end
 
-hear (/gh repo\s+(?<reponame>\S+)/) do
-  clearance &:registered?
+hear(/gh repo\s+(?<reponame>\S+)/) do
+  clearance(&:registered?)
   description ''
   usage 'gh repo <reponame>'
   on do
@@ -72,8 +72,8 @@ hear (/gh repo\s+(?<reponame>\S+)/) do
   end
 end
 
-hear (/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
-  clearance &:registered?
+hear(/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
+  clearance(&:registered?)
   description 'Prints user information, format is a valid ruby formatting string with keynames.'
   usage 'gh user <username> <fmt>'
   on do
@@ -84,15 +84,15 @@ hear (/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
     end
     if data
       fomt = params[:fomt].presence || "%<login>s #{fmt.uri(data['html_url'])}"
-      reply (fomt % data)
+      reply(fomt % data)
     else
       reply "User #{username} not found"
     end
   end
 end
 
-hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
-  clearance &:registered?
+hear(/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
+  clearance(&:registered?)
   description 'Prints out a github issue.'
   usage 'gh issue <repo> #<issue_number>'
   on do
@@ -103,15 +103,15 @@ hear (/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
     rescue Octokit::NotFound
     end
     if i
-      reply ("github/#{reponame}: %<title>s #{fmt.uri(i['html_url'])}" % i)
+      reply("github/#{reponame}: %<title>s #{fmt.uri(i['html_url'])}" % i)
     else
       reply 'Repo or issue did not exist.'
     end
   end
 end
 
-hear (/gh search repos\s+(?<terms>.+)/i) do
-  clearance &:registered?
+hear(/gh search repos\s+(?<terms>.+)/i) do
+  clearance(&:registered?)
   description 'Searches github for reposistories using the provided search <terms>.'
   usage 'gh search repos <terms>'
   on do

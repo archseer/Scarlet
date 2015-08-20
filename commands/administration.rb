@@ -9,8 +9,8 @@ can_ban = lambda do |banner, target|
 end
 can_unban = can_ban
 
-hear (/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\s*\:\s+(?<reason>.+))?/i) do
-  clearance &:sudo?
+hear(/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\s*\:\s+(?<reason>.+))?/i) do
+  clearance(&:sudo?)
   description 'Bans a user from using the bot.'
   usage 'bot ban <user>'
   on do
@@ -42,8 +42,8 @@ hear (/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\s*\:\s+(?<reason>.+))?/i) do
   end
 end
 
-hear (/bot unban (?<nicks>.+)/i) do
-  clearance &:sudo?
+hear(/bot unban (?<nicks>.+)/i) do
+  clearance(&:sudo?)
   description 'Unbans a user from using the bot.'
   usage 'bot unban <user>'
   on do
@@ -73,8 +73,8 @@ hear (/bot unban (?<nicks>.+)/i) do
   end
 end
 
-hear (/rename\s+(.+)/i) do
-  clearance &:sudo?
+hear(/rename\s+(.+)/i) do
+  clearance(&:sudo?)
   description 'renames the bot to nick.'
   usage 'rename <nick>'
   on do
@@ -82,8 +82,8 @@ hear (/rename\s+(.+)/i) do
   end
 end
 
-hear (/filter (.+)/i) do
-  clearance &:sudo?
+hear(/filter (.+)/i) do
+  clearance(&:sudo?)
   description %Q(Bans a specific command phrase.
 This could be either a single word, or a spaced phrase.
 If it's a phrase, it looks for the entire phrase and NOT just
@@ -94,8 +94,8 @@ individual words.)
   end
 end
 
-hear (/unfilter (.+)/i) do
-  clearance &:sudo?
+hear(/unfilter (.+)/i) do
+  clearance(&:sudo?)
   description 'Unbans a specific command phrase.'
   usage 'unfilter <phrase>'
   on do
@@ -103,8 +103,8 @@ hear (/unfilter (.+)/i) do
   end
 end
 
-hear (/restart/i) do
-  clearance &:sudo?
+hear(/restart/i) do
+  clearance(&:sudo?)
   description 'Restarts the bot.'
   usage 'restart'
   on do
@@ -119,8 +119,8 @@ end
  ['voice', [:+, :voice]], ['devoice', [:-, :voice]]
 ].each do |str|
   name, (op, mode) = *str
-  hear (/#{name}\s(\S+)/i) do
-    clearance &:sudo?
+  hear(/#{name}\s(\S+)/i) do
+    clearance(&:sudo?)
     description "##{op == :+ ? 'Gives' : 'Removes'} #{mode} for user."
     usage "#{name} <nick>"
     on do
@@ -134,8 +134,8 @@ end
   end
 end
 
-hear (/kick\s+(?<nick>\S+)(?<channel>\s+\#\S+)?(?:\s+(?<reason>.+))?/i) do
-  clearance &:sudo?
+hear(/kick\s+(?<nick>\S+)(?<channel>\s+\#\S+)?(?:\s+(?<reason>.+))?/i) do
+  clearance(&:sudo?)
   description 'Kicks nick from channel, if no channel is given, kicks from the sender channel.'
   usage 'kick <nick> [<channel>] [<reason>]'
   on do
@@ -143,8 +143,8 @@ hear (/kick\s+(?<nick>\S+)(?<channel>\s+\#\S+)?(?:\s+(?<reason>.+))?/i) do
   end
 end
 
-hear (/kickban\s+(\S+)/i) do
-  clearance &:sudo?
+hear(/kickban\s+(\S+)/i) do
+  clearance(&:sudo?)
   description 'Kickbans nick from channel'
   usage 'kickban <nick>'
   on do
@@ -152,8 +152,8 @@ hear (/kickban\s+(\S+)/i) do
   end
 end
 
-hear (/invite\s(\S+)(?:\s(\S+))?/i) do
-  clearance &:sudo?
+hear(/invite\s(\S+)(?:\s(\S+))?/i) do
+  clearance(&:sudo?)
   description 'Invites nick to channel'
   usage 'invite <nick>'
   on do

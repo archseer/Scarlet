@@ -1,5 +1,5 @@
-hear (/user group (?<cmd>add|remove) (?<nick>\S+) (?<groups>.+)/i) do
-  clearance &:sudo?
+hear(/user group (?<cmd>add|remove) (?<nick>\S+) (?<groups>.+)/i) do
+  clearance(&:sudo?)
   description 'Adds user to the given groups'
   usage 'user group (add|remove) <nick> <groups>'
   on do
@@ -33,7 +33,7 @@ hear (/user group (?<cmd>add|remove) (?<nick>\S+) (?<groups>.+)/i) do
   end
 end
 
-hear (/user groups(?:\s+(?<nick>\S+))?/i) do
+hear(/user groups(?:\s+(?<nick>\S+))?/i) do
   clearance nil
   description 'Displays which groups the user belongs to'
   usage 'user groups [<nick>]'
@@ -44,7 +44,7 @@ hear (/user groups(?:\s+(?<nick>\S+))?/i) do
   end
 end
 
-hear (/user status(?:\s+(?<nick>\S+))?/i) do
+hear(/user status(?:\s+(?<nick>\S+))?/i) do
   clearance nil
   description 'Displays whether the user is logged in or not'
   usage 'user status [<nick>]'

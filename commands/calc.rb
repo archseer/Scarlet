@@ -1,6 +1,6 @@
 require 'calc'
 
-hear (/calc\s+(?<problem>.+)/) do
+hear(/calc\s+(?<problem>.+)/) do
   clearance nil
   usage 'calc <problem>'
   on do

@@ -66,7 +66,7 @@ ddg = lambda do |ctx, search_terms|
   end
 end
 
-hear (/ddg\s+(?<search_term>.+)/) do
+hear(/ddg\s+(?<search_term>.+)/) do
   clearance nil
   description 'Search for something using DuckDuckGo.'
   usage 'ddg <search_term>'

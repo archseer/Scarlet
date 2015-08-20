@@ -1,4 +1,4 @@
-hear (/commit message/i) do
+hear(/commit message/i) do
   clearance nil
   description 'Displays a random commit message.'
   usage 'commit message'

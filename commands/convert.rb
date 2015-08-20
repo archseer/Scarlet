@@ -2,7 +2,7 @@ require 'scarlet/helpers/http_command_helper'
 require 'scarlet/helpers/json_command_helper'
 require 'ostruct'
 
-hear (/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) do
+hear(/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) do
   clearance nil
   description 'Converts currency from one unit to another.'
   usage 'convert <value> <from_unit> [to] <to_unit>'

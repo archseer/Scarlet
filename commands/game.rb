@@ -1,4 +1,4 @@
-﻿hear (/dice\s+(\d+)d(\d+)/i) do
+﻿hear(/dice\s+(\d+)d(\d+)/i) do
   clearance nil
   description 'rolls <x> dies with <y> sides.'
   usage 'dice <x>d<y>'
@@ -11,7 +11,7 @@
   end
 end
 
-hear (/coin\s+(\d+)/i) do
+hear(/coin\s+(\d+)/i) do
   clearance nil
   description 'Flips <x> coins O is heads, and X is tails.'
   usage 'coin <x>'

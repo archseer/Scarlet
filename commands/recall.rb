@@ -1,5 +1,5 @@
-hear (/recall(?:\s+(\d+))?/) do
-  clearance &:registered?
+hear(/recall(?:\s+(\d+))?/) do
+  clearance(&:registered?)
   description 'Returns the last n messages, default is 5, limit is 5.'
   usage 'recall [<count>]'
   on do

@@ -12,7 +12,7 @@ describe Moon::DataModel::Validators::Presence do
     expect(subject.valid?('a')).to eq(true)
     expect(subject.valid?(1)).to eq(true)
     expect(subject.valid?([1])).to eq(true)
-    expect(subject.valid?({1 => 2})).to eq(true)
+    expect(subject.valid?(1 => 2)).to eq(true)
   end
 
   it 'reports false for a blank? value' do

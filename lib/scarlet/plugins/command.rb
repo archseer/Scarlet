@@ -33,7 +33,7 @@ module Scarlet::Plugins
     # @param [Proc] block The block to execute when the command is used.
     def hear *patterns, &block
       # make a prefab Listener
-      ls = Scarlet::Command::Listener.new.tap { |l| Scarlet::Command::Builder.new(l).instance_eval &block }
+      ls = Scarlet::Command::Listener.new.tap { |l| Scarlet::Command::Builder.new(l).instance_eval(&block) }
       patterns.each do |regex|
         regex = Regexp.new "^#{regex.source}$", regex.options
         @listeners[regex] = ls
@@ -96,9 +96,9 @@ module Scarlet::Plugins
     # @param [String] command The keywords to search for.
     def get_help command = nil
       help = if c = command.presence
-               match_commands(c).map &:help
+               match_commands(c).map(&:help)
              else
-               @listeners.each_value.map &:help
+               @listeners.each_value.map(&:help)
              end
       # map each by #presence (exposing empty strings),
       # remove all nil entries from presence,

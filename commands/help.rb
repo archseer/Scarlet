@@ -1,4 +1,4 @@
-hear (/help(?:\s*(?<query>.*))/i) do
+hear(/help(?:\s*(?<query>.*))/i) do
   clearance nil
   description 'Displays the help for a command, if a command is given displays the help associated with that command'
   usage 'help [<query>]'

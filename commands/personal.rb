@@ -1,4 +1,4 @@
-hear (/login/i) do
+hear(/login/i) do
   clearance nil
   description 'Logs the user into his bot account.'
   usage 'login'
@@ -15,8 +15,8 @@ hear (/login/i) do
   end
 end
 
-hear (/logout/i) do
-  clearance &:registered?
+hear(/logout/i) do
+  clearance(&:registered?)
   description 'Logs the user out from his bot account.'
   usage 'logout'
   on do
@@ -27,7 +27,7 @@ hear (/logout/i) do
   end
 end
 
-hear (/register/i) do
+hear(/register/i) do
   clearance nil
   description 'Registers an account with the bot.'
   usage 'register'

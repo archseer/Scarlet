@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'scarlet/helpers/http_command_helper'
 
-hear (/weather in\s+(?<location>.+)(?:\s+units\s+(?<unit>\S+))?/i) do
+hear(/weather in\s+(?<location>.+)(?:\s+units\s+(?<unit>\S+))?/i) do
   clearance nil
   description 'Displays the current weather stats for <location> in <units>.'
   usage 'weather in <location> units <unit>'

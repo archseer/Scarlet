@@ -1,4 +1,4 @@
-hear (/(?:who(?:'s| is)|whose) your daddy\?/) do
+hear(/(?:who(?:'s| is)|whose) your daddy\?/) do
   clearance nil
   description 'Ask the bot who its owner is.'
   usage "(who's|who is|whose) your daddy?"

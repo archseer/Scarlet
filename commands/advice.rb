@@ -25,10 +25,10 @@ random_advice = lambda do |c|
   end
 end
 
-hear (/what (?:do you|should I) do (?:when|about) (?<query>.*)/i),
-  (/how do you handle (?<query>.*)/i),
-  (/some advice about (?<query>.*)/i),
-  (/think about (?<query>.*)/i) do
+hear(/what (?:do you|should I) do (?:when|about) (?<query>.*)/i,
+  /how do you handle (?<query>.*)/i,
+  /some advice about (?<query>.*)/i,
+  /think about (?<query>.*)/i) do
   clearance nil
   description 'Ask about the wonders of the world!'
   helpers Scarlet::HttpCommandHelper
@@ -47,7 +47,7 @@ hear (/what (?:do you|should I) do (?:when|about) (?<query>.*)/i),
   end
 end
 
-hear (/advice/i) do
+hear(/advice/i) do
   clearance nil
   description 'Ask for random advice.'
   usage 'advice'

@@ -1,5 +1,5 @@
-hear (/win(?:\s+(?<nick>\S+))?/i) do
-  clearance &:registered?
+hear(/win(?:\s+(?<nick>\S+))?/i) do
+  clearance(&:registered?)
   description 'Show some respect to <name>, and give em a win point.'
   usage 'win <name>'
   on do

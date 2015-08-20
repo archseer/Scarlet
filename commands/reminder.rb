@@ -1,5 +1,5 @@
-hear (/remind me in (?<time>.+?) to (?<action>.+)[.!]?/i) do
-  clearance &:registered?
+hear(/remind me in (?<time>.+?) to (?<action>.+)[.!]?/i) do
+  clearance(&:registered?)
   description 'Set a reminder in <time> to do an <action>.'
   usage 'remind me in <time> to <action>'
   on do

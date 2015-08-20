@@ -1,4 +1,4 @@
-hear (/ping/i) do
+hear(/ping/i) do
   clearance nil
   description 'Pings the bot, should respond with PONG!'
   usage 'ping'
@@ -7,7 +7,7 @@ hear (/ping/i) do
   end
 end
 
-hear (/pong/i) do
+hear(/pong/i) do
   clearance nil
   description 'Pongs the bot, should respond with PING!'
   usage 'pong'

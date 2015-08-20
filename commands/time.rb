@@ -7,8 +7,8 @@ find_timezone = proc do |timezone|
   Time.find_zone timezone
 end
 
-hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
-  clearance &:registered?
+hear(/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
+  clearance(&:registered?)
   description 'Sets your timezone. (used with "time for" command)'
   usage 'set [my] timezone <timezone>'
   on do
@@ -25,7 +25,7 @@ hear (/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
   end
 end
 
-hear (/timezone\? (?<timezone>.+)/i) do
+hear(/timezone\? (?<timezone>.+)/i) do
   clearance nil
   description 'Checks if the given timezone is valid.'
   usage 'timezone? <timezone>'
@@ -39,7 +39,7 @@ hear (/timezone\? (?<timezone>.+)/i) do
   end
 end
 
-hear (/timezone for\s+(?<nick>\S+)/i) do
+hear(/timezone for\s+(?<nick>\S+)/i) do
   clearance nil
   description 'Displays the timezone for a specified user.'
   usage 'timezone for <nick>'
@@ -48,13 +48,13 @@ hear (/timezone for\s+(?<nick>\S+)/i) do
       if zone_str = nick.settings[:timezone]
         reply "Timezone for #{nick.nick} is #{zone_str}"
       else
-        reply (msg_timezone_not_set % { nick: nick.nick })
+        reply(msg_timezone_not_set % { nick: nick.nick })
       end
     end
   end
 end
 
-hear (/time for\s+(?<nick>\S+)/i) do
+hear(/time for\s+(?<nick>\S+)/i) do
   clearance nil
   description 'Displays the time for a specified user.'
   usage 'time for <nick>'
@@ -69,7 +69,7 @@ hear (/time for\s+(?<nick>\S+)/i) do
   end
 end
 
-hear (/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) do
+hear(/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) do
   clearance nil
   description 'Calculates time using natural language parsing and optionally a timezone.'
   usage 'time query <query> [:in <timezone>]'
@@ -90,7 +90,7 @@ hear (/time query\s+(?:(?<query_tz>.+)\s+\:in\s+(?<timezone>.+)|(?<query>.+))/) 
   end
 end
 
-hear (/time(\s+in\s+(?<timezone>.+))?/) do
+hear(/time(\s+in\s+(?<timezone>.+))?/) do
   clearance nil
   description 'Returns the time for a specified timezone, else returns the bot\'s local time'
   usage 'time [in <timezone>]'

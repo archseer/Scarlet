@@ -1,5 +1,5 @@
-hear (/(?:leave|part)(?:\s+(\#\S+)(?:\s+(.+))?)?/i) do
-  clearance &:sudo?
+hear(/(?:leave|part)(?:\s+(\#\S+)(?:\s+(.+))?)?/i) do
+  clearance(&:sudo?)
   description 'Ask bot to leave #channel.'
   usage 'part #<channel>'
   on do
@@ -8,8 +8,8 @@ hear (/(?:leave|part)(?:\s+(\#\S+)(?:\s+(.+))?)?/i) do
   end
 end
 
-hear (/join\s+(.+)/i) do
-  clearance &:sudo?
+hear(/join\s+(.+)/i) do
+  clearance(&:sudo?)
   description 'Ask bot to join #channel or channels.'
   usage 'join <#channel>[,<#channel>,<#channel>]'
   on do
@@ -17,8 +17,8 @@ hear (/join\s+(.+)/i) do
   end
 end
 
-hear (/quit/i) do
-  clearance &:sudo?
+hear(/quit/i) do
+  clearance(&:sudo?)
   description 'Asks the bot to leave the server.'
   usage 'quit'
   on do
@@ -26,8 +26,8 @@ hear (/quit/i) do
   end
 end
 
-hear (/send\s+(.+)/) do
-  clearance &:sudo?
+hear(/send\s+(.+)/) do
+  clearance(&:sudo?)
   description 'Sends provided string to server'
   usage 'send <string>'
   on do
@@ -35,8 +35,8 @@ hear (/send\s+(.+)/) do
   end
 end
 
-hear (/(privmsg|msg)\s+(?<target>\S+)\s(?<message>.+)/i) do
-  clearance &:sudo?
+hear(/(privmsg|msg)\s+(?<target>\S+)\s(?<message>.+)/i) do
+  clearance(&:sudo?)
   description 'Sends msg to #channel or user.'
   usage '(privmsg|msg) <#channel | user> <string>'
   on do
@@ -44,8 +44,8 @@ hear (/(privmsg|msg)\s+(?<target>\S+)\s(?<message>.+)/i) do
   end
 end
 
-hear (/action\s+(?<target>\S+)\s+(?<message>.+)/) do
-  clearance &:sudo?
+hear(/action\s+(?<target>\S+)\s+(?<message>.+)/) do
+  clearance(&:sudo?)
   description 'Sends an action <messafe> to the <channel>'
   usage 'action <channel> <message>'
   on do
@@ -53,8 +53,8 @@ hear (/action\s+(?<target>\S+)\s+(?<message>.+)/) do
   end
 end
 
-hear (/notice\s+(?<target>\S+)\s(?<message>.+)/i) do
-  clearance &:sudo?
+hear(/notice\s+(?<target>\S+)\s(?<message>.+)/i) do
+  clearance(&:sudo?)
   description 'Sends notice <#channel|user> <string>.'
   usage 'notice <#channel | user> <string>'
   on do
@@ -62,8 +62,8 @@ hear (/notice\s+(?<target>\S+)\s(?<message>.+)/i) do
   end
 end
 
-hear (/cycle(?:\s+(?<channel>\S+))?/i) do
-  clearance &:sudo?
+hear(/cycle(?:\s+(?<channel>\S+))?/i) do
+  clearance(&:sudo?)
   description 'Leave and rejoin #channel.'
   usage 'cycle <#channel>'
   on do
