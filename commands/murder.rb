@@ -18,10 +18,19 @@ quotes = [
   end
 end
 
+possesive = lambda do |str|
+  if str.ends_with?('s')
+    str + "'"
+  else
+    str + "'s"
+  end
+end
+
 murder_templates = [
-  "puts a bullet to %s head",
-  "snaps %s's neck",
-  "uppercuts %s"
+  "puts a bullet to %<possesive>s head",
+  "snaps %<possesive>s neck",
+  "uppercuts %<name>s",
+  "slashes %<possesive>s throat"
 ]
 
 hear(/murder(?:\s+(?<nick>\S+))?/) do
@@ -36,7 +45,7 @@ hear(/murder(?:\s+(?<nick>\S+))?/) do
       nicks.delete(server.current_nick)
       nicks.sample
     end
-    action tmp % nik
+    action(tmp % { possesive: possesive.call(nik), name: nik })
   end
 end
 
