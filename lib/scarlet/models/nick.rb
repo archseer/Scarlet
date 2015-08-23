@@ -36,7 +36,7 @@ class Scarlet
     end
 
     def self.owner
-      first groups: Moon::Repository::Query.includes?('owner')
+      first groups: Moon::Repository::Query.includes?('root')
     end
   end
 end
