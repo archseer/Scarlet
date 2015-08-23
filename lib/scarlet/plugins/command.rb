@@ -27,19 +27,6 @@ module Scarlet::Plugins
       load_commands
     end
 
-    # Registers a new listener for bot commands.
-    #
-    # @param [Regexp] patterns The regex that should match when we want to trigger our callback.
-    # @param [Proc] block The block to execute when the command is used.
-    def hear *patterns, &block
-      # make a prefab Listener
-      ls = Scarlet::Command::Listener.new.tap { |l| Scarlet::Command::Builder.new(l).instance_eval(&block) }
-      patterns.each do |regex|
-        regex = Regexp.new "^#{regex.source}$", regex.options
-        @listeners[regex] = ls
-      end
-    end
-
     # Loads a command file from the given path
     #
     # @param [String] path
@@ -59,8 +46,12 @@ module Scarlet::Plugins
       old_listeners = @listeners.dup
       @listeners.clear
       begin
+        commands = []
         Dir[File.join(Scarlet.root, 'commands/**/*.rb')].each do |path|
-          load_command path
+          commands << load_command(path)
+        end
+        commands.each do |command|
+          @listeners.merge!(command.listeners)
         end
         true
       rescue => ex
