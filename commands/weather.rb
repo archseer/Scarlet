@@ -37,8 +37,11 @@ get_weather = lambda do |location, units|
       else
         weather = data['weather'][0]
         main = data['main']
+        wind = data['wind']
         sys = data['sys']
-        reply "Weather forecast for #{data['name']}, #{sys['country']}: #{weather['description']}, #{main['temp_min']}°C / #{main['temp_max']}°C, #{main['humidity']}% humidity. [updated #{fmt.short_time(Time.at(data['dt']))}]"
+        arr = ["N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
+        wind_dir = arr[((deg/22.5)+0.5) % 16]
+        reply "Weather forecast for #{data['name']}, #{sys['country']}: #{weather['description']} #{main['temp']}°C, #{wind_dir} #{wind[:speed]} km/h wind, #{main['humidity']}% humidity. [updated #{fmt.short_time(Time.at(data['dt']))}]"
       end
     else
       reply "No data received: " + weather_errors.sample
