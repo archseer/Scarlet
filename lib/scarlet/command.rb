@@ -142,7 +142,9 @@ class Scarlet
         @event = event
         @event.params = matches
         begin
-          instance_exec self, &@block
+          catch :abort do
+            instance_exec self, &@block
+          end
         rescue => ex
           logger.error ex.inspect
           logger.error ex.backtrace.join("\n")
@@ -151,6 +153,16 @@ class Scarlet
       end
 
       delegate :msg, :notice, :reply, :action, :send, :send_cmd, to: :@event
+
+      def error_reply(msg)
+        reply msg
+        throw :abort
+      end
+
+      def error_notify(msg)
+        notify msg
+        throw :abort
+      end
 
       # format module
       def fmt
