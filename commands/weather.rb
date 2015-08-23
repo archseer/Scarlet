@@ -31,7 +31,6 @@ get_weather = lambda do |location, units|
   http.errback { reply "HTTP Error: " + weather_errors.sample }
   http.callback do
     if data = http.response.value
-      puts data
       if msg = data['message']
         reply msg
       else
@@ -40,8 +39,8 @@ get_weather = lambda do |location, units|
         wind = data['wind']
         sys = data['sys']
         arr = ["N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
-        wind_dir = arr[((deg/22.5)+0.5) % 16]
-        reply "Weather forecast for #{data['name']}, #{sys['country']}: #{weather['description']} #{main['temp']}°C, #{wind_dir} #{wind[:speed]} km/h wind, #{main['humidity']}% humidity. [updated #{fmt.short_time(Time.at(data['dt']))}]"
+        wind_dir = arr[((wind['deg'] / 22.5) + 0.5) % arr.size]
+        reply "Weather forecast for #{data['name']}, #{sys['country']}: #{weather['description']} #{main['temp']}°C, #{wind_dir} #{wind['speed']} km/h wind, #{main['humidity']}% humidity. [updated #{fmt.short_time(Time.at(data['dt']))}]"
       end
     else
       reply "No data received: " + weather_errors.sample
