@@ -19,6 +19,7 @@ class Scarlet
   end
 
   def initialize(settings = {})
+    @started_at = Time.now
     settings = OpenStruct.new(settings)
 
     Scarlet.root = settings.root
@@ -57,8 +58,10 @@ class Scarlet
     return unless @servers.empty?
     # create servers
     Scarlet.config.servers.each do |name, cfg|
-      @servers[name] = Server.new cfg.merge(server_name: name)
-      @servers[name].plugins = @plugins
+      server = Server.new cfg.merge(server_name: name)
+      server.started_at = @started_at
+      server.plugins = @plugins
+      @servers[name] = server
     end
     # for safety delete the servers list after it gets loaded
     Scarlet.config.delete :servers

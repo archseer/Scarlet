@@ -1,3 +1,17 @@
+require 'time-lord'
+
+hear(/uptime/i) do
+  clearance nil
+  description 'Displays the start time and uptime of the bot'
+  usage 'uptime'
+  on do
+    tthen = server.started_at
+    now = Time.now
+    scale = TimeLord::Scale.new((now - tthen).to_i)
+    reply "I started at #{fmt.time(tthen)}. My uptime is #{scale.to_value} #{scale.to_unit}"
+  end
+end
+
 hear(/version/i) do
   clearance nil
   description 'Displays the version information.'
