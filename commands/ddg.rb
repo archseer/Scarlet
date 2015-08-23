@@ -21,7 +21,9 @@ end
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
 def format_answer(data)
-  yield data['AnswerType'] + "; " + data['Answer']
+  head = ''
+  head << data['AnswerType'] << "; " << data['Answer']
+  yield head
 end
 
 # @param [Hash<String, String>] data
@@ -51,10 +53,10 @@ def ddg(search_terms)
       func = -> (line) { reply line }
       if data['Abstract'].present?
         format_abstract(data, &func)
-      elsif data['Answer'].present?
-        format_answer(data, &func)
       elsif data['Definition'].present?
         format_definition(data, &func)
+      elsif data['Answer'].present?
+        format_answer(data, &func)
       else
         reply 'Quack! No results!'
       end
