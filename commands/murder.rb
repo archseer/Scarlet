@@ -1,3 +1,4 @@
+
 hear(/murda core/i) do
 quotes = [
 "What are you doing? Stop it! I... I... We are pleased that you made it through the final challenge where we pretended we were going to murder you.",
@@ -18,7 +19,7 @@ quotes = [
   end
 end
 
-possesive = lambda do |str|
+def to_possesive_form(str)
   if str.ends_with?('s')
     str + "'"
   else
@@ -45,7 +46,7 @@ hear(/murder(?:\s+(?<nick>\S+))?/) do
       nicks.delete(server.current_nick)
       nicks.sample
     end
-    action(tmp % { possesive: possesive.call(nik), name: nik })
+    action(tmp % { possesive: to_possesive_form(nik), name: nik })
   end
 end
 
