@@ -12,6 +12,20 @@ hear(/uptime/i) do
   end
 end
 
+hear(/how old are you\?/i) do
+  clearance nil
+  description 'Displays the bot\'s age'
+  usage 'how old are you?'
+  on do
+    # :Scarlet is a special nick for the bot, regardless of current name
+    with_nick ':Scarlet' do |nick|
+      dob = nick.settings[:dob]
+      scale = TimeLord::Scale.new((Time.now - Time.at(dob)).to_i)
+      reply "I am #{scale.to_value} #{scale.to_unit} old"
+    end
+  end
+end
+
 hear(/version/i) do
   clearance nil
   description 'Displays the version information.'

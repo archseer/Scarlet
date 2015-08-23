@@ -10,11 +10,24 @@ options = OpenStruct.new(
   config: File.expand_path('../config.yml', dirname)
 )
 
-OptionParser.new do |opts|
+argv = OptionParser.new do |opts|
   opts.on '-c', '--config FILENAME', String, 'Use the specified file as the config' do |filename|
     options.config = filename
   end
 end.parse(ARGV.dup)
 
 scarlet = Scarlet.new(options)
-scarlet.run
+
+argv << 'run' if argv.empty?
+
+argv.each do |arg|
+  case arg
+  when 'bootstrap'
+    nick = Scarlet::Nick.first(nick: ':Scarlet') || Scarlet::Nick.new(nick: ':Scarlet')
+    nick.groups << 'bot'
+    nick.settings[:dob] = Time.new(2012, 4, 16).to_i
+    nick.save
+  when 'run'
+    scarlet.run
+  end
+end
