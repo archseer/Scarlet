@@ -5,7 +5,8 @@ class Scarlet
       when ':me'
         sender.nick
       when ':you'
-        server.current_nick
+        #server.current_nick
+        ':Scarlet'
       else
         name
       end

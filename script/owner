@@ -2,7 +2,6 @@
 # Creates an owner for Scarlet.
 require 'bundler/setup'
 require 'scarlet/models/nick'
-Scarlet.init
 
 name = ARGV.shift
 

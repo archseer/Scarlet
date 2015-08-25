@@ -1,10 +1,10 @@
-require 'scarlet/helpers/http_command_helper'
+require 'scarlet/helpers/http_helper'
 
-hear(/rubygems gem\s+(?<gemname>.+)/) do
+hear(/gem\s+(?<gemname>.+)/) do
   clearance nil
   description 'Displays information about a gem <gemname>.'
   usage 'rubygems gem <gemname>'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     http = json_request("https://rubygems.org/api/v1/gems/#{params[:gemname]}.json").get
     http.errback { reply 'ERROR: rubygems gem' }
@@ -23,7 +23,7 @@ hear(/rubygems search\s+(?<name>.+)/) do
   clearance nil
   description 'Searchs for gems with <name>'
   usage 'rubygems search <name>'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     http = json_request('https://rubygems.org/api/v1/search.json').get query: { query: params[:name] }
     http.errback { reply 'ERROR: rubygems search' }

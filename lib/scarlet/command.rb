@@ -11,17 +11,19 @@ class Scarlet
       def initialize plugin
         @command = plugin
       end
-      # (see Command.hear)
-      def hear *args, &block
-        @command.hear *args, &block
-      end
 
       def load_file filename
-        instance_eval File.read(filename), filename, 1
+        # all commands are placed into a Callback class
+        Class.new(Callback) do
+          define_singleton_method(:filename) { filename }
+          define_singleton_method(:name) { "Callback(#{filename})" }
+
+          class_eval File.read(filename), filename, 1
+        end
       end
     end
 
-    class Listener
+    module Listener
       # @return [Proc] clearance filter function
       attr_accessor :clearance
       # @return [Proc] raw callback block
@@ -33,7 +35,7 @@ class Scarlet
       # @return [Array<Module>] helpers to extend the callback
       attr_accessor :helpers
 
-      def initialize
+      def setup
         # allow registered users to access the command by default
         @clearance = proc { |_| true }
         @callback = nil
@@ -53,10 +55,6 @@ class Scarlet
         else
           ''
         end
-      end
-
-      def invoke event, matches
-        Callback.invoke @callback, @helpers, event, matches
       end
     end
 
@@ -124,14 +122,6 @@ class Scarlet
       # @return [Scarlet::Event]
       attr_reader :event
 
-      # Create a new callback instance,
-      #
-      # @param [Proc] block The block we want to call as a callback.
-      def initialize block, helpers
-        @block = block
-        @helpers = helpers
-      end
-
       # Run our stored callback, passing in the event we captured and the matches
       # from our command.
       #
@@ -143,12 +133,10 @@ class Scarlet
         @event.params = matches
         begin
           catch :abort do
-            instance_exec self, &@block
+            process
           end
-        rescue => ex
-          logger.error ex.inspect
-          logger.error ex.backtrace.join("\n")
-          reply "Command Callback error: #{ex.inspect}"
+        rescue StandardError => ex
+          handle_error ex
         end
       end
 
@@ -164,6 +152,12 @@ class Scarlet
         throw :abort
       end
 
+      def handle_error(ex)
+        logger.error ex.inspect
+        logger.error ex.backtrace.join("\n")
+        reply "Command Callback error: #{ex.inspect}"
+      end
+
       # format module
       def fmt
         Scarlet::Fmt
@@ -172,9 +166,6 @@ class Scarlet
       # DSL delegator, delegates calls to the helpers or +@event+ to be able to directly use their
       # attributes or methods.
       def method_missing method, *args, &block
-        @helpers.each do |helper|
-          return helper.__send__ method, *args, &block if helper.respond_to? method
-        end
         return @event.__send__ method, *args, &block if @event.respond_to? method
         super
       end
@@ -184,10 +175,55 @@ class Scarlet
       # @param [Proc] cb
       # @param [Event] event
       # @param [MatchData] matches
-      def self.invoke cb, helpers, event, matches
-        new(cb, helpers).invoke event, matches
+      def self.invoke event, matches
+        new.invoke event, matches
+      end
+
+      extend Listener
+
+      def self.set(hash)
+        hash.each_pair do |key, value|
+          define_method(key) { value }
+        end
+      end
+
+      def self.finalize
+        helpers.each do |mod|
+          include mod
+        end
+        define_method(:process, &callback)
+      end
+
+      def self.listeners
+        @listeners ||= {}
+      end
+
+      # Registers a new listener for bot commands.
+      #
+      # @param [Regexp] patterns The regex that should match when we want to trigger our callback.
+      # @param [Proc] block The block to execute when the command is used.
+      def self.hear *patterns, &block
+        # make a prefab Listener
+        # The listener will use the current Command Callback class as its
+        # main callback class scope.
+        parent = self
+        ls = Class.new(parent) do |cls|
+          scope = "#{parent.filename}##{patterns}"
+          define_singleton_method(:name) { "Class<Callback(#{scope})>" }
+          define_singleton_method(:to_s) { "Class<Callback(#{scope})>" }
+
+          define_method(:to_s) { "Callback(#{scope})" }
+
+          setup
+          Scarlet::Command::Builder.new(cls).instance_eval(&block)
+          finalize
+        end
+        patterns.each do |regex|
+          regex = Regexp.new "^#{regex.source}$", regex.options
+          listeners[regex] = ls
+        end
       end
     end
-
   end
 end
+

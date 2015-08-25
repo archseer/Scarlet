@@ -20,6 +20,7 @@ class Scarlet
     attr_reader :channels
     attr_reader :scheduler
     attr_reader :users
+    attr_accessor :started_at
     attr_accessor :cap_extensions
     attr_accessor :current_nick
     attr_accessor :extensions

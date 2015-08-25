@@ -1,13 +1,33 @@
 #!/usr/bin/env ruby
-$:.unshift File.expand_path("../../lib", __FILE__)
+dirname = File.dirname(__FILE__)
+$:.unshift File.expand_path("../../lib", dirname)
 require 'scarlet'
-require 'scarlet/plugins/link_printer'
-require 'scarlet/plugins/autoname'
 require 'optparse'
+require 'ostruct'
 
-Scarlet.setup do
-  # displays title of HTML links
-  use Scarlet::Plugins::LinkPrinter
-  # automatically reclaim nickname
-  use Scarlet::Plugins::Autoname
-end.run
+options = OpenStruct.new(
+  root: File.expand_path('../', dirname),
+  config: File.expand_path('../config.yml', dirname)
+)
+
+argv = OptionParser.new do |opts|
+  opts.on '-c', '--config FILENAME', String, 'Use the specified file as the config' do |filename|
+    options.config = filename
+  end
+end.parse(ARGV.dup)
+
+scarlet = Scarlet.new(options)
+
+argv << 'run' if argv.empty?
+
+argv.each do |arg|
+  case arg
+  when 'bootstrap'
+    nick = Scarlet::Nick.first(nick: ':Scarlet') || Scarlet::Nick.new(nick: ':Scarlet')
+    nick.groups << 'bot'
+    nick.settings[:dob] = Time.new(2012, 4, 16).to_i
+    nick.save
+  when 'run'
+    scarlet.run
+  end
+end
