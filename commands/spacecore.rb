@@ -1,5 +1,4 @@
-hear(/space core/) do
-quotes = [
+set quotes: [
 "What's your favorite thing about space? Mine is space.",
 "Space going to space can't wait.",
 "Space...",
@@ -112,6 +111,8 @@ quotes = [
 "YEEEHAAAAAW!",
 "Ah!"
 ]
+
+hear(/space core/) do
   clearance nil
   description 'Says a random quote from space core!'
   usage 'space core'

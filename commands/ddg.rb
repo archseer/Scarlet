@@ -1,77 +1,75 @@
-require 'scarlet/helpers/http_command_helper'
+require 'scarlet/helpers/http_helper'
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_abstract = lambda do |ctx, data, &block|
+def format_abstract(data)
   heading = data['Heading'].presence
   url = data['AbstractURL'].presence || data['Redirect'].presence
   head = ''
   head << heading << ' ' if heading
-  head << ctx.fmt.uri(url) if url
-  block.call head if head.present?
+  head << fmt.uri(url) if url
+  yield head if head.present?
   if text = data['AbstractText'].presence
     if source = data['AbstractSource'].presence
-      block.call source + "; " + text
+      yield source + "; " + text
     else
-      block.call text
+      yield text
     end
   end
 end
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_answer = lambda do |ctx, data, &block|
-  block.call data['AnswerType'] + "; " + data['Answer']
+def format_answer(data)
+  yield data['AnswerType'] + "; " + data['Answer']
 end
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
-format_definition = lambda do |ctx, data, &block|
+def format_definition(data)
   url = data['DefinitionURL'].presence || data['Redirect'].presence
   head = ''
-  head << ctx.fmt.uri(url) if url
-  block.call head if head.present?
+  head << fmt.uri(url) if url
+  yield head if head.present?
   if text = data['Definition'].presence
     if source = data['DefinitionSource'].presence
-      block.call source + "; " + text
+      yield source + "; " + text
     else
-      block.call text
+      yield text
     end
   end
 end
 
-# @param [Object] ctx
 # @param [String] search_terms
-ddg = lambda do |ctx, search_terms|
+def ddg(search_terms)
   q = CGI.escape(search_terms)
   query = { q: q, format: 'json', no_html: 1 }
-  http = ctx.json_request('https://api.duckduckgo.com').get query: query
-  http.errback { ctx.reply 'Error!' }
+  http = json_request('https://api.duckduckgo.com').get query: query
+  http.errback { reply 'Error!' }
   http.callback do
     if data = http.response.value
-      func = if data['Abstract'].present?
-        format_abstract
+      func = -> (line) { reply line }
+      if data['Abstract'].present?
+        format_abstract(data, &func)
       elsif data['Answer'].present?
-        format_answer
+        format_answer(data, &func)
       elsif data['Definition'].present?
-        format_definition
+        format_definition(data, &func)
       else
-        ctx.reply 'Quack! No results!'
-        nil
+        reply 'Quack! No results!'
       end
-      func.call(ctx, data) { |line| ctx.reply line } if func
     else
-      ctx.reply 'Invalid response data'
+      reply 'Invalid response data'
     end
   end
 end
 
-hear(/ddg\s+(?<search_term>.+)/) do
+hear(/ddg\s+(?<search_term>.+)/i) do
   clearance nil
   description 'Search for something using DuckDuckGo.'
   usage 'ddg <search_term>'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
-    ddg.call self, params[:search_term].strip
+    ddg params[:search_term].strip
   end
 end

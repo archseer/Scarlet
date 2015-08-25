@@ -1,4 +1,4 @@
-can_ban = lambda do |banner, target|
+def can_ban?(banner, target)
   # owners can ban anyone
   return true if banner.root?
   # moderators and above can ban users without an account
@@ -7,7 +7,10 @@ can_ban = lambda do |banner, target|
   return true if banner.sudo? && (!target.root? && !target.sudo?)
   return false
 end
-can_unban = can_ban
+
+def can_unban?(*args)
+  can_ban?(*args)
+end
 
 hear(/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\s*\:\s+(?<reason>.+))?/i) do
   clearance(&:sudo?)
@@ -23,7 +26,7 @@ hear(/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\s*\:\s+(?<reason>.+))?/i) do
       #notify "%s is currently not present on this network"
       ban = Scarlet::Ban.first_or_create(nick: nick_str)
       nck = find_nick(nick_str)
-      if ban && can_ban.call(sender_nik, nck)
+      if ban && can_ban?(sender_nik, nck)
         ban.level = ban_level
         ban.by = sender.nick
         ban.reason = ban_reason
@@ -56,7 +59,7 @@ hear(/bot unban (?<nicks>.+)/i) do
         next
       end
       nick = find_nick(nick_str)
-      if can_unban.call(sender_nik, nick)
+      if can_unban?(sender_nik, nick)
         if ban = Scarlet::Ban.first(nick: nick_str)
           ban.level = 0
           ban.by = sender.nick

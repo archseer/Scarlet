@@ -1,5 +1,4 @@
-hear(/fact core/) do
-facts = [
+set facts: [
 "The situation you are in is very dangerous.",
 "The likelihood of you dying within the next five minutes is eighty-seven point six one percent.",
 "The likelihood of you dying violently within the next five minutes is eighty-seven point six one percent.",
@@ -100,6 +99,8 @@ facts = [
 "To make a photocopier, simply photocopy a mirror.",
 "Dreams are the subconscious mind's way of reminding people to go to school naked and have their teeth fall out."
 ]
+
+hear(/fact core/) do
   clearance nil
   description 'Returns a random quote from Portal 2\'s Fact core.'
   usage 'fact core'

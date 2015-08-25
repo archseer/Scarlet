@@ -4,6 +4,8 @@ require 'active_support/configurable'
 require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/plugins/command'
+require 'scarlet/plugins/link_printer'
+require 'scarlet/plugins/autoname'
 require 'scarlet/plugins/account_notify'
 require 'scarlet/logger'
 
@@ -16,9 +18,11 @@ class Scarlet
     attr_accessor :root
   end
 
-  def initialize
-    Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
-    Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
+  def initialize(settings = {})
+    settings = OpenStruct.new(settings)
+
+    Scarlet.root = settings.root
+    Scarlet.config.merge! YAML.load_file(settings.config).symbolize_keys
     Scarlet.config.db.symbolize_keys! if Scarlet.config.db
 
     @servers = {}
@@ -26,14 +30,16 @@ class Scarlet
     use Scarlet::Core
     use Scarlet::Plugins::AccountNotify
     use Scarlet::Plugins::Command
-  end
 
-  def self.setup(&block)
-    new.setup(&block)
-  end
-
-  def self.run(&block)
-    new.run(&block)
+    if plugins = Scarlet.config.plugins
+      plugins.each do |plugin|
+        if const = "Scarlet::Plugins::#{plugin}".safe_constantize
+          use const
+        else
+          puts "No such plugin: #{plugin}"
+        end
+      end
+    end
   end
 
   def use plugin
