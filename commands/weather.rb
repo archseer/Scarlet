@@ -27,7 +27,7 @@ end
 # Gracefully stolen from, with some fun stuff thrown in
 # https://github.com/skibish/hubot-weather/blob/master/src/hubot-weather.coffee
 get_weather = lambda do |location, units|
-  http = json_request(url).get query: { q: location, units: units }
+  http = json_request(url).get query: { q: CGI.escape(location), units: units }
   http.errback { reply "HTTP Error: " + weather_errors.sample }
   http.callback do
     if data = http.response.value
