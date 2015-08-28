@@ -23,6 +23,7 @@ class Scarlet::Connection < EM::Connection
 
   def handshake
     send_data "CAP LS" # CAP extension http://ircv3.atheme.org/ (freenode)
+    send_data "PASS #{@server.config.password}" if @server.config.password
     send_data "NICK #{@server.current_nick}"
     send_data "USER #{Scarlet.config.host} * * :#{Scarlet.config.name}"
   end
