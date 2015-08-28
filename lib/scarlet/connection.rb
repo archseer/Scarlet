@@ -39,7 +39,7 @@ class Scarlet::Connection < EM::Connection
   # (as per IRC specs).
   # @param [String, #to_s] data The data to be sent to server.
   def send_data data
-    super "#{data}\r"
+    super "#{data}\r\n"
   end
 
   # Closes the connection to server and triggers the +@server.unbind+ method.
