@@ -1,0 +1,159 @@
+GIT
+  remote: git://github.com/igrigorik/em-http-request.git
+  revision: 7b8d47c40191758f7df565625703727982fcd635
+  specs:
+    em-http-request (1.1.2)
+      addressable (>= 2.3.4)
+      cookiejar (<= 0.3.0)
+      em-socksify (>= 0.3)
+      eventmachine (>= 1.0.3)
+      http_parser.rb (>= 0.6.0)
+
+GIT
+  remote: git://github.com/polyfox/moon-data_model.git
+  revision: 8db1dd43c09dd38d6d67630c8b1c21c4aace485d
+  specs:
+    moon-data_model (1.0.0)
+      activesupport (~> 4.2)
+      moon-prototype (~> 1.1)
+      moon-safe_copy (~> 1.0)
+      moon-serializable (~> 1.0)
+      rake (~> 10.3)
+
+GIT
+  remote: git://github.com/polyfox/moon-prototype.git
+  revision: 916c2631f0a2887e009e4a6d782772ae3e5c0d5e
+  specs:
+    moon-prototype (1.1.0)
+      activesupport (~> 4.2)
+      rake (~> 10.3)
+
+GIT
+  remote: git://github.com/polyfox/moon-repository.git
+  revision: 10c2dc2a1678c0c70322f0af92f45c26d7d62838
+  specs:
+    moon-repository (1.1.0)
+      activesupport (~> 4.2)
+
+GIT
+  remote: git://github.com/polyfox/moon-safe_copy.git
+  revision: 86bb1a2b8f26c3af6e36f682b167fb7b74b91fbf
+  specs:
+    moon-safe_copy (1.0.0)
+      rake (~> 10.3)
+
+GIT
+  remote: git://github.com/polyfox/moon-serializable.git
+  revision: b5c6083c661413019845f1c8e84966e579b12075
+  specs:
+    moon-serializable (1.0.0)
+      moon-prototype (~> 1.0)
+      rake (~> 10.3)
+
+PATH
+  remote: .
+  specs:
+    scarlet (1.3.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (4.2.4)
+      i18n (~> 0.7)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.3, >= 0.3.4)
+      tzinfo (~> 1.1)
+    addressable (2.3.8)
+    calc (1.0.0)
+    chronic (0.10.2)
+    codeclimate-test-reporter (0.4.7)
+      simplecov (>= 0.7.1, < 1.0.0)
+    colorize (0.7.7)
+    cookiejar (0.3.0)
+    diff-lcs (1.2.5)
+    docile (1.1.5)
+    em-socksify (0.3.0)
+      eventmachine (>= 1.0.0.beta.4)
+    em-throttled_queue (1.1.1)
+      eventmachine
+    eventmachine (1.0.7)
+    faraday (0.9.1)
+      multipart-post (>= 1.2, < 3)
+    http_parser.rb (0.6.0)
+    i18n (0.7.0)
+    json (1.8.3)
+    lorem (0.1.2)
+    mini_portile (0.6.2)
+    minitest (5.8.0)
+    multi_json (1.11.0)
+    multipart-post (2.0.0)
+    nokogiri (1.6.6.2)
+      mini_portile (~> 0.6.0)
+    octokit (3.8.0)
+      sawyer (~> 0.6.0, >= 0.5.3)
+    rake (10.4.2)
+    rspec (3.2.0)
+      rspec-core (~> 3.2.0)
+      rspec-expectations (~> 3.2.0)
+      rspec-mocks (~> 3.2.0)
+    rspec-core (3.2.3)
+      rspec-support (~> 3.2.0)
+    rspec-expectations (3.2.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-mocks (3.2.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-support (3.2.2)
+    rufus-scheduler (3.1.1)
+    sawyer (0.6.0)
+      addressable (~> 2.3.5)
+      faraday (~> 0.8, < 0.10)
+    simplecov (0.10.0)
+      docile (~> 1.1.0)
+      json (~> 1.8)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
+    thread_safe (0.3.5)
+    time-lord (1.0.1)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+    yajl-ruby (1.2.1)
+    yard (0.8.7.6)
+    yard-delegate (0.0.1)
+      yard
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport (>= 4.2.2)
+  calc
+  chronic
+  codeclimate-test-reporter
+  colorize
+  em-http-request!
+  em-throttled_queue
+  eventmachine
+  lorem
+  moon-data_model!
+  moon-prototype!
+  moon-repository!
+  moon-safe_copy!
+  moon-serializable!
+  multi_json
+  nokogiri
+  octokit (~> 3.0)
+  rspec
+  rufus-scheduler
+  scarlet!
+  simplecov
+  thread_safe
+  time-lord
+  yajl-ruby
+  yard
+  yard-delegate
+
+BUNDLED WITH
+   1.10.3

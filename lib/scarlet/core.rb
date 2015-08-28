@@ -168,13 +168,14 @@ class Scarlet
     end
 
     on :authenticate do |event| # SASL AUTHENTICATE
-      event.server.send "AUTHENTICATE #{event.server.sasl.generate(config.nick, config.password, event.target)}"
+      event.server.send "AUTHENTICATE #{event.server.sasl.generate(config.nick, config.nickserv_password, event.target)}"
     end
 
     on :'001' do |event| # RPL_WELCOME - First message sent after client registration.
       event.server.state = :connected
       # login only if a password was supplied and SASL wasn't used
-      msg 'NickServ', "IDENTIFY #{config.password}" if config.password && !event.server.sasl
+      pass = config.nickserv_password
+      msg 'NickServ', "IDENTIFY #{pass}" if pass && !event.server.sasl
     end
 
     on :'004' do |event|
