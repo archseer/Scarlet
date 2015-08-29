@@ -32,7 +32,10 @@ class Scarlet
     end
 
     def exec(&block)
-      instance_exec(@event, &block)
+      catch(:abort) { instance_exec(@event, &block) }
+    rescue Exception => ex
+      logger.error ex.inspect
+      logger.error ex.backtrace.join("\n")
     end
 
     def method_missing method, *args, &block
@@ -65,12 +68,7 @@ class Scarlet
     # @param [Event] event The event that was recieved.
     def handle(event)
       self.class.__listeners__.each_listener(event.command) do |block|
-        begin
-          self.class.context.new(event.dup, self).exec(&block)
-        rescue Exception => ex
-          logger.error ex.inspect
-          logger.error ex.backtrace.join("\n")
-        end
+        self.class.context.new(event.dup, self).exec(&block)
       end
     end
 
