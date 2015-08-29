@@ -1,11 +1,19 @@
 ﻿require 'scarlet/plugins/klik'
 
+set time_data: [Time.now, Time.now]
+
+def klik
+  time_data[0] = Time.now - time_data[1]
+  time_data[1] = Time.now
+  time_data[0]
+end
+
 hear(/klik/i) do
   clearance(&:registered?)
   description 'Displays how many seconds have elapsed between the last klik.'
   usage 'klik'
   on do
-    n = Scarlet::Klik.klik.round(2)
+    n = klik.round(2)
     reply format("KLIK! %0.2f %s", n, "sec".pluralize(n))
   end
 end
