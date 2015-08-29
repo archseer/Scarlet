@@ -8,11 +8,11 @@ module Scarlet::Plugins
     on :privmsg do |event|
       # if we detect a command sequence, we remove the prefix and execute it.
       # it is prefixed with config.control_char or by mentioning the bot's current nickname
-      if event.params.first =~ /^#{event.server.current_nick}[:,]?\s*/i
-        event.params[0] = event.params[0].split[1..-1].join(' ')
+      if params.first =~ /^#{event.server.current_nick}[:,]?\s*/i
+        params[0] = params[0].split[1..-1].join(' ')
         process_command(event.dup)
-      elsif event.params.first.starts_with? config.control_char
-        event.params.first.slice!(0)
+      elsif params.first.starts_with? config.control_char
+        params.first.slice!(0)
         process_command(event.dup)
       end
     end

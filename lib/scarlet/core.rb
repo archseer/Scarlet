@@ -24,7 +24,7 @@ class Scarlet
 
     ctcp :PING do |event|
       logger.info "[ CTCP PING from #{event.sender.nick} ]"
-      event.ctcp :PING, event.params.first
+      event.ctcp :PING, params.first
     end
 
     ctcp :VERSION do |event|
@@ -49,12 +49,12 @@ class Scarlet
     end
 
     on :privmsg do |event|
-      Core.handle_ctcp(event) if event.params.first =~ /\001.+\001/ # It's a CTCP message
+      Core.handle_ctcp(event) if params.first =~ /\001.+\001/ # It's a CTCP message
     end
 
     on :notice do |event|
       if event.sender.nick == "HostServ"
-        event.params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) do |host|
+        params.first.match(/Your vhost of \x02(\S+)\x02 is now activated./i) do |host|
           server.vHost = host[1]
           logger.info "#{server.vHost} is now your hidden host (set by services.)"
         end
@@ -98,27 +98,27 @@ class Scarlet
     end
 
     on :kick do |event|
-      messg  = "#{event.sender.nick} has kicked #{event.params.first} from #{event.target}"
-      messg += " (#{event.params[1]})" if event.params[1] != event.sender.nick # reason for kick, if given
+      messg  = "#{event.sender.nick} has kicked #{params.first} from #{event.target}"
+      messg += " (#{params[1]})" if params[1] != event.sender.nick # reason for kick, if given
       messg += "."
       logger.warn messg
       # we process this the same way as a part.
-      if event.params.first == server.current_nick
+      if params.first == server.current_nick
         server.channels.remove(event.channel) # if scarlet was kicked, delete that chan's array.
       else
         # remove the kicked user from channels[#channel] array
-        server.users.get(event.params.first).part(event.channel)
+        server.users.get(params.first).part(event.channel)
       end
     end
 
     on :mode do |event|
-      ev_params = event.params.first.split('')
+      ev_params = params.first.split('')
       if event.target == server.current_nick # Parse bot's private modes (ix,..) - self is the target of the event.
         Parser.parse_modes ev_params, server.modes
       else # USER/CHAN modes
-        event.params.compact!
-        if event.params.count > 1 # user list - USER modes on CHAN (event.target/event.channel)
-          event.params[1..-1].each do |nick|
+        params.compact!
+        if params.count > 1 # user list - USER modes on CHAN (event.target/event.channel)
+          params[1..-1].each do |nick|
             chan = server.channels.get(event.channel)
             user = server.users.get_ensured(nick)
             chan.user_flags[user] ||= {}
@@ -131,22 +131,22 @@ class Scarlet
     end
 
     on :topic do |event| # Channel topic was changed
-      server.channels.get(event.channel).topic = event.params.first
+      server.channels.get(event.channel).topic = params.first
     end
 
     on :error do |event|
       if event.target.start_with? "Closing Link"
         logger.info "Disconnection from #{config.address} successful."
       else
-        logger.error "ERROR: #{event.params.join(' ')}"
+        logger.error "ERROR: #{params.join(' ')}"
       end
     end
 
     on :cap do |event|
       # This will need quite some correcting, but it should work.
-      case event.params[0]
+      case params[0]
       when 'LS'
-        event.params[1].split(" ").each {|extension| server.cap_extensions[extension] = false}
+        params[1].split(" ").each {|extension| server.cap_extensions[extension] = false}
         # Handshake not yet complete. That means, request extensions!
         if server.state == :connecting
           # get an array of extensions we want and that server supports
@@ -154,7 +154,7 @@ class Scarlet
           send_data "CAP REQ :#{ext.join(' ')}"
         end
       when 'ACK'
-        event.params[1].split(' ').each {|extension| server.cap_extensions[extension] = true }
+        params[1].split(' ').each {|extension| server.cap_extensions[extension] = true }
 
         if server.cap_extensions['sasl'] && config.sasl
           server.send_sasl
@@ -162,7 +162,7 @@ class Scarlet
           send_data "CAP END"
         end
       when 'NAK'
-        event.params[1].split(' ').each {|extension| server.cap_extensions[extension] = false}
+        params[1].split(' ').each {|extension| server.cap_extensions[extension] = false}
         send_data "CAP END"
       end
     end
@@ -179,31 +179,31 @@ class Scarlet
     end
 
     on :'004' do |event|
-      server.ircd = event.params[1] # grab the name of the ircd that the server is using
+      server.ircd = params[1] # grab the name of the ircd that the server is using
     end
 
     on :'005' do |event| # PROTOCTL NAMESX reply with a list of options
-      event.params.pop # remove last item (:are supported by this server)
-      server.extensions.merge! Parser.parse_isupport(event.params)
+      params.pop # remove last item (:are supported by this server)
+      server.extensions.merge! Parser.parse_isupport(params)
     end
 
     on :'315' # End of /WHO list
 
     on :'324' do |event| # RPL_CHANNELMODEIS - Channel mode
-      Parser.parse_modes event.params[1].split(''), server.channels.get(event.params.first).modes
+      Parser.parse_modes params[1].split(''), server.channels.get(params.first).modes
     end
 
     on :'332' do |event| # Channel topic
-      server.channels.get(event.params.first).topic = event.params[1]
+      server.channels.get(params.first).topic = params[1]
     end
 
     on :'353' do |event| # NAMES list
       # param[0] --> chantype: "@" is used for secret channels, "*" for private channels, and "=" for public channels.
       # param[1] -> chan, param[2] - users
-      event.params[2].split(' ').each do |nick|
+      params[2].split(' ').each do |nick|
         user_name, flags = server.parser.parse_names_list(nick)
         user = server.users.get_ensured(user_name)
-        channel = server.channels.get(event.params[1])
+        channel = server.channels.get(params[1])
         user.join channel
         channel.user_flags[user] = flags
       end
@@ -221,8 +221,8 @@ class Scarlet
     end
 
     on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
-      server.vHost = event.params.first
-      logger.info event.params.join(' ')
+      server.vHost = params.first
+      logger.info params.join(' ')
     end
 
     on :'433' do |event| # ERR_NICKNAMEINUSE - Nickname is already in use
@@ -252,8 +252,8 @@ class Scarlet
         #  439 * :Please wait while we process your connection.
         # Ignore.
       when /4\d\d/ # Error message range
-        unless event.params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
-          logger.error event.params.join(' ')
+        unless params.join(' ') =~ /CAP Unknown command/ # Ignore bitchy ircd's that can't handle CAP
+          logger.error params.join(' ')
         end
       end
     end
