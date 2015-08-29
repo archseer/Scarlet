@@ -88,6 +88,7 @@ module Scarlet::Plugins
     # @param [String] command
     # @return [Array<Listener>]
     def match_commands command
+      return @listeners.each_value unless command.present?
       select_commands { |c| c.usage.include? command }
     end
 
@@ -96,16 +97,11 @@ module Scarlet::Plugins
     #
     # @param [String] command The keywords to search for.
     def get_help command = nil
-      help = if c = command.presence
-               match_commands(c).map(&:help)
-             else
-               @listeners.each_value.map(&:help)
-             end
-      # map each by #presence (exposing empty strings),
-      # remove all nil entries from presence,
+      help = match_commands(c).map(&:help)
+      # remove all blank entries,
       # make each line unique,
       # and finally sort the result.
-      help.map(&:presence).compact.uniq.sort
+      help.reject(&:blank?).uniq.sort
     end
 
     # Initialize is here abused to run a new instance of the Command.
