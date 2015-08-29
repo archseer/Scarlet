@@ -3,6 +3,7 @@ require 'em-http-request'
 # Optional responses
 require 'em-http/middleware/opt_html_response'
 require 'em-http/middleware/opt_json_response'
+require 'em-http/middleware/opt_plaintext_response'
 require 'em-http/middleware/opt_xml_response'
 
 class Scarlet
@@ -14,6 +15,10 @@ class Scarlet
 
     def http_request_with_middleware middleware, *args, &block
       http_request(*args, &block).tap { |c| c.use middleware }
+    end
+
+    def plaintext_request *args, &block
+      http_request_with_middleware EM::Middleware::OptPlaintextResponse, *args, &block
     end
 
     def html_request *args, &block
