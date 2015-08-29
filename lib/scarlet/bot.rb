@@ -17,6 +17,7 @@ class Scarlet
   end
 
   def initialize
+    @started_at = Time.now
     Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
     Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
     Scarlet.config.db.symbolize_keys! if Scarlet.config.db
@@ -51,8 +52,10 @@ class Scarlet
     return unless @servers.empty?
     # create servers
     Scarlet.config.servers.each do |name, cfg|
-      @servers[name] = Server.new cfg.merge(server_name: name)
-      @servers[name].plugins = @plugins
+      server = Server.new cfg.merge(server_name: name)
+      server.started_at = @started_at
+      server.plugins = @plugins
+      @servers[name] = server
     end
     # for safety delete the servers list after it gets loaded
     Scarlet.config.delete :servers
