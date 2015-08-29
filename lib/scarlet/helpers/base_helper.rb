@@ -15,6 +15,10 @@ class Scarlet
       event.server.send data
     end
 
+    def config
+      event.server.config
+    end
+
     # Sends a PRIVMG message. Logs the message to the log.
     #
     # @param [String, Symbol] target The target recipient of the message.
