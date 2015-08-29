@@ -1,12 +1,22 @@
-hear(/remind me in (?<time>.+?) to (?<action>.+)[.!]?/i) do
+hear(/remind (?<nick>.+?) in (?<time>.+?) to (?<action>.+)[.!]?/i) do
   clearance(&:registered?)
   description 'Set a reminder in <time> to do an <action>.'
-  usage 'remind me in <time> to <action>'
+  usage 'remind <nick> in <time> to <action>'
   on do
+    nick = handle_special_nick(params[:nick])
     t = params[:time]
+    action = params[:action].strip
     server.scheduler.in t do
-      msg sender.nick, "#{sender.nick}, you asked me to remind you to #{params[:action]}."
+      if nick == sender.nick
+        msg nick, "#{nick}, you asked me to remind you to #{action}."
+      else
+        msg nick, "#{sender.nick} asked me to remind you to #{action}."
+      end
     end
-    reply "Ok, I'll remind you in #{t}."
+    if nick == sender.nick
+      reply "Ok, I'll remind you in #{t}."
+    else
+      reply "Ok, I'll remind #{nick} in #{t}."
+    end
   end
 end

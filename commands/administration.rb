@@ -18,14 +18,14 @@ hear(/bot ban (?<lvl>[0-3]) (?<nicks>.+)(?:\s*\:\s+(?<reason>.+))?/i) do
     ban_level = params[:lvl].to_i
     ban_reason = params[:reason]
     list = []
-    sender_nik = find_nick(sender.nick)
+    sender_nik = find_nick(event.sender.nick)
     nicks.each do |nick_str|
       #notify "%s is currently not present on this network"
       ban = Scarlet::Ban.first_or_create(nick: nick_str)
       nck = find_nick(nick_str)
       if ban && can_ban.call(sender_nik, nck)
         ban.level = ban_level
-        ban.by = sender.nick
+        ban.by = event.sender.nick
         ban.reason = ban_reason
         ban.servers |= [server.config.address]
         list << ban.nick
@@ -78,7 +78,7 @@ hear(/rename\s+(.+)/i) do
   description 'renames the bot to nick.'
   usage 'rename <nick>'
   on do
-    send "nick #{params[1].strip}"
+    send_data "nick #{params[1].strip}"
   end
 end
 
@@ -121,12 +121,12 @@ end
   name, (op, mode) = *str
   hear(/#{name}\s(\S+)/i) do
     clearance(&:sudo?)
-    description "##{op == :+ ? 'Gives' : 'Removes'} #{mode} for user."
+    description "#{op == :+ ? 'Gives' : 'Removes'} #{mode} for user."
     usage "#{name} <nick>"
     on do
       if modes_hsh = server.mode_list[mode]
         mode = op.to_s + modes_hsh[:prefix].to_s
-        server.send "MODE %s #{mode} %s" % [channel, params[1]]
+        send_data "MODE %s #{mode} %s" % [channel, params[1]]
       else
         notify "The network does not support this mode: #{mode}"
       end
@@ -139,7 +139,7 @@ hear(/kick\s+(?<nick>\S+)(?<channel>\s+\#\S+)?(?:\s+(?<reason>.+))?/i) do
   description 'Kicks nick from channel, if no channel is given, kicks from the sender channel.'
   usage 'kick <nick> [<channel>] [<reason>]'
   on do
-    send "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
+    send_data "KICK #{params[:channel]||channel} #{params[:nick]} #{params[:reason]}"
   end
 end
 
@@ -148,15 +148,17 @@ hear(/kickban\s+(\S+)/i) do
   description 'Kickbans nick from channel'
   usage 'kickban <nick>'
   on do
-    send "KICKBAN #{params[1]}"
+    send_data "KICKBAN #{params[1]}"
   end
 end
 
-hear(/invite\s(\S+)(?:\s(\S+))?/i) do
+hear(/invite\s(?<nick>\S+)(?:\s(?<channel>\S+))?/i) do
   clearance(&:sudo?)
   description 'Invites nick to channel'
-  usage 'invite <nick>'
+  usage 'invite <nick> [<channel>]'
   on do
-    send "INVITE #{params[1]} #{(params[2] || '')}"
+    nick = params[:nick]
+    channel = params[:channel] || event.channel
+    send_data "INVITE #{nick} #{channel}"
   end
 end

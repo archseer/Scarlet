@@ -39,7 +39,7 @@ hear(/murder(?:\s+(?<nick>\S+))?/) do
   usage 'murder [<user>]'
   on do
     tmp = murder_templates.sample
-    nik = params[:nick].presence || begin
+    nik = handle_special_nick(params[:nick].presence) || begin
       # a really fugly hack, I'd prefer to use Event#channel, and rename the existing #channel to #channel_name
       nicks = server.channels.get(channel).users.map(&:nick)
       nicks.delete(server.current_nick)

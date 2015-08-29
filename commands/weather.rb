@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'scarlet/helpers/http_command_helper'
+require 'scarlet/helpers/http_helper'
 
 url = 'http://api.openweathermap.org/data/2.5/weather'
 
@@ -52,7 +52,7 @@ hear(/weather in\s+(?<location>.+)(?:\s+:units\s+(?<units>\S+))?/i) do
   clearance nil
   description 'Displays the current weather stats for <location> in <units>.'
   usage 'weather in <location> [units <unit>]'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     nick = find_nick sender.nick
 
@@ -80,7 +80,7 @@ hear(/weather for\s+(?<nick>\S+)/i) do
   clearance nil
   description 'Displays your weather forecast for a user'
   usage 'weather for <nick>'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     instance_exec(params[:nick], &get_weather_for)
   end
@@ -90,7 +90,7 @@ hear(/weather/i) do
   clearance(&:registered?)
   description 'Displays your weather forecast.'
   usage 'weather'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     instance_exec(sender.nick, &get_weather_for)
   end

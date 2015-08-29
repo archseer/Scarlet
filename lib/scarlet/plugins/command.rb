@@ -1,4 +1,5 @@
 require 'scarlet/plugin'
+require 'scarlet/helpers/base_helper'
 
 module Scarlet::Plugins
   class Command
@@ -7,11 +8,11 @@ module Scarlet::Plugins
     on :privmsg do |event|
       # if we detect a command sequence, we remove the prefix and execute it.
       # it is prefixed with config.control_char or by mentioning the bot's current nickname
-      if event.params.first =~ /^#{event.server.current_nick}[:,]?\s*/i
-        event.params[0] = event.params[0].split[1..-1].join(' ')
+      if params.first =~ /^#{event.server.current_nick}[:,]?\s*/i
+        params[0] = params[0].split[1..-1].join(' ')
         process_command(event.dup)
-      elsif event.params.first.starts_with? config.control_char
-        event.params.first.slice!(0)
+      elsif params.first.starts_with? config.control_char
+        params.first.slice!(0)
         process_command(event.dup)
       end
     end
@@ -142,20 +143,21 @@ module Scarlet::Plugins
     # @param [Proc] clearance  proc to determine if the use passes clearance
     # @return [Boolean] True if access is allowed, else false.
     def check_access event, clearance
+      ctx = Scarlet::Context.new event, Scarlet::BaseHelper
       nick = Scarlet::Nick.first nick: event.sender.nick
       return false if check_ban(event) # if the user is banned
       return true unless clearance
 
       if event.server.users.get(event.sender.nick).ns_login # check login
         if !nick # check that user is registered
-          event.reply "Registration not found, please register."
+          ctx.reply "Registration not found, please register."
           return false
         elsif !clearance.call(nick)
-          event.reply "Your security clearance does not grant access."
+          ctx.reply "Your security clearance does not grant access."
           return false
         end
       else
-        event.reply "Test subject #{event.sender.nick} is not logged in with NickServ."
+        ctx.reply "Test subject #{event.sender.nick} is not logged in with NickServ."
         return false
       end
       return true

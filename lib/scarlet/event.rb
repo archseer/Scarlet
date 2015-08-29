@@ -27,32 +27,6 @@ class Scarlet
       @data = {}
     end
 
-    # Delegated back to +@server+.
-    delegate :msg, :notice, :send, to: :@server
-
-    # Sends a reply back to where the event came from (a user or a channel).
-    # @param [String] message The message to send back.
-    def reply(message)
-      msg return_path, message
-    end
-
-    # Sends a NOTICE reply back to the sender (a user).
-    # @param [String] message The message to send back.
-    def notify(message)
-      notice @sender.nick, message
-    end
-
-    # Send a reply back as a ctcp message.
-    def ctcp(command, message)
-      notify "\001#{command} #{message}\001"
-    end
-
-    # Sends a described action back to where the event came from.
-    # @param (see #reply)
-    def action(message)
-      reply "\001ACTION #{message}\001"
-    end
-
     # A representation of the message sender, created from the hostmask.
     class Sender
       attr_accessor :nick, :username, :host, :user

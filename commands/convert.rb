@@ -1,12 +1,11 @@
-require 'scarlet/helpers/http_command_helper'
-require 'scarlet/helpers/json_command_helper'
+require 'scarlet/helpers/http_helper'
 require 'ostruct'
 
 hear(/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) do
   clearance nil
   description 'Converts currency from one unit to another.'
   usage 'convert <value> <from_unit> [to] <to_unit>'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     q = { q: params[:value], from: params[:from], to: params[:to] }
     http = json_request("http://rate-exchange.appspot.com/currency").get(query: q)

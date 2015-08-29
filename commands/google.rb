@@ -1,12 +1,11 @@
 require 'cgi'
-require 'scarlet/helpers/http_command_helper'
-require 'scarlet/helpers/json_command_helper'
+require 'scarlet/helpers/http_helper'
 
 hear(/(g|google)\s+(.+)/) do
   clearance nil
   description 'Harness the power of google!'
   usage 'google <terms>'
-  helpers Scarlet::HttpCommandHelper, Scarlet::JsonCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     http = json_request('http://ajax.googleapis.com/ajax/services/search/web').get query: {'v' => '1.0', 'q' => params[1]}
     http.errback { reply "ERROR! Fatal mistake." }

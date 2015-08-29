@@ -2,6 +2,7 @@ require 'active_support/concern'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/listeners'
 require 'scarlet/logger'
+require 'scarlet/helpers/base_helper'
 
 class Scarlet
   module Helpers
@@ -14,7 +15,7 @@ class Scarlet
 
       def helper(*args, &block)
         args.each do |mod|
-          helpers.module_eval { extend mod }
+          helpers.module_eval { include mod }
         end
 
         helpers.module_eval(&block) if block_given?
@@ -23,8 +24,19 @@ class Scarlet
   end
 
   class Context
-    def initialize *objs
+    include Scarlet::Loggable
+    attr_accessor :event
+
+    def initialize event, *objs
+      @event = event
       @objs = objs
+    end
+
+    def exec(&block)
+      catch(:abort) { instance_exec(@event, &block) }
+    rescue Exception => ex
+      logger.error ex.inspect
+      logger.error ex.backtrace.join("\n")
     end
 
     def method_missing method, *args, &block
@@ -43,6 +55,7 @@ class Scarlet
 
     included do
       # ~
+      helper Scarlet::BaseHelper
     end
 
     def emit(event)
@@ -55,20 +68,16 @@ class Scarlet
     # All events get passed to the +:all+ listener.
     # @param [Event] event The event that was recieved.
     def handle(event)
-      klass = self.class
-      execute = lambda do |block|
-        begin
-          cxt = Scarlet::Context.new(self, klass.helpers, event.server)
-          cxt.instance_exec(event.dup, &block)
-        rescue Exception => ex
-          logger.error ex.inspect
-          logger.error ex.backtrace.join("\n")
-        end
+      self.class.__listeners__.each_listener(event.command) do |block|
+        self.class.context.new(event.dup, self).exec(&block)
       end
-      klass.__listeners__.each_listener(event.command, &execute)
     end
 
     class_methods do
+      def context
+        @_cxt ||= Class.new(Scarlet::Context).include(helpers)
+      end
+
       def __listeners__
         @_listeners ||= Listeners.new
       end
