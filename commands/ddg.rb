@@ -1,4 +1,4 @@
-require 'scarlet/helpers/http_command_helper'
+require 'scarlet/helpers/http_helper'
 
 # @param [Hash<String, String>] data
 # @yieldparam [String] line
@@ -70,7 +70,7 @@ hear(/ddg\s+(?<search_term>.+)/) do
   clearance nil
   description 'Search for something using DuckDuckGo.'
   usage 'ddg <search_term>'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     ddg.call self, params[:search_term].strip
   end

@@ -1,4 +1,4 @@
-require 'scarlet/helpers/http_command_helper'
+require 'scarlet/helpers/http_helper'
 # Ported to ruby for Scarlet from https://github.com/github/hubot-scripts/blob/master/src/scripts/advice.coffee
 # Get some valuable advice from adviceslip.com
 
@@ -31,7 +31,7 @@ hear(/what (?:do you|should I) do (?:when|about) (?<query>.*)/i,
   /think about (?<query>.*)/i) do
   clearance nil
   description 'Ask about the wonders of the world!'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     query = params[:query]
     http = json_request("http://api.adviceslip.com/advice/search/#{query}").get
@@ -51,7 +51,7 @@ hear(/advice/i) do
   clearance nil
   description 'Ask for random advice.'
   usage 'advice'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     random_advice.call self
   end

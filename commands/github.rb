@@ -1,11 +1,11 @@
 require 'octokit'
-require 'scarlet/helpers/http_command_helper'
+require 'scarlet/helpers/http_helper'
 
 hear(/gh status/) do
   clearance nil
   description 'Displays latest message from github.status'
   usage 'gh status'
-  helpers Scarlet::HttpCommandHelper
+  helpers Scarlet::HttpHelper
   on do
     http = json_request('https://status.github.com/api/last-message.json').get
     http.errback { reply 'ERR!' }
