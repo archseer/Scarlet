@@ -15,6 +15,10 @@ class Scarlet
       event.server.send data
     end
 
+    def params
+      event.params
+    end
+
     def config
       event.server.config
     end
