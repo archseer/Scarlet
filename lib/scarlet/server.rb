@@ -40,6 +40,7 @@ class Scarlet
     # @param [Hash] cfg A hash with configuration keys and values.
     def initialize cfg
       config.log_buffer_size = 256
+      config.delay_join = true
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick
       config.control_char ||= Scarlet.config.control_char
