@@ -1,6 +1,6 @@
 require 'scarlet/helpers/http_helper'
 
-hear(/rubygems gem\s+(?<gemname>.+)/) do
+hear(/gem\s+(?<gemname>.+)/) do
   clearance nil
   description 'Displays information about a gem <gemname>.'
   usage 'rubygems gem <gemname>'
