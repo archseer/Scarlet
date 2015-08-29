@@ -26,7 +26,7 @@ class Scarlet
     def msg target, message
       chop_msg message do |m|
         event.server.throttle_send "PRIVMSG #{target} :#{m}"
-        write_log :privmsg, m, target
+        event.server.write_log :privmsg, m, target
       end
     end
 
@@ -37,7 +37,7 @@ class Scarlet
     def notice target, message
       chop_msg message do |m|
         event.server.throttle_send "NOTICE #{target} :#{m}"
-        write_log :notice, message, target
+        event.server.write_log :notice, message, target
       end
     end
 

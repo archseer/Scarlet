@@ -24,6 +24,7 @@ class Scarlet
   end
 
   class Context
+    include Scarlet::Loggable
     attr_accessor :event
 
     def initialize event, *objs
