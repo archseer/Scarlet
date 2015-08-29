@@ -23,14 +23,22 @@ class Scarlet
       event.server.config
     end
 
+    def sender
+      event.sender
+    end
+
+    def server
+      event.server
+    end
+
     # Sends a PRIVMG message. Logs the message to the log.
     #
     # @param [String, Symbol] target The target recipient of the message.
     # @param [String] message The message to be sent.
     def msg target, message
       chop_msg message do |m|
-        event.server.throttle_send "PRIVMSG #{target} :#{m}"
-        event.server.write_log :privmsg, m, target
+        server.throttle_send "PRIVMSG #{target} :#{m}"
+        server.write_log :privmsg, m, target
       end
     end
 
@@ -40,8 +48,8 @@ class Scarlet
     # @param [String] message The message to be sent.
     def notice target, message
       chop_msg message do |m|
-        event.server.throttle_send "NOTICE #{target} :#{m}"
-        event.server.write_log :notice, message, target
+        server.throttle_send "NOTICE #{target} :#{m}"
+        server.write_log :notice, message, target
       end
     end
 

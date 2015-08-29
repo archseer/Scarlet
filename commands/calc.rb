@@ -7,7 +7,7 @@ hear(/calc\s+(?<problem>.+)/) do
     problem = params[:problem]
     begin
       answer = Calc.evaluate(problem)
-      reply "#{sender.nick}: #{answer}"
+      reply "#{event.sender.nick}: #{answer}"
     rescue ZeroDivisionError
       reply "I'm sorry, Dave, I'm afraid I can't do that."
     end

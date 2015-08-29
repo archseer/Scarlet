@@ -14,7 +14,7 @@ hear(/seen (?<nick>\S+)/i) do
     message = "#{log.nick} was last seen #{Time.at(log.updated_at).ago.to_words}"
     case log.command.downcase.to_sym
     when :privmsg
-      message << " in #{log.target}" unless log.target.downcase == channel
+      message << " in #{log.target}" unless log.target.downcase == event.channel
       if log.message =~ /\u0001ACTION (.+)\u0001/
         message << " doing '/me #{$1}'."
       else

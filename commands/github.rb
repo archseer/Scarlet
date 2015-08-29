@@ -54,7 +54,7 @@ end
 
 hear(/gh repo\s+(?<reponame>\S+)/) do
   clearance(&:registered?)
-  description ''
+  description 'Display description of specified repository'
   usage 'gh repo <reponame>'
   on do
     reponame = params[:reponame]

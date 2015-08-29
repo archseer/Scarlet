@@ -50,11 +50,14 @@ hear(/user status(?:\s+(?<nick>\S+))?/i) do
   usage 'user status [<nick>]'
   on do
     with_nick params[:nick] || sender.nick do |nick|
-      user = event.server.users.get(nick.nick)
-      if user.ns_login
-        reply "#{nick.nick} is logged in"
+      if user = event.server.users.get(nick.nick)
+        if user.ns_login
+          reply "#{nick.nick} is logged in"
+        else
+          reply "#{nick.nick} does not appear to be logged in"
+        end
       else
-        reply "#{nick.nick} does not appear to be logged in"
+        reply "User #{nick.nick} not found, sorry."
       end
     end
   end
