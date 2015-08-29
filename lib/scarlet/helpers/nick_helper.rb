@@ -2,9 +2,9 @@ class Scarlet
   module NickHelper
     def handle_special_nick(name)
       case name
-      when ':me'
+      when ':me', 'me'
         sender.nick
-      when ':you'
+      when ':you', 'you'
         server.current_nick
       else
         name
