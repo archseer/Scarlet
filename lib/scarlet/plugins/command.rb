@@ -145,7 +145,7 @@ module Scarlet::Plugins
       return true unless clearance
 
       user = event.server.users.get(event.sender.nick)
-      if user && user.ns_login # check login
+      if user.try(:identified?) # check login
         if !nick # check that user is registered
           ctx.reply "Registration not found, please register."
           return false

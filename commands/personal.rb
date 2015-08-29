@@ -5,7 +5,7 @@ hear(/login/i) do
   on do
     message = "%s, you do not have an account yet. Use the register command."
     with_nick nick: sender.nick, msgfmt: message do
-      if !sender.user.ns_login
+      if !sender.user.identified?
         server.check_ns_login sender.nick
         notify "#{sender.nick}, you have been logged in successfuly."
       else
@@ -20,7 +20,7 @@ hear(/logout/i) do
   description 'Logs the user out from his bot account.'
   usage 'logout'
   on do
-    if sender.user.ns_login
+    if sender.user.identified?
       sender.user.ns_login = false
       notify "#{sender.nick}, you are now logged out."
     end
