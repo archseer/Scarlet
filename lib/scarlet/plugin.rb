@@ -26,9 +26,8 @@ class Scarlet
   class Context
     attr_accessor :event
 
-    def initialize event, helpers, *objs
+    def initialize event, *objs
       @event = event
-      extend(helpers)
       @objs = objs
     end
 
@@ -65,20 +64,21 @@ class Scarlet
     # All events get passed to the +:all+ listener.
     # @param [Event] event The event that was recieved.
     def handle(event)
-      klass = self.class
-      execute = lambda do |block|
+      self.class.__listeners__.each_listener(event.command) do |block|
         begin
-          cxt = Scarlet::Context.new(event.dup, klass.helpers, self)
-          cxt.exec(&block)
+          self.class.context.new(event.dup, self).exec(&block)
         rescue Exception => ex
           logger.error ex.inspect
           logger.error ex.backtrace.join("\n")
         end
       end
-      klass.__listeners__.each_listener(event.command, &execute)
     end
 
     class_methods do
+      def context
+        @_cxt ||= Class.new(Scarlet::Context).include(helpers)
+      end
+
       def __listeners__
         @_listeners ||= Listeners.new
       end
