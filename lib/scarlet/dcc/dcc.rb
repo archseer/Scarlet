@@ -44,6 +44,18 @@ class Scarlet
       @ip ||= %x{curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+'}.delete("\n")
     end
 
+    def self.get_ip_port(server)
+      sockname = EM.get_sockname(server)
+      port, ip = Socket.unpack_sockaddr_in(sockname)
+
+      # @ip can be local, so assign to global
+      ip = Scarlet::DCC.ip
+
+      ip = "127.0.0.1" # Debug, local sends
+      ip = IPAddr.new(ip).to_i
+      return ip, port
+    end
+
     def self.handle_dcc event
       case event.type
       when :SEND

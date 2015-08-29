@@ -88,6 +88,7 @@ module Scarlet::Plugins
     # @param [String] command
     # @return [Array<Listener>]
     def match_commands command
+      return @listeners.each_value unless command.present?
       select_commands { |c| c.usage.include? command }
     end
 
@@ -96,16 +97,11 @@ module Scarlet::Plugins
     #
     # @param [String] command The keywords to search for.
     def get_help command = nil
-      help = if c = command.presence
-               match_commands(c).map(&:help)
-             else
-               @listeners.each_value.map(&:help)
-             end
-      # map each by #presence (exposing empty strings),
-      # remove all nil entries from presence,
+      help = match_commands(c).map(&:help)
+      # remove all blank entries,
       # make each line unique,
       # and finally sort the result.
-      help.map(&:presence).compact.uniq.sort
+      help.reject(&:blank?).uniq.sort
     end
 
     # Initialize is here abused to run a new instance of the Command.
@@ -148,7 +144,8 @@ module Scarlet::Plugins
       return false if check_ban(event) # if the user is banned
       return true unless clearance
 
-      if event.server.users.get(event.sender.nick).ns_login # check login
+      user = event.server.users.get(event.sender.nick)
+      if user.try(:identified?) # check login
         if !nick # check that user is registered
           ctx.reply "Registration not found, please register."
           return false

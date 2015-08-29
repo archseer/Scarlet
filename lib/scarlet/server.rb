@@ -41,6 +41,7 @@ class Scarlet
     # @param [Hash] cfg A hash with configuration keys and values.
     def initialize cfg
       config.log_buffer_size = 256
+      config.delay_join = true
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick
       config.control_char ||= Scarlet.config.control_char
@@ -141,10 +142,9 @@ class Scarlet
     def unbind
       reset_vars
 
-      if not @state == :disconnecting
-        logger.error "Connection to server lost. Reconnecting..."
-        reconnect
-      end
+      return unless @state == :disconnecting
+      logger.error "Connection to server lost. Reconnecting..."
+      reconnect
     end
 
     # Sends the data over to the server.
