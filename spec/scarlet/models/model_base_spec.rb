@@ -2,10 +2,14 @@ require 'spec_helper'
 require 'scarlet/models/model_base'
 
 class FixtureModel < Scarlet::ModelBase
+  extend Scarlet::RecordRepository
+
   field :name, type: String
 end
 
 class TestModel < Scarlet::ModelBase
+  extend Scarlet::RecordRepository
+
   field :name, type: String
 end
 

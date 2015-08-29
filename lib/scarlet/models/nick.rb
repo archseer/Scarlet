@@ -3,6 +3,8 @@ require 'moon-repository/query'
 
 class Scarlet
   class Nick < ModelBase
+    extend RecordRepository
+
     field :nick,       type: String,  validate: { presence: {} }
     field :aliases,    type: Array,   default: proc { Array.new }
     # owner > dev > admin > mod > (every other user)

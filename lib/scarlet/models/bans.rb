@@ -7,6 +7,8 @@ class Scarlet
   # 2 - Bot Ban
   # 3 - Ban (from Channel)
   class Ban < ModelBase
+    extend RecordRepository
+
     field :nick,    type: String, validate: { presence: {} }
     field :servers, type: Array,  default: proc { Array.new }
     field :by,      type: String
