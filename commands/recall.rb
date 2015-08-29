@@ -5,7 +5,7 @@ hear(/recall(?:\s+(\d+))?/) do
   on do
     if event.channel
       recall_depth = ([[(params[1] || 5).to_i, 5].min, 1].max) + 1
-      logs = Scarlet::Log.channel(event.channel)
+      logs = server.logs.channel(event.channel)
         .select { |o| o.command.to_s == 'PRIVMSG' }
         .sort { |a, b| b.updated_at <=> a.updated_at }
         .limit(recall_depth)

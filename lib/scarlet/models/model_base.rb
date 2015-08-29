@@ -9,35 +9,45 @@ require 'scarlet/core_ext/enumerable'
 
 class Scarlet
   # Base model class for all other models in Scarlet
-  class ModelBase < Moon::DataModel::Metal
-    include Moon::Record
+  module RecordRepository
+    include Moon::Record::ClassMethods
 
-    field :id,           type: String,  default: proc { SecureRandom.uuid }
-    field :created_at,   type: Integer, default: proc { Time.now.to_i }
-    field :updated_at,   type: Integer, default: proc { Time.now.to_i }
-    field :destroyed_at, type: Integer, default: proc { -1 }
-
-    def self.repository_basename
+    def repository_basename
       name.tableize + '.yml'
     end
 
       # @return [String]
-    def self.repository_filename
+    def repository_filename
       dirname = File.expand_path(Scarlet.config.db.fetch(:path), Scarlet.root)
       filename = File.join(dirname, repository_basename)
     end
 
       # @return [Hash<Symbol, Object>]
-    def self.repo_config
+    def repo_config
       {
         memory: false,
         filename: repository_filename
       }
     end
 
-    def self.prepare_repository
+    def prepare_repository
       FileUtils.mkdir_p(File.dirname(repository_filename))
     end
+
+    def scope(method_name, cb)
+      define_singleton_method method_name do |*a|
+        cb.call(*a)
+      end
+    end
+  end
+
+  class ModelBase < Moon::DataModel::Metal
+    include Moon::Record::InstanceMethods
+
+    field :id,           type: String,  default: proc { SecureRandom.uuid }
+    field :created_at,   type: Integer, default: proc { Time.now.to_i }
+    field :updated_at,   type: Integer, default: proc { Time.now.to_i }
+    field :destroyed_at, type: Integer, default: proc { -1 }
 
     def pre_update
       self.updated_at = Time.now.to_i
@@ -49,12 +59,6 @@ class Scarlet
 
     def pre_destroy
       self.destroyed_at = Time.now.to_i
-    end
-
-    def self.scope(method_name, cb)
-      define_singleton_method method_name do |*a|
-        cb.call(*a)
-      end
     end
   end
 end
