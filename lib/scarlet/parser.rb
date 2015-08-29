@@ -28,22 +28,20 @@ class Scarlet
     end
 
     def self.parse_isupport params
-      hash = {}
-      params.each do |segment|
+      params.each_with_object({}) do |segment, hash|
         if s = segment.match(/(?<token>.+)\=(?<params>.+)/)
-          if s[:params].include? ':'
-            val = Hash[s[:params].scan(/([^,]+):([^,]+)/).map {|(k,v)| [k.downcase.to_sym, convert_digit(v)]}]
+          val = if s[:params].include? ':'
+            Hash[s[:params].scan(/([^,]+):([^,]+)/).map {|(k,v)| [k.downcase.to_sym, convert_digit(v)]}]
           elsif s[:params].include? ',' # convert arrays and it's digit keys
-            val = s[:params].split(',').map {|c| convert_digit(c)}
+            s[:params].split(',').map {|c| convert_digit(c)}
           else
-            val = convert_digit(s[:params])
+            convert_digit(s[:params])
           end
           hash[s[:token].downcase.to_sym] = val
         else
           hash[segment.downcase.to_sym] = true
         end
       end
-      hash
     end
 
     # converts val to int if it's made from digits only
@@ -99,13 +97,11 @@ class Scarlet
     # @param [Boolean] remove True if we want to remove the IRC code and not parse
     #  it to ANSI.
     def self.parse_esc_codes msg, remove = false
-      new_msg = msg.gsub(/\x02(.+?)\x02/) do
+      msg.gsub(/\x02(.+?)\x02/) do
         remove ?  "#{$1}" : "\x1b[1m#{$1}\x1b[22m"
-      end
-      new_msg = new_msg.gsub(/\x1F(.+?)\x1F/) do
+      end.gsub(/\x1F(.+?)\x1F/) do
         remove ?  "#{$1}" : "\x1b[4m#{$1}\x1b[24m"
       end
-      new_msg
     end
 
     # Parses the message sent by the server into several distinct parts:

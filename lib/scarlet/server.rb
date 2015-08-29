@@ -140,10 +140,9 @@ class Scarlet
     def unbind
       reset_vars
 
-      if not @state == :disconnecting
-        logger.error "Connection to server lost. Reconnecting..."
-        reconnect
-      end
+      return unless @state == :disconnecting
+      logger.error "Connection to server lost. Reconnecting..."
+      reconnect
     end
 
     # Sends the data over to the server.

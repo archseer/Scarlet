@@ -36,15 +36,9 @@ class Scarlet
           # start server on this computer and port 0 means start on any open port.
           @server = EM.start_server '0.0.0.0', 0, Connection, @filename
 
-          sockname = EM.get_sockname(@server)
-          @port, @ip = Socket.unpack_sockaddr_in(sockname)
-          # @ip can be local, so assign to global
-          @ip = Scarlet::DCC.ip
+          @ip, @port = Scarlet::DCC.get_ip_port(@server)
 
-          @ip = "127.0.0.1" # Debug, local sends
-
-          ip = IPAddr.new(@ip).to_i
-          @event.ctcp "DCC", "SEND \"#{@filename}\" #{ip} #{@port} #{@size}"
+          @event.ctcp "DCC", "SEND \"#{@filename}\" #{@ip} #{@port} #{@size}"
         end
       end
     end

@@ -7,11 +7,7 @@ class Scarlet
       class Connection < EventMachine::Connection
         def initialize(send)
           @send = send
-          if @send.pos
-            @io = File.open(@send.filename, 'wb')
-          else
-            @io = File.open(@send.filename, 'ab')
-          end
+          @io = File.open(@send.filename, @send.pos ? 'ab' : 'wb')
           @total = 0
         end
 
@@ -42,12 +38,12 @@ class Scarlet
 
         def initialize(opts)
           @event, @filename, @ip, @port, @size, @token = opts.values_at(:event, :filename, :ip, :port, :size, :token)
-          #if File.exist?(@filename)
-          #  @pos = File.size(@filename)
-          #  resume
-          #else
+          if File.exist?(@filename)
+            @pos = File.size(@filename)
+            resume
+          else
             accept
-          #end
+          end
         end
 
         def accept
@@ -64,15 +60,9 @@ class Scarlet
           # start server on this computer and port 0 means start on any open port.
           @server = EM.start_server '0.0.0.0', 0, Connection, self
 
-          sockname = EM.get_sockname(@server)
-          @port, @ip = Socket.unpack_sockaddr_in(sockname)
+          @ip, @port = Scarlet::DCC.get_ip_port(@server)
 
-          # @ip can be local, so assign to global
-          @ip = Scarlet::DCC.ip
-
-          @ip = "127.0.0.1" # Debug, local sends
-          ip = IPAddr.new(@ip).to_i
-          @event.ctcp "DCC", "SEND \"#{@filename}\" #{ip} #{@port} #{@size} #{@token}"
+          @event.ctcp "DCC", "SEND \"#{@filename}\" #{@ip} #{@port} #{@size} #{@token}"
         end
       end
     end
