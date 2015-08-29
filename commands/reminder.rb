@@ -5,11 +5,12 @@ hear(/remind (?<nick>.+?) in (?<time>.+?) to (?<action>.+)[.!]?/i) do
   on do
     nick = handle_special_nick(params[:nick])
     t = params[:time]
+    action = params[:action].strip
     server.scheduler.in t do
       if nick == sender.nick
-        msg nick, "#{nick}, you asked me to remind you to #{params[:action]}."
+        msg nick, "#{nick}, you asked me to remind you to #{action}."
       else
-        msg nick, "#{sender.nick} asked me to remind you to #{params[:action]}."
+        msg nick, "#{sender.nick} asked me to remind you to #{action}."
       end
     end
     if nick == sender.nick
