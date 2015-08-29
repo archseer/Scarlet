@@ -152,8 +152,6 @@ class Scarlet
         end
       end
 
-      delegate :msg, :notice, :reply, :action, :send, to: :@event
-
       def error_reply(msg)
         reply msg
         throw :abort
@@ -162,11 +160,6 @@ class Scarlet
       def error_notify(msg)
         notify msg
         throw :abort
-      end
-
-      # format module
-      def fmt
-        Scarlet::Fmt
       end
 
       # DSL delegator, delegates calls to the helpers or +@event+ to be able to directly use their
