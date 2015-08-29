@@ -15,6 +15,13 @@ class Scarlet
       @channels = Channels.new
     end
 
+    # Whether a user has been indentified or not.
+    #
+    # @return [Boolean]
+    def indentified?
+      @ns_login == true
+    end
+
     # Add the user to a channel.
     # @param [Channel] channel The channel we want to join.
     def join channel
