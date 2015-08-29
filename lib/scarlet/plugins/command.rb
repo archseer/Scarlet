@@ -1,4 +1,5 @@
 require 'scarlet/plugin'
+require 'scarlet/helpers/base_helper'
 
 module Scarlet::Plugins
   class Command
@@ -142,20 +143,21 @@ module Scarlet::Plugins
     # @param [Proc] clearance  proc to determine if the use passes clearance
     # @return [Boolean] True if access is allowed, else false.
     def check_access event, clearance
+      ctx = Scarlet::Context.new event, Scarlet::BaseHelper
       nick = Scarlet::Nick.first nick: event.sender.nick
       return false if check_ban(event) # if the user is banned
       return true unless clearance
 
       if event.server.users.get(event.sender.nick).ns_login # check login
         if !nick # check that user is registered
-          event.reply "Registration not found, please register."
+          ctx.reply "Registration not found, please register."
           return false
         elsif !clearance.call(nick)
-          event.reply "Your security clearance does not grant access."
+          ctx.reply "Your security clearance does not grant access."
           return false
         end
       else
-        event.reply "Test subject #{event.sender.nick} is not logged in with NickServ."
+        ctx.reply "Test subject #{event.sender.nick} is not logged in with NickServ."
         return false
       end
       return true
