@@ -1,7 +1,11 @@
+require 'scarlet/logger'
+
 # A connection instance that gets used by EM to send and recieve messages.
 # Provides basic IRC initialization and automated timeout checking.
 class Scarlet::Connection < EM::Connection
+  include Scarlet::Loggable
   include EventMachine::Protocols::LineText2
+
   # Initialize a new connection.
   # @note Never make a new instance directly, but by using EM.connect.
   # @param [Server] server Our server instance to give the messages to.
@@ -31,6 +35,7 @@ class Scarlet::Connection < EM::Connection
   # Gets a recieved message and gives it to +Server+.
   # @param [String] line The line that was recieved from the server.
   def receive_line line
+    logger.debug " > #{line}"
     reset_check_connection_timer
     @server.receive_line line
   end
@@ -39,6 +44,7 @@ class Scarlet::Connection < EM::Connection
   # (as per IRC specs).
   # @param [String, #to_s] data The data to be sent to server.
   def send_data data
+    logger.debug " < #{data}"
     super "#{data}\r\n"
   end
 
