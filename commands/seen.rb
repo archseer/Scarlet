@@ -5,7 +5,7 @@ hear(/seen (?<nick>\S+)/i) do
   description 'When was the last time you saw nick?'
   usage 'seen <nick>'
   on do
-    log = Scarlet::Log.nick(params[:nick]).sort_by(&:updated_at).last
+    log = server.logs.nick(params[:nick]).sort_by(&:updated_at).last
     unless log
       reply "Sorry, I have never seen #{params[:nick]}."
       next

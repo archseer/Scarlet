@@ -2,6 +2,7 @@ require 'active_support/configurable'
 require 'eventmachine'
 require 'rufus-scheduler'
 require 'scarlet/logger'
+require 'scarlet/models/log'
 require 'scarlet/connection'
 require 'scarlet/event'
 require 'scarlet/parser'
@@ -30,6 +31,7 @@ class Scarlet
     attr_accessor :sasl
     attr_accessor :sasl_mechanisms
     attr_accessor :state
+    attr_accessor :logs
     attr_accessor :vHost
 
     # Initializes a new abstracted connection instance to an IRC server.
@@ -37,6 +39,7 @@ class Scarlet
     #
     # @param [Hash] cfg A hash with configuration keys and values.
     def initialize cfg
+      config.log_buffer_size = 256
       config.merge! cfg.symbolize_keys
       @current_nick = config.nick
       config.control_char ||= Scarlet.config.control_char
@@ -47,6 +50,7 @@ class Scarlet
       @channels  = ServerChannels.new # channels
       @users     = Users.new          # users (seen) on the server
       @state     = :connecting
+      @logs      = LogBuffer.new(config.log_buffer_size)
       @reconnects = 0
       reset_vars
       connect!
@@ -164,7 +168,7 @@ class Scarlet
       parsed_line = Parser.parse_line line
       event = Event.new(self, parsed_line[:prefix], parsed_line[:command],
                         parsed_line[:target], parsed_line[:params])
-      Log.write(event)
+      logs.write(event)
       @plugins.each do |plug|
         plug.handle event
       end
@@ -179,8 +183,8 @@ class Scarlet
       return if target =~ /Serv$/ # if we PM a bot, i.e. for logging in, that shouldn't be logged.
 
       channel = target.starts_with?("#") ? target : ''
-      Log.log(nick: @current_nick, message: message,
-              command: command.upcase, target: target, channel: channel)
+      logs.log(nick: @current_nick, message: message,
+               command: command.upcase, target: target, channel: channel)
     end
   end
 end
