@@ -3,13 +3,13 @@ require 'scarlet/helpers/http_command_helper'
 
 # The echo command is simply used for checking if the bot exists, or for testing
 # message sending.
-hear (/translate (?<msg>.+)/) do
+hear (/translate (?::(?<origin>\w+))? (?<msg>.+)/) do
   clearance nil
   description 'Translates given message.'
   usage 'translate <message>'
   helpers Scarlet::HttpCommandHelper
   on do
-    origin = 'auto'
+    origin = params[:origin] || 'auto'
     target = 'en'
     term = CGI.escape(params[:msg])
     query = {
