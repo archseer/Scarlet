@@ -3,7 +3,7 @@ require 'scarlet/helpers/http_helper'
 require 'uri'
 
 module Scarlet::Plugins
-  # Plugin for priting HTTP(S) link titles.
+  # Plugin for printing HTTP(S) link titles.
   class LinkPrinter
     include Scarlet::Plugin
     helper Scarlet::HttpHelper
@@ -14,7 +14,7 @@ module Scarlet::Plugins
         html_request(uri.to_s).get(redirects: 1).callback do |http|
           if html = http.response.value.presence
             if title = html.css('title').text.presence
-              event.reply "Title: #{title.strip}"
+              reply "Title: #{title.strip}"
             end
           end
         end
