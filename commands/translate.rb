@@ -1,9 +1,13 @@
+require 'scarlet/js_object_parser'
+require 'scarlet/helpers/http_command_helper'
+
 # The echo command is simply used for checking if the bot exists, or for testing
 # message sending.
 hear (/translate (?<msg>.+)/) do
   clearance nil
   description 'Translates given message.'
   usage 'translate <message>'
+  helpers Scarlet::HttpCommandHelper
   on do
     origin = 'auto'
     target = 'en'
@@ -21,10 +25,19 @@ hear (/translate (?<msg>.+)/) do
         otf: 1,
         dt: ['bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't', 'at']
     }
-    http = ctx.json_request('https://translate.google.com/translate_a/single').get query: query
-    http.errback { ctx.reply 'Error!' }
+    http = plaintext_request('https://translate.google.com/translate_a/single').get query: query
+    http.errback { reply 'Error!' }
     http.callback do
-      reply 'Invalid response data'
+      if str = http.response.value
+        begin
+          data = Scarlet::JsObjectParser.parse(str)
+          reply data.inspect
+        rescue Scarlet::JsObjectParser::ParserJam => ex
+          reply "ERROR: #{ex.inspect}"
+        end
+      else
+        reply 'Invalid response data'
+      end
     end
   end
 end
