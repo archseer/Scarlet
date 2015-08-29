@@ -148,7 +148,8 @@ module Scarlet::Plugins
       return false if check_ban(event) # if the user is banned
       return true unless clearance
 
-      if event.server.users.get(event.sender.nick).ns_login # check login
+      user = event.server.users.get(event.sender.nick)
+      if user && user.ns_login # check login
         if !nick # check that user is registered
           ctx.reply "Registration not found, please register."
           return false
