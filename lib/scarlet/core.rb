@@ -22,11 +22,6 @@ class Scarlet
       @@ctcp_listeners.each_listener(event.command, &execute)
     end
 
-    def join_default_channels
-      channels = config.channels.presence
-      join *channels
-    end
-
     ctcp :PING do |event|
       logger.info "[ CTCP PING from #{event.sender.nick} ]"
       event.ctcp :PING, params.first
@@ -182,7 +177,10 @@ class Scarlet
       pass = config.nickserv_password
       msg 'NickServ', "IDENTIFY #{pass}" if pass && !server.sasl
 
-      event.server.join_default_channels unless config.delay_join
+      unless config.delay_join
+        channels = config.channels.presence
+        join *channels if channels
+      end
     end
 
     on :'004' do |event|
@@ -224,7 +222,10 @@ class Scarlet
     end
 
     on :'376' do |event| # END of MOTD command. Join channel(s)! (if any)
-      server.join_default_channels if config.delay_join
+      if config.delay_join
+        channels = config.channels.presence
+        join *channels if channels
+      end
     end
 
     on :'396' do |event| # RPL_HOSTHIDDEN - on some ircd's sent when user mode +x (host masking) was set
