@@ -21,8 +21,6 @@ module Scarlet::Plugins
       # Contains all of our listeners.
       # @return [Hash<Regexp, Listener>]
       @listeners = {}
-      # Any words we want to filter.
-      @filter = []
 
       @loader = Scarlet::Command::Loader.new(self)
       load_commands
@@ -108,11 +106,6 @@ module Scarlet::Plugins
     #
     # @param [Event] event The event that was caught by the server.
     def process_command event
-      if word = check_filters(event.params.first)
-        event.reply "Cannot execute because \"#{word}\" is blocked."
-        return
-      end
-
       @listeners.keys.each do |key|
         listener = @listeners[key]
         key.match event.params.first do |matches|
@@ -125,14 +118,6 @@ module Scarlet::Plugins
     end
 
     private # Make the checks private.
-
-    # Runs the command trough a filter to check whether any of the words
-    # it uses are disallowed.
-    # @param [String] params The parameters to check for censored words.
-    def check_filters params
-      return false if @filter.empty? or params.start_with?("unfilter")
-      return Regexp.new("(#{@filter.join("|")})").match params
-    end
 
     # Checks whether the user actually has access to the command and can use it.
     # @param [Event] event The event that was recieved.
