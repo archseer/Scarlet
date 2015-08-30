@@ -13,7 +13,7 @@ class Scarlet
     # @param [Symbol] command The command the event carries.
     # @param [String] target Whom the event targets.
     # @param [Array] params An array of params for the event.
-    def initialize(server, prefix, command, target, params)
+    def initialize(server:, prefix:, command:, target:, params:)
       @server = server
       @sender = Sender.new prefix
       unless @sender.server?

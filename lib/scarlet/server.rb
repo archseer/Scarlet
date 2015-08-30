@@ -167,8 +167,7 @@ class Scarlet
     # @param [String] line The line that was recieved from the server.
     def receive_line line
       parsed_line = Parser.parse_line line
-      event = Event.new(self, parsed_line[:prefix], parsed_line[:command],
-                        parsed_line[:target], parsed_line[:params])
+      event = Event.new(server: self, **parsed_line)
       logs.write(event)
       @plugins.each do |plug|
         plug.handle event
