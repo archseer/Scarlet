@@ -18,8 +18,8 @@ module Scarlet::Plugins
     end
 
     on :quit do |event|
-      my_nick = event.server.config.nick
-      event.send "NICK #{my_nick}" if update_nick?(event)
+      my_nick = config.nick
+      send_data "NICK #{my_nick}" if update_nick?(event)
     end
   end
 end

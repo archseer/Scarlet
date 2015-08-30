@@ -51,11 +51,7 @@ class Scarlet
     # Gets an user if he exists, else it creates one.
     # @param [String] user The user we are looking for.
     def get_ensured user
-      if exist? user
-        get user
-      else
-        add User.new(user)
-      end
+      get(user) || add(User.new(user))
     end
   end
 end

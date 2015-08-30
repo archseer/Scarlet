@@ -82,27 +82,6 @@ hear(/rename\s+(.+)/i) do
   end
 end
 
-hear(/filter (.+)/i) do
-  clearance(&:sudo?)
-  description %Q(Bans a specific command phrase.
-This could be either a single word, or a spaced phrase.
-If it's a phrase, it looks for the entire phrase and NOT just
-individual words.)
-  usage 'filter <phrase>'
-  on do
-    Scarlet::Command.filter << params[1].strip
-  end
-end
-
-hear(/unfilter (.+)/i) do
-  clearance(&:sudo?)
-  description 'Unbans a specific command phrase.'
-  usage 'unfilter <phrase>'
-  on do
-    Scarlet::Command.filter.delete params[1].strip
-  end
-end
-
 hear(/restart/i) do
   clearance(&:sudo?)
   description 'Restarts the bot.'
