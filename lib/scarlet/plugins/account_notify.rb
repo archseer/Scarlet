@@ -32,7 +32,7 @@ module Scarlet::Plugins
       # This is a capability extension for tracking user NickServ logins and logouts
       # event.target is the accountname, * if there is none. This must get executed
       # either way, because either the user logged in, or he logged out. (a change)
-      if user = event.sender.user
+      if user = sender.user
         user.ns_login = event.target != "*" ? true : false
         user.account_name = event.target != "*" ? event.target : nil
       end
@@ -40,7 +40,7 @@ module Scarlet::Plugins
 
     on :'366' do |event| # end of /NAMES list
       # After we got our NAMES list, we want to check their NickServ login stat.
-      # event.params.first <== channel
+      # params.first <== channel
 
       # if WHOX is enabled, we can use the 'a' flag to get user's account names
       # if the user has an account name, he is logged in. This is the prefered
@@ -48,10 +48,10 @@ module Scarlet::Plugins
       #
       # WHOX - http://hg.quakenet.org/snircd/file/37c9c7460603/doc/readme.who
 
-      if event.server.extensions[:whox]
-        event.server.send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
+      if server.extensions[:whox]
+        send_data "WHO #{params.first} %nact,42" # we use the 42 to locally identify login checks
       else
-        check_ns_login event.server.channels.get(event.params.first).users.map(&:name)
+        check_ns_login server.channels.get(params.first).users.map(&:name)
       end
     end
 
@@ -59,16 +59,16 @@ module Scarlet::Plugins
       # There's many different outputs, depending on flags. Right now, we'll just
       # parse those which include 42 (our login checks)
 
-      if event.params.first == '42'
+      if params.first == '42'
         # 0 - 42, 1 - channel, 2 - nick, 3 - account name (0 if none)
-        if event.params[3] != '0'
-          if user = event.server.users.get(event.params[2])
+        if params[3] != '0'
+          if user = server.users.get(params[2])
             user.ns_login = true
-            user.account_name = event.params[3]
+            user.account_name = params[3]
           end
         end
       else
-        logger.warn "WHOX TODO -- params: #{event.params.inspect};"
+        logger.warn "WHOX TODO -- params: #{params.inspect};"
       end
     end
 
@@ -76,23 +76,23 @@ module Scarlet::Plugins
       # :nick!user@host JOIN :#channelname - normal
       # :nick!user@host JOIN #channelname accountname :Real Name - extended-join
 
-      user = event.server.users.get_ensured(event.sender.nick)
+      user = server.users.get_ensured(sender.nick)
 
-      if event.server.current_nick != event.sender.nick
-        if !event.params.empty? && event.server.cap_extensions['extended-join']
+      if server.current_nick != sender.nick
+        if !params.empty? && server.cap_extensions['extended-join']
           # extended-join is enabled, which means that join returns two extra params,
           # NickServ account name and real name. This means, we don't need to query
           # NickServ about the user's login status.
           user.ns_login = true
-          user.account_name = event.params[0]
+          user.account_name = params[0]
         else
           # No luck, we need to manually query for a login check.
           # a) if WHOX is available, query with WHOX.
           # b) if still no luck, query NickServ.
-          if event.server.cap_extensions['whox']
-            event.server.send "WHO #{event.params.first} %nact,42" # we use the 42 to locally identify login checks
+          if server.cap_extensions['whox']
+            server.send "WHO #{params.first} %nact,42" # we use the 42 to locally identify login checks
           else
-            check_ns_login event.sender.nick
+            check_ns_login sender.nick
           end
         end
       end

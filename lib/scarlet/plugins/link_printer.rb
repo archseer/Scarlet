@@ -9,7 +9,7 @@ module Scarlet::Plugins
     helper Scarlet::HttpHelper
 
     on :privmsg do |event|
-      event.params.first.match(/((?:http|https):\/\/[^ ]*)/) do |url|
+      params.first.match(/((?:http|https):\/\/[^ ]*)/) do |url|
         uri = URI(url[0])
         html_request(uri.to_s).get(redirects: 1).callback do |http|
           if html = http.response.value.presence
