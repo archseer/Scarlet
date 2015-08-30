@@ -18,8 +18,8 @@ class Scarlet
     # Whether a user has been indentified or not.
     #
     # @return [Boolean]
-    def indentified?
-      @ns_login == true
+    def identified?
+      !!ns_login
     end
 
     # Add the user to a channel.
