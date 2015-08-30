@@ -5,6 +5,10 @@ module Scarlet::Plugins
   class Command
     include Scarlet::Plugin
 
+    class CommandContext < Scarlet::Context
+      include Scarlet::BaseHelper
+    end
+
     on :privmsg do |event|
       # if we detect a command sequence, we remove the prefix and execute it.
       # it is prefixed with config.control_char or by mentioning the bot's current nickname
@@ -139,7 +143,7 @@ module Scarlet::Plugins
     # @param [Proc] clearance  proc to determine if the use passes clearance
     # @return [Boolean] True if access is allowed, else false.
     def check_access event, clearance
-      ctx = Scarlet::Context.new event, Scarlet::BaseHelper
+      ctx = CommandContext.new event
       nick = Scarlet::Nick.first nick: event.sender.nick
       return false if check_ban(event) # if the user is banned
       return true unless clearance
