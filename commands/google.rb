@@ -1,13 +1,13 @@
 require 'cgi'
 require 'scarlet/helpers/http_helper'
 
-hear(/(g|google)\s+(.+)/) do
+hear(/(?:g|google)\s+(?<query>.+)/) do
   clearance nil
   description 'Harness the power of google!'
   usage 'google <terms>'
   helpers Scarlet::HttpHelper
   on do
-    http = json_request('http://ajax.googleapis.com/ajax/services/search/web').get query: {'v' => '1.0', 'q' => params[1]}
+    http = json_request('http://ajax.googleapis.com/ajax/services/search/web').get query: { v: '1.0', q: CGI.escape(params[:query]) }
     http.errback { reply "ERROR! Fatal mistake." }
     http.callback do
       if results = http.response.value
