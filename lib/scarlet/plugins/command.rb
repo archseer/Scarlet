@@ -43,7 +43,7 @@ module Scarlet::Plugins
     #
     # @param [String] path
     def load_command(path)
-      puts "Loading command: #{path}"
+      logger.debug "Loading command: #{path}"
       @loader.load_file path
     end
 
@@ -63,8 +63,8 @@ module Scarlet::Plugins
         end
         true
       rescue => ex
-        puts ex.inspect
-        puts ex.backtrace.join("\n")
+        logger.error ex.inspect
+        logger.error ex.backtrace.join("\n")
         @listeners.replace old_listeners
         false
       end

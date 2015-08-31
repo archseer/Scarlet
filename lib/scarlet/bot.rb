@@ -6,6 +6,7 @@ require 'active_support/core_ext/module/delegation'
 require 'scarlet/plugins/command'
 require 'scarlet/plugins/account_notify'
 require 'scarlet/logger'
+require 'scarlet/git'
 require 'scarlet/core_ext/process'
 
 # Our main module, namespacing all of our classes. It is used as a singleton,
@@ -22,6 +23,10 @@ class Scarlet
     Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
     Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
     Scarlet.config.db.symbolize_keys! if Scarlet.config.db
+
+    Dir.chdir Scarlet.root do
+      Scarlet::Git.data # cache data for later use
+    end
 
     @servers = {}
     @plugins = []

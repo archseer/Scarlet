@@ -17,7 +17,11 @@ hear(/version/i) do
   description 'Displays the version information.'
   usage 'version'
   on do
-    reply "Scarlet v#{Scarlet::Version::STRING}"
+    str = "Scarlet v#{Scarlet::Version::STRING}"
+    if commit = Scarlet::Git.data[:commit].presence
+      str << " commit #{fmt.commit_sha(commit)}"
+    end
+    reply str
   end
 end
 

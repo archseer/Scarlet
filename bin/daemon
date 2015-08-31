@@ -1,11 +1,25 @@
 #!/usr/bin/env ruby
 # Just keep her running
+require_relative '../lib/scarlet/git'
 require 'optparse'
 require 'ostruct'
 require 'digest/sha2'
+require 'logger'
 
-def log(msg)
-  puts "\t[daemon] #{msg}"
+class Scarlet
+  module Daemon
+    @logger = Logger.new(STDOUT)
+
+    def self.log(msg)
+      @logger.info "\t[daemon] #{msg}"
+    end
+
+    module Loggable
+      def log(*args)
+        Scarlet::Daemon.log(*args)
+      end
+    end
+  end
 end
 
 def calc_checksum
@@ -14,16 +28,64 @@ end
 
 @checksum = calc_checksum
 
+module Updater
+  extend Scarlet::Daemon::Loggable
+
+  def self.git_update
+    data = Scarlet::Git.get_data
+    branch = data[:branch]
+    throw :update_failed, 'no branch' unless branch
+    system("git fetch origin") || throw(:update_failed, 'Fetching failed')
+    system("git reset --hard origin/#{branch}") || throw(:update_failed, 'Reset failed')
+    current_data = Scarlet::Git.get_data
+    log "Updated from #{data[:commit]} to #{current_data[:commit]}"
+    false # false as in, did I fail?
+  end
+
+  def self.git_rollback(commit, reason)
+    log "Rolling back: #{reason}"
+    system("git reset --hard #{commit}")
+  end
+
+  def self.update!
+    head = Scarlet::Git.get_data
+    reason = catch :update_failed do
+      git_update
+    end
+
+    git_rollback head[:commit], reason if reason
+  end
+end
+
+include Scarlet::Daemon::Loggable
+
+@options = OpenStruct.new
+OptionParser.new do |opts|
+  opts.on '', '--dev' do
+    @options.dev = true
+  end
+end.parse(ARGV)
+
+puts "Running Options:"
+@options.each_pair do |key, value|
+  "\t#{key} => #{value}"
+end
+
 loop do
   begin
     system 'bundle exec bin/scarlet'
     status = $?
-    case status.to_i
+    case status.exitstatus
     when 0
       # the app closed properly, we can exit as well
       log "Exited normally"
       #break
     when 15 # hot update
+      if @options.dev
+        log "Running in development mode, update will be skipped."
+      else
+        Updater.update!
+      end
     else
       log "Process exited with status: #{status.to_i}"
     end
