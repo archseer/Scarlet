@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/igrigorik/em-http-request.git
-  revision: 7b8d47c40191758f7df565625703727982fcd635
+  revision: de39103c9c269fabb00e842b4f630657d19bd070
   specs:
     em-http-request (1.1.2)
       addressable (>= 2.3.4)
@@ -11,7 +11,7 @@ GIT
 
 GIT
   remote: git://github.com/polyfox/moon-data_model.git
-  revision: 8db1dd43c09dd38d6d67630c8b1c21c4aace485d
+  revision: 459bd1a60d4e0272bee58d4998fa0534d1d8c810
   specs:
     moon-data_model (1.0.0)
       activesupport (~> 4.2)
@@ -44,7 +44,7 @@ GIT
 
 GIT
   remote: git://github.com/polyfox/moon-serializable.git
-  revision: b5c6083c661413019845f1c8e84966e579b12075
+  revision: fd09d383221eee89a6360a313693c080ac5da07a
   specs:
     moon-serializable (1.0.0)
       moon-prototype (~> 1.0)
@@ -53,7 +53,7 @@ GIT
 PATH
   remote: .
   specs:
-    scarlet (1.3.0)
+    scarlet (1.7.0)
 
 GEM
   remote: https://rubygems.org/
@@ -77,7 +77,7 @@ GEM
       eventmachine (>= 1.0.0.beta.4)
     em-throttled_queue (1.1.1)
       eventmachine
-    eventmachine (1.0.7)
+    eventmachine (1.0.8)
     faraday (0.9.1)
       multipart-post (>= 1.2, < 3)
     http_parser.rb (0.6.0)
@@ -86,27 +86,27 @@ GEM
     lorem (0.1.2)
     mini_portile (0.6.2)
     minitest (5.8.0)
-    multi_json (1.11.0)
+    multi_json (1.11.2)
     multipart-post (2.0.0)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
     octokit (3.8.0)
       sawyer (~> 0.6.0, >= 0.5.3)
     rake (10.4.2)
-    rspec (3.2.0)
-      rspec-core (~> 3.2.0)
-      rspec-expectations (~> 3.2.0)
-      rspec-mocks (~> 3.2.0)
-    rspec-core (3.2.3)
-      rspec-support (~> 3.2.0)
-    rspec-expectations (3.2.1)
+    rspec (3.3.0)
+      rspec-core (~> 3.3.0)
+      rspec-expectations (~> 3.3.0)
+      rspec-mocks (~> 3.3.0)
+    rspec-core (3.3.2)
+      rspec-support (~> 3.3.0)
+    rspec-expectations (3.3.1)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.2.0)
-    rspec-mocks (3.2.1)
+      rspec-support (~> 3.3.0)
+    rspec-mocks (3.3.2)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.2.0)
-    rspec-support (3.2.2)
-    rufus-scheduler (3.1.1)
+      rspec-support (~> 3.3.0)
+    rspec-support (3.3.0)
+    rufus-scheduler (3.1.4)
     sawyer (0.6.0)
       addressable (~> 2.3.5)
       faraday (~> 0.8, < 0.10)
@@ -156,4 +156,4 @@ DEPENDENCIES
   yard-delegate
 
 BUNDLED WITH
-   1.10.3
+   1.10.6
