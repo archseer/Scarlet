@@ -26,6 +26,13 @@ describe Scarlet::Fmt do
     end
   end
 
+  context '.strip_msg' do
+    it 'removes excess spaces from strings' do
+      str = "     a  b   c"
+      expect(described_class.strip_msg(str)).to eq("a b c")
+    end
+  end
+
   context '.purify_msg' do
     it 'removes new lines from strings' do
       str = "Ho ho ho\nWhat is this\n\rAha!"
@@ -41,9 +48,14 @@ describe Scarlet::Fmt do
     end
 
     it 'yields multiple chunks if there are more than 450 characters' do
-      chars = Lorem::Base.new('chars', 800).output
+      chars = described_class.purify_msg(Lorem::Base.new('chars', 800).output)
       enum = described_class.chop_msg chars
       expect(enum.to_a.size).to eq(2)
+    end
+
+    it 'yields multiple lines if there are newlines present' do
+      str = "Hello Everyone.\nHow are you? fine thank you.\nOh my god\nI wish I were a bird"
+      expect(described_class.chop_msg(str).to_a).to eq(["Hello Everyone.", "How are you? fine thank you.", "Oh my god", "I wish I were a bird"])
     end
   end
 
