@@ -51,6 +51,7 @@ module Updater
     head = Scarlet::Git.get_data
     reason = catch :update_failed do
       git_update
+      `bundle install`
     end
 
     git_rollback head[:commit], reason if reason
