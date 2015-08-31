@@ -9,7 +9,15 @@ class Scarlet
 
     # Formats a Github sha value
     def self.commit_sha(sha)
-      sha[0, 8].center(10, ' ').irc_color(1, 8)
+      sha[0, 8].center(10, ' ').irc_color(1, 0)
+    end
+
+    # Removes excess spaces from the string
+    #
+    # @param [String] msg
+    # @return [String]
+    def self.strip_msg msg
+      msg.gsub(/\s+/, ' ').strip
     end
 
     # Removes newlines and returns from the string
