@@ -13,7 +13,7 @@ class Scarlet
     end
 
     def new_expiration
-      5.minutes.from_now
+      5.minutes.from_now.to_i
     end
 
     def schedule_time
@@ -35,7 +35,7 @@ class Scarlet
         logger.info 'Expiring old cache entries'
         modify do
           @entries.reject! do |key, data|
-            Time.now >= data[:expiration]
+            Time.now.to_i >= data[:expiration]
           end
         end
         schedule_expiration
