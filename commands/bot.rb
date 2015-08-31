@@ -30,6 +30,15 @@ hear(/ruby version/i) do
   end
 end
 
+hear(/update/) do
+  clearance(&:sudo?)
+  description "Restarts the bot, updating to the latest version"
+  usage 'update'
+  on do
+    Process.harakiri 'USR2'
+  end
+end
+
 hear(/reload commands/i) do
   clearance(&:sudo?)
   description 'Loads all available commands.'
