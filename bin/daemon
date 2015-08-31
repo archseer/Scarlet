@@ -1,14 +1,38 @@
 #!/usr/bin/env ruby
 # Just keep her running
+require 'optparse'
+require 'ostruct'
+require 'digest/sha2'
+
+def log(msg)
+  puts "\t[daemon] #{msg}"
+end
+
+def calc_checksum
+  Digest::SHA2.file __FILE__
+end
+
+@checksum = calc_checksum
+
 loop do
   begin
-    status = system 'bundle exec bin/scarlet'
-    if status
+    system 'bundle exec bin/scarlet'
+    status = $?
+    case status.to_i
+    when 0
       # the app closed properly, we can exit as well
+      log "Exited normally"
+      #break
+    when 15 # hot update
+    else
+      log "Process exited with status: #{status.to_i}"
+    end
+    # restart after 5 seconds
+    if calc_checksum != @checksum
+      log "Script has changed, exiting."
       break
     else
-      # the app closed with an error, restart
-      puts 'Waiting 5 seconds before restarting'
+      log "Waiting 5 seconds before restarting"
       sleep 5.0
     end
   rescue Interrupt
