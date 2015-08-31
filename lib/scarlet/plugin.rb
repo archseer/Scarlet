@@ -34,7 +34,7 @@ class Scarlet
 
     def exec(&block)
       catch(:abort) { instance_exec(@event, &block) }
-    rescue Exception => ex
+    rescue StandardError => ex
       logger.error ex.inspect
       logger.error ex.backtrace.join("\n")
     end

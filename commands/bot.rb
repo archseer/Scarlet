@@ -17,7 +17,11 @@ hear(/version/i) do
   description 'Displays the version information.'
   usage 'version'
   on do
-    reply "Scarlet v#{Scarlet::Version::STRING}"
+    str = "Scarlet v#{Scarlet::Version::STRING}"
+    if commit = Scarlet::Git.data[:commit].presence
+      str << " commit #{fmt.commit_sha(commit)}"
+    end
+    reply str
   end
 end
 
@@ -27,6 +31,15 @@ hear(/ruby version/i) do
   usage 'ruby version'
   on do
     reply "#{RUBY_ENGINE} #{RUBY_VERSION}p#{RUBY_PATCHLEVEL} [#{RUBY_PLATFORM}]"
+  end
+end
+
+hear(/update/) do
+  clearance(&:sudo?)
+  description "Restarts the bot, updating to the latest version"
+  usage 'update'
+  on do
+    Process.harakiri 'USR2'
   end
 end
 
@@ -58,3 +71,11 @@ hear(/reload command\s+(\w+)/i) do
   end
 end
 
+hear(/hct/) do
+  clearance(&:sudo?)
+  description 'Stop, Hammer Time.'
+  usage 'hct'
+  on do
+    Process.harakiri 'TERM'
+  end
+end

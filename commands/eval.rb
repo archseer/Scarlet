@@ -8,7 +8,7 @@ hear(/eval\s+(.+)/) do
       t.join(10)
       reply t[:output] if t[:output].size > 4
     rescue Exception  => result
-      reply "ERROR: #{result.message}".irc_color(4,0)
+      reply "ERROR: #{result.message}"
     end
   end
 end
