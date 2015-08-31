@@ -4,19 +4,21 @@ require 'scarlet/expiration_cache'
 display_jisho = lambda do |value|
   data = value['data'][0, 5]
   words = data.map do |entry|
-    entry['japanese'].map { |e| e['word'] }.join(', ')
+    e = entry['japanese'].first
+    e['word'] || e['reading']
   end
   str = words.each_with_index.map { |*e| e.reverse.join(' ') }.join(' | ')
   reply "#{words.size} hits: #{str}"
   data.each do |entry|
     japs = entry['japanese'].map do |e|
-      "#{e['word']} ［#{e['reading']}］"
+      e['word'] ? "#{e['word']} ［#{e['reading']}］" : e['reading']
     end
     senses = entry['senses'].map do |e|
       eng = e['english_definitions']
-      eng.join("/")
-    end
-    reply "#{japs.join(", ")} /#{senses.join("/")}/"
+      eng.join("; ")
+    end.each_with_index.map {|d, i| "(#{i}) #{d}" }
+    reply "#{japs.join(",　")}"
+    reply "#{senses.join(" ")}"
     break
   end
 end
