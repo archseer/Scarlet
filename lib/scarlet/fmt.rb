@@ -36,6 +36,7 @@ class Scarlet
       return to_enum(:chop_msg, str) unless block_given?
       str.each_line do |line|
         msg = line.chomp
+        next yield msg if msg.length < 450
         s = 0 # start point
         i = 0 # increment
         bp = -1 # breakpoint
