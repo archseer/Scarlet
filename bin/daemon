@@ -29,33 +29,49 @@ end
 @checksum = calc_checksum
 
 module Updater
+  class UpdateFailed < StandardError; end
+
   extend Scarlet::Daemon::Loggable
+
+  def self.checkout(commit)
+    # Though its called checkout, it simply does a hard reset, since checkout
+    # may cause the update to fail if the code base was modified.
+    system("git reset --hard #{commit}")
+  end
 
   def self.git_update
     data = Scarlet::Git.get_data
     branch = data[:branch]
-    throw :update_failed, 'no branch' unless branch
-    system("git fetch origin") || throw(:update_failed, 'Fetching failed')
-    system("git reset --hard origin/#{branch}") || throw(:update_failed, 'Reset failed')
+    raise UpdateFailed, 'no branch obtained.' unless branch
+
+    system("git fetch origin") || raise(UpdateFailed, 'git fetch failed')
+    checkout("origin/#{branch}") || raise(UpdateFailed, 'checkout failed')
+
     current_data = Scarlet::Git.get_data
     log "Updated from #{data[:commit]} to #{current_data[:commit]}"
-    false # false as in, did I fail?
   end
 
-  def self.git_rollback(commit, reason)
-    log "Rolling back: #{reason}"
-    system("git reset --hard #{commit}")
+  def self.install_gems
+    log "Installing gems"
+    system("bundle")
   end
 
   def self.update!
     head = Scarlet::Git.get_data
-    reason = catch :update_failed do
+    begin
+      # update to latest HEAD for the current branch
       git_update
-      `bundle` || throw(:update_failed, 'Bundle failed')
+      # update gems
+      install_gems || raise(UpdateFailed, "could not update gems")
+      true
+    rescue UpdateFailed => ex
+      # rollback to old commit
+      log "Rolling back: #{ex.message}"
+      checkout head[:commit]
+      # reset gems
+      install_gems
       false
     end
-
-    git_rollback head[:commit], reason if reason
   end
 end
 
@@ -81,12 +97,11 @@ loop do
     when 0
       # the app closed properly, we can exit as well
       log "Exited normally"
-      #break
     when 15 # hot update
       if @options.dev
         log "Running in development mode, update will be skipped."
       else
-        Updater.update!
+        log "Updating failed" unless Updater.update!
       end
     else
       log "Process exited with status: #{status.to_i}"
