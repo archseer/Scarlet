@@ -105,7 +105,7 @@ hear(/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
     if i
       reply("github/#{reponame}: %<title>s #{fmt.uri(i['html_url'])}" % i)
     else
-      reply 'Repo or issue did not exist.'
+      reply 'Repo or issue does not exist.'
     end
   end
 end
