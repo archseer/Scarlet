@@ -95,7 +95,7 @@ module Scarlet::Plugins
     #
     # @param [String] command The keywords to search for.
     def get_help command = nil
-      help = match_commands(c).map(&:help)
+      help = match_commands(command).map(&:help)
       # remove all blank entries,
       # make each line unique,
       # and finally sort the result.
