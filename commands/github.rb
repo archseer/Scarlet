@@ -91,10 +91,10 @@ hear(/gh user\s+(?<username>\S+)(?:\s+(?<fomt>.+))?/i) do
   end
 end
 
-hear(/gh issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)/i) do
+hear(/gh (?:issue\s+(?<repo>\S+)\s+\#(?<issue>\d+)|(?<repo>\S+\/\S+)\#(?<issue>\d+))/i) do
   clearance(&:registered?)
   description 'Prints out a github issue.'
-  usage 'gh issue <repo> #<issue_number>'
+  usage 'gh (issue <repo> #<issue_number> |<repo>#<issue_number>)'
   on do
     reponame = params[:repo]
     issue = params[:issue].to_i
