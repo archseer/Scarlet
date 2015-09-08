@@ -1,3 +1,4 @@
+require 'moon-null_io/null_io'
 require 'logger'
 require 'colorize'
 
@@ -32,6 +33,7 @@ class Scarlet
     end
   end
 
+  NullLogger = Logger.new(NullIO::OUT)
   self.logger = Logger.new(STDOUT)
   logger.formatter = LogFormatter
 

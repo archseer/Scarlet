@@ -17,6 +17,7 @@ gem 'moon-prototype',    github: 'polyfox/moon-prototype'
 gem 'moon-serializable', github: 'polyfox/moon-serializable'
 gem 'moon-data_model',   '>= 1.0.1', github: 'polyfox/moon-data_model'
 gem 'moon-repository',   github: 'polyfox/moon-repository'
+gem 'moon-null_io',      github: 'polyfox/moon-null_io'
 
 # All the awesome
 gem 'activesupport', '>= 4.2.2'
