@@ -12,6 +12,14 @@ class Scarlet
     field :win_points, type: Integer, default: 0
     field :settings,   type: Hash,    default: proc { Hash.new }
 
+    # Similar to updating the settings manually and then calling save on the nick
+    #
+    # @param [Hash] opts
+    def update_settings(opts)
+      settings.merge!(opts)
+      save
+    end
+
     # Checks if the nick is apart of the given groups
     #
     # @param [String] expected

@@ -15,8 +15,7 @@ hear(/set(?:\s+my)?\s+timezone\s+(?<timezone>.+)/i) do
     timezone = params[:timezone]
     with_nick sender.nick do |nick|
       if find_timezone.call(timezone)
-        nick.settings[:timezone] = timezone
-        nick.save
+        nick.update_settings(timezone: timezone)
         notify "Your current Time Zone is: %s" % nick.settings[:timezone]
       else
         notify "Invalid Time Zone: %s" % timezone

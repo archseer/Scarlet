@@ -18,8 +18,7 @@ hear(/set(?:\s+my)?\s+city\s+(?<city>.+)/i) do
   usage 'set[ my] city <city>'
   on do
     with_nick sender.nick do |nick|
-      nick.settings[:city] = params[:city]
-      nick.save
+      nick.update_settings(city: params[:city])
       notify "Your current city is: %s" % nick.settings[:city]
     end
   end
