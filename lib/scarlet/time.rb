@@ -4,6 +4,12 @@ require 'time-lord/units'
 require 'time-lord/units/business'
 require 'time-lord/units/special'
 require 'time-lord/units/long'
+module TimeLord
+  module Units
+    TRUE_YEAR = 365.25 * DAY
+  end
+end
+
 require 'time-lord/period'
 require 'time-lord/scale'
 require 'time-lord/time'
