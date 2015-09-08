@@ -1,3 +1,4 @@
+require 'date'
 require 'time'
 require 'time-lord/version'
 require 'time-lord/units'
@@ -15,6 +16,20 @@ require 'time-lord/scale'
 require 'time-lord/time'
 require 'time-lord/extensions/integer'
 require 'active_support/core_ext/time'
+
+class Scarlet
+  module DateHelper
+    # http://stackoverflow.com/questions/1904097/how-to-calculate-how-many-years-passed-since-a-given-date-in-ruby
+    def calc_age(bd, d = Date.today)
+      a = d.year - bd.year
+      a = a - 1 if (
+           bd.month >  d.month or
+          (bd.month >= d.month and bd.day > d.day)
+      )
+      a
+    end
+  end
+end
 
 class Time
   # Since exists to replace TimeLords Time#ago, since the method is overriden
