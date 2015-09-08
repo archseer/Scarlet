@@ -30,7 +30,7 @@ hear(/jisho (?<keyword>.+)/) do
   helpers Scarlet::HttpHelper
   on do
     keyword = params[:keyword]
-    cache = Scarlet::ExpirationCache.instance[:jisho] ||= {}
+    cache = Scarlet::ExpirationCache.instance.fetch(:jisho, {})
     if data = cache[keyword]
       instance_exec data, &display_jisho
     else
