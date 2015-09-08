@@ -1,4 +1,4 @@
-require 'time-lord'
+require 'scarlet/time'
 
 hear(/uptime/i) do
   clearance nil
@@ -7,8 +7,8 @@ hear(/uptime/i) do
   on do
     tthen = server.started_at
     now = Time.now
-    scale = TimeLord::Scale.new((now - tthen).to_i)
-    reply "I started at #{fmt.time(tthen)}. My uptime is #{scale.to_value} #{scale.to_unit}"
+    scale = (now - tthen).to_i.timescale
+    reply "I started at #{fmt.time(tthen)}. My uptime is #{scale}"
   end
 end
 

@@ -1,4 +1,4 @@
-require 'time-lord'
+require 'scarlet/time'
 
 hear(/seen (?<nick>\S+)(?:\s+last\s+(?<backlog>\d+))?/i) do
   clearance(&:registered?)
@@ -31,7 +31,7 @@ hear(/seen (?<nick>\S+)(?:\s+last\s+(?<backlog>\d+))?/i) do
       when :quit
         message << " quiting IRC."
       else
-        message = "Not yet implemented!"
+        message = "Command #{log.command} not yet implemented!"
       end
       reply message
     end
