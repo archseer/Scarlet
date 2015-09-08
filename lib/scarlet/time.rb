@@ -38,6 +38,21 @@ module TimeLord
       "#{to_value} #{to_unit}"
     end
   end
+
+  class Period
+    # Alias for to_words
+    #
+    # @return [String]
+    alias :to_s :to_words
+
+    # This exposes the Scale object used by the period
+    #
+    # @return [Scale]
+    def scale
+      # I hope they don't pull a "I TOLD YOU IT WAS PRIVATE"
+      Scale.new(absolute)
+    end
+  end
 end
 
 class Integer
