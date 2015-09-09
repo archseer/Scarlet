@@ -79,7 +79,7 @@ class Scarlet
     # @param [Time] tme
     # @return [String]
     def self.short_time tme
-      tme.strftime("%H:%M %b %d, %Y")
+      tme.strftime("%H:%M %b %-d, %Y")
     end
   end
 end
