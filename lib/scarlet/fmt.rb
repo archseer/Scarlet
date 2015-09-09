@@ -81,5 +81,13 @@ class Scarlet
     def self.short_time tme
       tme.strftime("%H:%M %b %-d, %Y")
     end
+
+    # Formats a time object, in a digit format
+    #
+    # @param [Time] tme
+    # @return [String]
+    def self.digital_time tme
+      tme.strftime("%H:%M %Y-%m-%d")
+    end
   end
 end
