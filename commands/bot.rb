@@ -71,10 +71,10 @@ hear(/reload command\s+(\w+)/i) do
   end
 end
 
-hear(/hct/) do
+hear(/hcf/) do
   clearance(&:sudo?)
   description 'Stop, Hammer Time.'
-  usage 'hct'
+  usage 'hcf'
   on do
     Process.harakiri 'TERM'
   end
