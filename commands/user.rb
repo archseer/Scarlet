@@ -44,6 +44,17 @@ hear(/user groups(?:\s+(?<nick>\S+))?/i) do
   end
 end
 
+hear(/user settings/) do
+  clearance &:registered?
+  description 'Displays all your settings'
+  usage 'user settings'
+  on do
+    with_nick sender.nick do |nick|
+      notify nick.settings.to_s
+    end
+  end
+end
+
 hear(/user status(?:\s+(?<nick>\S+))?/i) do
   clearance nil
   description 'Displays whether the user is logged in or not'
