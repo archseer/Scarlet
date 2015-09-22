@@ -1,3 +1,4 @@
+require 'uri'
 require 'cgi'
 require 'scarlet/helpers/http_helper'
 
@@ -10,9 +11,12 @@ hear(/(?:g|google)\s+(?<query>.+)/) do
     http = json_request('http://ajax.googleapis.com/ajax/services/search/web').get query: { v: '1.0', q: CGI.escape(params[:query]) }
     http.errback { reply "ERROR! Fatal mistake." }
     http.callback do
-      if results = http.response.value
-        message = !results['responseData']['results'].empty? ? results['responseData']['results'][0]['url'] : "No search result found."
-        reply message
+      if value = http.response.value
+        reply(if results = value['responseData']['results'].presence
+          URI.unescape(results.first['url'])
+        else
+          "No search result found."
+        end)
       else
         reply "An error occured while trying to google."
       end
