@@ -11,13 +11,20 @@ GIT
 
 GIT
   remote: git://github.com/polyfox/moon-data_model.git
-  revision: 459bd1a60d4e0272bee58d4998fa0534d1d8c810
+  revision: ecc9313a22c881dc31263ff1d6097da636f1cfec
   specs:
-    moon-data_model (1.0.0)
+    moon-data_model (1.0.1)
       activesupport (~> 4.2)
+      moon-maybe_copy (~> 1.0)
       moon-prototype (~> 1.1)
-      moon-safe_copy (~> 1.0)
       moon-serializable (~> 1.0)
+      rake (~> 10.3)
+
+GIT
+  remote: git://github.com/polyfox/moon-maybe_copy.git
+  revision: 7cf25345b037d4e236e31cd2a50cfd65f59a5642
+  specs:
+    moon-maybe_copy (1.1.0)
       rake (~> 10.3)
 
 GIT
@@ -36,15 +43,8 @@ GIT
       activesupport (~> 4.2)
 
 GIT
-  remote: git://github.com/polyfox/moon-safe_copy.git
-  revision: 86bb1a2b8f26c3af6e36f682b167fb7b74b91fbf
-  specs:
-    moon-safe_copy (1.0.0)
-      rake (~> 10.3)
-
-GIT
   remote: git://github.com/polyfox/moon-serializable.git
-  revision: fd09d383221eee89a6360a313693c080ac5da07a
+  revision: 54ea28a2a21b967edce1b946f66adae261b0aa10
   specs:
     moon-serializable (1.0.0)
       moon-prototype (~> 1.0)
@@ -67,13 +67,13 @@ GEM
     addressable (2.3.8)
     calc (1.0.0)
     chronic (0.10.2)
-    codeclimate-test-reporter (0.4.7)
+    codeclimate-test-reporter (0.4.8)
       simplecov (>= 0.7.1, < 1.0.0)
     colorize (0.7.7)
     cookiejar (0.3.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
-    em-socksify (0.3.0)
+    em-socksify (0.3.1)
       eventmachine (>= 1.0.0.beta.4)
     em-throttled_queue (1.1.1)
       eventmachine
@@ -137,10 +137,10 @@ DEPENDENCIES
   em-throttled_queue
   eventmachine
   lorem
-  moon-data_model!
+  moon-data_model (>= 1.0.1)!
+  moon-maybe_copy (>= 1.1.0)!
   moon-prototype!
   moon-repository!
-  moon-safe_copy!
   moon-serializable!
   multi_json
   nokogiri
