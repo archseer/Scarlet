@@ -26,6 +26,12 @@ GIT
     moon-maybe_copy (1.1.1)
 
 GIT
+  remote: git://github.com/polyfox/moon-null_io.git
+  revision: b6df1d0ceb08cbb806db17ebd3c6074df0de5432
+  specs:
+    moon-null_io (1.0.0)
+
+GIT
   remote: git://github.com/polyfox/moon-prototype.git
   revision: 5fec8fc92a52212edbdd9ff032480e5381e101e4
   specs:
@@ -134,6 +140,7 @@ DEPENDENCIES
   lorem
   moon-data_model (>= 1.0.1)!
   moon-maybe_copy (>= 1.1.0)!
+  moon-null_io!
   moon-prototype!
   moon-repository!
   moon-serializable!
