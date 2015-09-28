@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'scarlet/helpers/http_helper'
 
+dirs = ["N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"].freeze
 url = 'http://api.openweathermap.org/data/2.5/weather'
 
 weather_errors = [
@@ -38,8 +39,12 @@ get_weather = lambda do |location, units|
         main = data['main']
         wind = data['wind']
         sys = data['sys']
-        arr = ["N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
-        wind_dir = arr[((wind['deg'] / 22.5) + 0.5) % arr.size]
+
+        wind_dir = if wind['deg']
+          dirs[((wind['deg'] / 22.5) + 0.5) % dirs.size]
+        else
+          'UNKNOWN'
+        end
         reply "Weather forecast for #{data['name']}, #{sys['country']}: #{weather['description']} #{main['temp']}°C, #{wind_dir} #{wind['speed']} km/h wind, #{main['humidity']}% humidity. [updated #{fmt.short_time(Time.at(data['dt']))}]"
       end
     else
