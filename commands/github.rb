@@ -72,7 +72,7 @@ display_user = lambda do |username|
   end
 end
 
-hear(/gh (?<path>(?<user>[\w\-_]+)(?:\/(?<repo>[\w\-_]+))?)(?:\#(?<issue>\d+)|\@(?<commit_sha>\w+))?/) do
+hear(/gh (?<path>(?<user>[\w\-_\.]+)(?:\/(?<repo>[\w\-_\.]+))?)(?:\#(?<issue>\d+)|\@(?<commit_sha>\w+))?/) do
   clearance nil
   description 'General github command'
   usage 'gh (<user>|<user>/<repo>[:branch][(#<issue>|@<commit>)]'
