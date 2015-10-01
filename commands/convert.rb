@@ -11,7 +11,10 @@ hear(/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) d
     http = json_request("http://api.fixer.io/latest").get(query: q)
     http.errback { reply 'Error!' }
     http.callback do
-      if v = http.response.value
+      v = http.response.value
+      if v && (err = v['error'])
+        reply "ERROR: #{err}"
+      elsif v
         base = v['base']
         dest = params[:to].upcase
         if rate = v['rates'][dest]
