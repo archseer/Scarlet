@@ -1,6 +1,16 @@
 require 'scarlet/helpers/http_helper'
 require 'ostruct'
 
+hear(/to_hex\s+(?<number>\d+)/) do
+  clearance nil
+  description 'Converts an integer to hexadecimal'
+  usage 'to_hex <number>'
+  on do
+    num = params[:number].to_i
+    reply "%d : %x" % [num, num]
+  end
+end
+
 hear(/convert\s+(?<value>\d+.\d+|\d+)\s*(?<from>\w+)\s+(?:to\s+)?(?<to>\w+)/i) do
   clearance nil
   description 'Converts currency from one unit to another.'
