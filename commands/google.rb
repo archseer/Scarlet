@@ -13,7 +13,7 @@ hear(/(?:g|google)\s+(?<query>.+)/) do
     http.callback do
       if value = http.response.value
         reply(if results = value['responseData']['results'].presence
-          URI.unescape(results.first['url'])
+          URI.unescape(URI.unescape(results.first['url']))
         else
           "No search result found."
         end)
