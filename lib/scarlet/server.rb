@@ -8,6 +8,7 @@ require 'scarlet/event'
 require 'scarlet/parser'
 require 'scarlet/models/log'
 require 'scarlet/fmt'
+require 'scarlet/reminder_scheduler'
 
 class Scarlet
   # This class is the meat of the bot, encapsulating the connection and
@@ -20,6 +21,7 @@ class Scarlet
 
     attr_reader :channels
     attr_reader :scheduler
+    attr_reader :reminder_scheduler
     attr_reader :users
     attr_accessor :started_at
     attr_accessor :cap_extensions
@@ -46,8 +48,10 @@ class Scarlet
       @current_nick = config.nick
       config.control_char ||= Scarlet.config.control_char
       config.buffer_rate ||= 1
+      config.scheduler_rate ||= 1
       config.freeze
 
+      @reminder_scheduler = ReminderScheduler.new self
       @scheduler = Rufus::Scheduler.new
       @channels  = ServerChannels.new # channels
       @users     = Users.new          # users (seen) on the server
@@ -56,6 +60,15 @@ class Scarlet
       @reconnects = 0
       reset_vars
       connect!
+    end
+
+    private def scheduler_loop
+      EM.add_timer config.scheduler_rate do
+        @reminder_scheduler.update
+        if @state != :disconnecting
+          scheduler_loop
+        end
+      end
     end
 
     def buffer_loop
@@ -79,13 +92,14 @@ class Scarlet
 
       @channels.clear
       @users.clear
-      @buffer.push '' if @buffer # to avoid locking the buffer_loop while waiting on a object
+      @buffer.push '' if @buffer # to avoid locking the buffer_loop while waiting on an object
       @buffer = EM::Queue.new
       @modes           = []     # bot account's modes (ix,..)
       @extensions      = {}     # what the server-side supports (PROTOCTL)
       @cap_extensions  = {}     # CAPability extensions (CAP REQ)
       @vHost           = nil    # vHost/cloak
       buffer_loop
+      scheduler_loop
     end
 
     def send_sasl
