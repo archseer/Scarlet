@@ -1,7 +1,7 @@
 require 'octokit'
 require 'scarlet/helpers/http_helper'
 
-hear(/gh status/) do
+hear(/gh-status/) do
   clearance nil
   description 'Displays latest message from github.status'
   usage 'gh status'
@@ -94,7 +94,7 @@ hear(/gh (?<path>(?<user>[\w\-_\.]+)(?:\/(?<repo>[\w\-_\.]+))?)(?:\#(?<issue>\d+
   end
 end
 
-hear(/gh search repos\s+(?<terms>.+)/i) do
+hear(/gh-search-repos\s+(?<terms>.+)/i) do
   clearance(&:registered?)
   description 'Searches github for reposistories using the provided search <terms>.'
   usage 'gh search repos <terms>'
