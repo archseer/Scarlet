@@ -1,4 +1,4 @@
-hear(/remind (?<nick>.+?) in (?<time>.+?) to (?<action>.+)[.!]?/i) do
+hear(/remind\s+(?<nick>.+?)\s+(?<time>.+?)\s+to\s+(?<action>.+[.!]?)/i) do
   clearance(&:registered?)
   description 'Set a reminder in <time> to do an <action>.'
   usage 'remind <nick> in <time> to <action>'
@@ -8,17 +8,24 @@ hear(/remind (?<nick>.+?) in (?<time>.+?) to (?<action>.+)[.!]?/i) do
     action = params[:action].strip
 
     mesg = if nick == sender.nick
-      "#{nick}, you asked me to remind you to #{action}."
+      "#{nick}, you asked me to remind you to #{action}"
     else
-      "#{sender.nick} asked me to remind you to #{action}."
+      "#{sender.nick} asked me to remind you to #{action}"
     end
 
-    server.reminder_scheduler.in t, sender: sender.nick, receiver: nick, message: mesg
+    added = server.reminder_scheduler.add(t,
+      sender: sender.nick,
+      receiver: nick,
+      message: mesg)
 
-    if nick == sender.nick
-      reply "Ok, I'll remind you in #{t}."
+    if added
+      if nick == sender.nick
+        reply "Ok, I'll remind you #{t}."
+      else
+        reply "Ok, I'll remind #{nick} #{t}."
+      end
     else
-      reply "Ok, I'll remind #{nick} in #{t}."
+      reply "Error, Could not add reminder, something is wrong with the time provided!"
     end
   end
 end

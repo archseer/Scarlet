@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/igrigorik/em-http-request.git
-  revision: 4b8f38dbbaa91c5e9550084f8817a56083e48107
+  revision: 912fc078a33eaa8be9093ae779cb7762210bb755
   specs:
     em-http-request (1.1.3)
       addressable (>= 2.3.4)
@@ -11,44 +11,40 @@ GIT
 
 GIT
   remote: git://github.com/polyfox/moon-data_model.git
-  revision: 1d0eebe139455fa0fc8e825d995e9977c5dd1c05
+  revision: 18ea79fbe04b624e4a3d3fbdb9bb18998d9a0765
   specs:
-    moon-data_model (1.0.1)
+    moon-data_model (1.0.2)
       activesupport (~> 4.2)
-      moon-maybe_copy (~> 1.0)
-      moon-prototype (~> 1.1)
-      moon-serializable (~> 1.0)
-      rake (~> 10.3)
+      moon-maybe_copy (~> 1.1, >= 1.1.1)
+      moon-prototype (~> 1.1, >= 1.1.1)
+      moon-serializable (~> 1.0, >= 1.0.1)
 
 GIT
   remote: git://github.com/polyfox/moon-maybe_copy.git
-  revision: 9c59bb3497437af7132fb69e4fb546491a774f19
+  revision: 3c7d3fa3f5b377b02fa78d61ae3f6431e4acfd25
   specs:
-    moon-maybe_copy (1.1.0)
-      rake (~> 10.3)
+    moon-maybe_copy (1.1.1)
 
 GIT
   remote: git://github.com/polyfox/moon-prototype.git
-  revision: e88f8393e5a549440479b0f1a9623a4b3b8bd3f1
+  revision: 5fec8fc92a52212edbdd9ff032480e5381e101e4
   specs:
-    moon-prototype (1.1.0)
+    moon-prototype (1.1.1)
       activesupport (~> 4.2)
-      rake (~> 10.3)
 
 GIT
   remote: git://github.com/polyfox/moon-repository.git
-  revision: 10c2dc2a1678c0c70322f0af92f45c26d7d62838
+  revision: 96d3bcbfc2d0e71cf3f92ecbd2af3a03d1d490f9
   specs:
-    moon-repository (1.1.0)
+    moon-repository (1.1.1)
       activesupport (~> 4.2)
 
 GIT
   remote: git://github.com/polyfox/moon-serializable.git
-  revision: 3fc2557851b3335f5e67137642fdcbcee07896d1
+  revision: a8989d945deb809e8daf73b70af82de8cc3fc5b7
   specs:
-    moon-serializable (1.0.0)
-      moon-prototype (~> 1.0)
-      rake (~> 10.3)
+    moon-serializable (1.0.2)
+      moon-prototype (~> 1.0, >= 1.1.1)
 
 PATH
   remote: .
@@ -58,7 +54,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (4.2.5)
+    activesupport (4.2.6)
       i18n (~> 0.7)
       json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
@@ -67,7 +63,7 @@ GEM
     addressable (2.3.8)
     calc (1.0.0)
     chronic (0.10.2)
-    codeclimate-test-reporter (0.4.8)
+    codeclimate-test-reporter (0.5.0)
       simplecov (>= 0.7.1, < 1.0.0)
     colorize (0.7.7)
     cookiejar (0.3.0)
@@ -77,7 +73,7 @@ GEM
       eventmachine (>= 1.0.0.beta.4)
     em-throttled_queue (1.1.1)
       eventmachine
-    eventmachine (1.0.9.1)
+    eventmachine (1.2.0.1)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
     http_parser.rb (0.6.0)
@@ -85,19 +81,18 @@ GEM
     json (1.8.3)
     lorem (0.1.2)
     mini_portile2 (2.0.0)
-    minitest (5.8.3)
-    multi_json (1.11.2)
+    minitest (5.8.4)
+    multi_json (1.11.3)
     multipart-post (2.0.0)
-    nokogiri (1.6.7.1)
+    nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
     octokit (3.8.0)
       sawyer (~> 0.6.0, >= 0.5.3)
-    rake (10.5.0)
     rspec (3.4.0)
       rspec-core (~> 3.4.0)
       rspec-expectations (~> 3.4.0)
       rspec-mocks (~> 3.4.0)
-    rspec-core (3.4.1)
+    rspec-core (3.4.4)
       rspec-support (~> 3.4.0)
     rspec-expectations (3.4.0)
       diff-lcs (>= 1.2.0, < 2.0)
@@ -110,7 +105,7 @@ GEM
     sawyer (0.6.0)
       addressable (~> 2.3.5)
       faraday (~> 0.8, < 0.10)
-    simplecov (0.11.1)
+    simplecov (0.11.2)
       docile (~> 1.1.0)
       json (~> 1.8)
       simplecov-html (~> 0.10.0)

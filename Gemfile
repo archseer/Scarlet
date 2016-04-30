@@ -28,8 +28,10 @@ gem 'colorize'
 gem 'nokogiri'
 
 # fun stuff
-gem 'chronic' # Natural language time parser
-gem 'time-lord' # pretty output of 'x time ago'
+# Natural language time parser
+gem 'chronic'
+# pretty output of 'x time ago'
+gem 'time-lord'
 gem 'octokit', '~> 3.0'
 gem 'calc'
 
