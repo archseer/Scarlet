@@ -27,9 +27,9 @@ GIT
 
 GIT
   remote: git://github.com/polyfox/moon-null_io.git
-  revision: b6df1d0ceb08cbb806db17ebd3c6074df0de5432
+  revision: e7796b820a9be308127cba2836bf8f301691a3b7
   specs:
-    moon-null_io (1.0.0)
+    moon-null_io (1.0.1)
 
 GIT
   remote: git://github.com/polyfox/moon-prototype.git
