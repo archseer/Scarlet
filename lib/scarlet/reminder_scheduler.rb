@@ -1,4 +1,5 @@
 require 'scarlet/models/model_base'
+require 'chronic'
 
 class Scarlet
   class ReminderScheduler
@@ -82,9 +83,22 @@ class Scarlet
       end
     end
 
-    def in(t, data)
-      excat = DateTime.now.in(Rufus::Scheduler.parse_in(t))
-      repository.create({ execute_at: excat }.merge(data))
+    private def create_job(execute_at, data)
+      repository.create({ execute_at: execute_at }.merge(data))
+    end
+
+    # Parses a duration string
+    #
+    # @param [String] t
+    # @param [Hash] data
+    # @return [Boolean] true the job was added, false something went wrong
+    def add(t, data)
+      if execute_at = Chronic.parse(t)
+        create_job(execute_at.to_datetime, data)
+        true
+      else
+        false
+      end
     end
   end
 end
