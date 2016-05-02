@@ -66,7 +66,15 @@ class Scarlet
       end
     end
 
-    # Formats a time object
+    # Formats a Date object
+    #
+    # @param [Date] dat
+    # @return [String]
+    def self.date dat
+      dat.strftime("%A, %B %d, %Y")
+    end
+
+    # Formats a Time object
     #
     # @param [Time] tme
     # @return [String]
@@ -74,7 +82,7 @@ class Scarlet
       tme.strftime("%T %Z, %A, %B %d, %Y")
     end
 
-    # Formats a time object, short format
+    # Formats a Time object, with a shortened format
     #
     # @param [Time] tme
     # @return [String]
