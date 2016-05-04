@@ -12,7 +12,8 @@ hear(/(?:g|google)\s+(?<query>.+)/) do
     http.errback { reply "ERROR! Fatal mistake." }
     http.callback do
       if value = http.response.value
-        reply(if results = value['responseData']['results'].presence
+        responseData = value['responseData'] || {}
+        reply(if results = responseData['results'].presence
           URI.unescape(results.first['url'])
         else
           "No search result found."

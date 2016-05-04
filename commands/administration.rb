@@ -84,7 +84,7 @@ end
 
 hear(/restart/i) do
   clearance(&:sudo?)
-  description 'Restarts the bot.'
+  description 'Restarts the bot on the current server.'
   usage 'restart'
   on do
     reply 'Restarting myself...'

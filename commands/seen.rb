@@ -13,7 +13,7 @@ hear(/seen (?<nick>\S+)(?:\s+last\s+(?<backlog>\d+))?/i) do
 
     reply "#{params[:nick]} was last seen:"
     logs.each do |log|
-      message = "#{Time.at(log.updated_at).ago.to_words}"
+      message = "#{Time.at(log.updated_at).since}"
       case log.command.downcase.to_sym
       when :privmsg
         message << " in #{log.target}" unless log.target.downcase == event.channel
