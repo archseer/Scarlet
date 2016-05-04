@@ -5,11 +5,26 @@ dirs = ["N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WN
 url = 'http://api.openweathermap.org/data/2.5/weather'
 
 weather_errors = [
-  'A comet struck the weather connection!',
-  'Dunno, partially snowy I suppose?',
-  'THE SKY IS FALLING!',
-  'How am I suppose to know!',
-  'There was a problem in getting the weather'
+  "A comet struck the weather station!",
+  "Dunno, partially snowy I suppose?",
+  "Ever tried looking outside instead, hmm?",
+  "How am I suppose to know!",
+  "Last time I checked, wait, I didn't check",
+  "Obviously it's sunny while raining",
+  "THE SKY IS FALLING!",
+  "There was a problem in getting the weather",
+  "They don't pay me enough to do this",
+  "It's not my fault",
+  "I tried at least, right?",
+]
+
+# Because even Scarlet has a short temper
+apikey_errors = [
+  "Apparently someone forgot to give me an apikey for the weather, *hint* *hint*",
+  "I ain't got the keys to dem wheels",
+  "I can count from 1 to 10, but I can't pick locks",
+  "I'm sorry, are you asking me?",
+  "What's the password?",
 ]
 
 hear(/set(?:\s+my)?\s+city\s+(?<city>.+)/i) do
@@ -27,7 +42,15 @@ end
 # Gracefully stolen from, with some fun stuff thrown in
 # https://github.com/skibish/hubot-weather/blob/master/src/hubot-weather.coffee
 get_weather = lambda do |location, units|
-  http = json_request(url).get query: { q: CGI.escape(location), units: units }
+  apikey = (Scarlet.config['api_keys']||{})['openweathermap']
+  unless apikey.present?
+    error_reply apikey_errors.sample
+  end
+  http = json_request(url).get query: {
+    apikey: apikey,
+    q: CGI.escape(location),
+    units: units
+  }
   http.errback { reply "HTTP Error: " + weather_errors.sample }
   http.callback do
     if data = http.response.value
