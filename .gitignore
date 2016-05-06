@@ -15,11 +15,12 @@ tmp
 # YARD artifacts
 .yardoc
 _yardoc
-doc/
+config.yml
+config/
+coverage/
+data/
 data/db
+doc/
+spec/fixtures/db/models/test_models.yml
 var/
 vendor/
-
-coverage/
-config.yml
-spec/fixtures/db/models/test_models.yml
