@@ -1,0 +1,7 @@
+require 'scarlet/core_ext/array'
+require 'scarlet/core_ext/enumerable'
+require 'scarlet/core_ext/hash'
+require 'scarlet/core_ext/literal'
+require 'scarlet/core_ext/numeric'
+require 'scarlet/core_ext/process'
+require 'scarlet/core_ext/string'
