@@ -58,14 +58,17 @@ module Scarlet::Plugins
       old_listeners = @listeners.dup
       @listeners.clear
       begin
-        Dir[File.join(Scarlet.root, 'commands/**/*.rb')].each do |path|
+        Dir[Scarlet.root.join('commands/**/*.rb')].each do |path|
           load_command path
         end
         true
-      rescue => ex
+      rescue StandardError, SyntaxError => ex
         logger.error ex.inspect
         logger.error ex.backtrace.join("\n")
-        @listeners.replace old_listeners
+        if old_listeners.present?
+          logger.warn "Rolling back old command listeners"
+          @listeners.replace old_listeners
+        end
         false
       end
     end
