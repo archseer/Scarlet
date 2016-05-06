@@ -1,11 +1,20 @@
 require 'scarlet/time'
 
+config = load_config_file do
+  {
+    recall: {
+      default: 1,
+      limit: 10
+    }
+  }
+end
+
 hear(/seen (?<nick>\S+)(?:\s+last\s+(?<backlog>\d+))?/i) do
   clearance(&:registered?)
   description 'When was the last time you saw nick?'
   usage 'seen <nick> [last <count>]'
   on do
-    n = [1, [(params[:backlog] || 1).to_i, 10].min].max
+    n = [1, [(params[:backlog] || config[:default]).to_i, config[:limit]].min].max
     logs = server.logs.
       channel(event.channel).
       select { |log| log.nick == params[:nick] }.
