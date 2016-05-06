@@ -1,5 +1,6 @@
 require 'yaml'
 require 'colorize'
+require 'pathname'
 require 'active_support/configurable'
 require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
@@ -20,7 +21,7 @@ class Scarlet
 
   def initialize
     @started_at = Time.now
-    Scarlet.root = File.expand_path '../../', File.dirname(__FILE__)
+    Scarlet.root = Pathname.new(File.expand_path '../../', File.dirname(__FILE__))
     Scarlet.config.merge! YAML.load_file("#{Scarlet.root}/config.yml").symbolize_keys
     Scarlet.config.db.symbolize_keys! if Scarlet.config.db
 

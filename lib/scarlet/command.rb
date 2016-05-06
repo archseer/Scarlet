@@ -1,3 +1,5 @@
+require 'fileutils'
+require 'yaml'
 require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/module/delegation'
 require 'scarlet/fmt'
@@ -11,12 +13,30 @@ class Scarlet
       def initialize plugin
         @command = plugin
       end
+
+      # @param [String] filename - name of config file to load
+      def load_config_file(filename = nil)
+        filename ||= Scarlet.root.join('config/commands',
+          File.basename(@__file__, File.extname(@__file__)) + '.yml')
+        if File.exists?(filename)
+          YAML.load_file(filename)
+        else
+          if block_given?
+            yield.tap do |d|
+              FileUtils.mkdir_p File.dirname(filename)
+              File.write(filename, d.to_yaml)
+            end
+          end
+        end
+      end
+
       # (see Command.hear)
       def hear *args, &block
         @command.hear *args, &block
       end
 
       def load_file filename
+        @__file__ = filename
         instance_eval File.read(filename), filename, 1
       end
     end

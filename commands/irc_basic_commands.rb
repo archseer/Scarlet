@@ -1,19 +1,25 @@
-hear(/(?:leave|part)(?:\s+(\#\S+)(?:\s+(.+))?)?/i) do
+hear(/(?:leave|part)(?:\s+(?<channel>\#\S+)(?:\s+(?<reason>.+))?)?/i) do
   clearance(&:sudo?)
   description 'Ask bot to leave #channel.'
   usage 'part #<channel>'
   on do
-    chan, reason = params[1]||channel, params[2]
+    chan = params[:channel].presence || event.channel
+    reason = params[:reason]
     send_data "PART #{chan} #{reason}"
   end
 end
 
-hear(/join\s+(.+)/i) do
+hear(/join\s+(?<channels>.+)/i) do
   clearance(&:sudo?)
   description 'Ask bot to join #channel or channels.'
   usage 'join <#channel>[,<#channel>,<#channel>]'
   on do
-    send_data "JOIN #{params[1].gsub(' ',',')}"
+    channels = params[:channels].
+      gsub(/\s+/, ' ').
+      split(" ").
+      select(&:present?).
+      join(",")
+    send_data "JOIN #{channels}"
   end
 end
 
@@ -26,12 +32,12 @@ hear(/quit/i) do
   end
 end
 
-hear(/send\s+(.+)/) do
+hear(/send\s+(?<string>.+)/) do
   clearance(&:sudo?)
   description 'Sends provided string to server'
   usage 'send <string>'
   on do
-    send_data params[1]
+    send_data params[:string]
   end
 end
 

@@ -1,10 +1,17 @@
+config = load_config_file do
+  {
+    default: 5,
+    limit: 10
+  }
+end
+
 hear(/recall(?:\s+(\d+))?/) do
   clearance(&:registered?)
-  description 'Returns the last n messages, default is 5, limit is 5.'
+  description "Returns the last n messages, default is #{config[:default]}, limit is #{config[:limit]}."
   usage 'recall [<count>]'
   on do
     if event.channel
-      recall_depth = ([[(params[1] || 5).to_i, 5].min, 1].max) + 1
+      recall_depth = (params[1] || config[:default]).to_i.minmax(1, config[:limit]) + 1
       logs = server.logs.channel(event.channel)
         .select { |o| o.command.to_s == 'PRIVMSG' }
         .sort { |a, b| b.updated_at <=> a.updated_at }
